@@ -39,7 +39,11 @@
           </li>
           <li>
             <i class="fa-brands fa-windows"></i
-            ><a href="">Kiểm tra và phê duyệt</a>
+            ><a href="../admin/ui_quanly_cty.php">Kiểm tra và phê duyệt cty</a>
+          </li>
+          <li>
+            <i class="fa-brands fa-windows"></i
+            ><a href="../admin/ui_quanlytt.php">Kiểm tra và phê duyệt tt</a>
           </li>
           <li>
             <i class="fa-brands fa-windows"></i

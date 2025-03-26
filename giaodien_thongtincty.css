@@ -1,22 +1,21 @@
-
 body {
   font-family: 'Roboto', sans-serif;
-margin: 0;
-padding: 0;
-background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
 }
 
 .container {
-max-width: 1200px;
-margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Header */
 .header {
   background-color: #fff;
-  padding: 20px 20px;
+  padding: 20px;
   display: flex;
-  justify-content: space-between; /* Logo + tiêu đề ở một bên, menu ở một bên */
+  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -24,22 +23,22 @@ margin: 0 auto;
 .header .left-section {
   display: flex;
   align-items: center;
-  gap: 20px; /* Khoảng cách giữa logo và tiêu đề */
+  gap: 20px;
 }
 
 .header .logo img {
   height: 70px;
 }
 
-.header .ten_trg {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
+.header .ten_trg h3 {
+  margin: 0;
+  font-size: 20px;
 }
 
-.header .ten_trg h3,
 .header .ten_trg p {
   margin: 0;
+  font-size: 14px;
+  color: #666;
 }
 
 .header .nav {
@@ -53,17 +52,11 @@ margin: 0 auto;
   color: #333;
   font-weight: 500;
   font-size: 19px;
-  
-
 }
+
 .header .nav a:hover {
-  text-decoration: none;
   color: #20e74f;
-  
-  
-
 }
-
 
 .header .nav .btn {
   background-color: #28a745;
@@ -72,143 +65,125 @@ margin: 0 auto;
   border-radius: 5px;
 }
 
-.header .nav .btn-secondary {
-  background-color: #343a40;
-}
-
-
-
-.timkiem-job{
+/* Thanh tìm kiếm */
+.timkiem-job {
   background-color: #19734e;
-  font-family: Inter, sans-serif;
-  font-style: normal;
-  max-height: 72px;
-  padding: 25px 0;
   padding: 20px;
- text-align: center;
-
+  text-align: center;
 }
-
-
 
 .search-bar {
   background-color: #fff;
   padding: 12px;
- 
   display: inline-flex;
-  justify-content: center;
   gap: 10px;
   border-radius: 5px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.search-bar select,
-.search-bar input,
-.search-bar button {
+.search-bar input {
   padding: 10px;
+  width: 800px;
   border: none;
   border-radius: 5px;
 }
 
-.search-bar select,
-.search-bar input {
-  width: 200px;
-}
-
-.search-bar input{
-
-width: 800px;
-}
-
 .search-bar button {
+  padding: 10px 20px;
   background-color: #28a745;
   color: #fff;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
 }
 
-/* gt cty */
-/* Phần giới thiệu công ty */
-.company-container {
-  width: 80%;
+.search-bar button:hover {
+  background-color: #218838;
+}
+
+/* Danh sách công ty */
+.company-list {
+  max-width: 1200px;
   margin: 20px auto;
+  padding: 0 20px;
+}
+
+.company-list h2 {
+  text-align: center;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.company-container {
+  width: 100%;
+  margin-bottom: 20px;
   background-color: white;
-  padding: 20px;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* PHẦN 1: Thông tin công ty */
+/* Phần tiêu đề công ty */
 .company-header {
   position: relative;
-  width: 100%;
-
-  margin: 0 auto;
   text-align: center;
   background: linear-gradient(90deg, #212f3f, #00b14f);
-  /* Màu nền giống ảnh */
-  border-radius: 10px;
   padding-bottom: 70px;
+  border-radius: 5px 5px 0 0;
 }
 
-/* Ảnh nền */
-.company-header > div:first-child img {
+.company-cover img {
   width: 100%;
-  border-radius: 10px 10px 0 0;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 5px 5px 0 0;
 }
 
-/* Logo công ty */
 .company-logo {
   position: absolute;
-  margin-top: 0;
+  top: 50%;
   left: 10%;
   transform: translate(-50%, -50%);
   width: 100px;
   height: 100px;
   border-radius: 50%;
   background-color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 30px;
+  padding: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.company-cover img{
-  /* margin-top: 30px; */
-}
-
 .company-logo img {
-  
   width: 100%;
-  height: auto;
+  height: 100%;
   border-radius: 50%;
+  object-fit: cover;
 }
 
-/* Nội dung công ty */
-.company-header div:nth-child(3) {
-  margin-top: 40px;
+.company-info {
+  padding: 20px 20px 0;
   color: white;
 }
 
-.company-header h2  {
+.company-info h2 {
   font-size: 20px;
   margin-bottom: 5px;
 }
 
-
-.company-info a{
+.company-info a {
   color: white;
   text-decoration: none;
 }
 
+.company-info a:hover {
+  text-decoration: underline;
+}
 
-/* Nút Theo dõi công ty */
 .follow-button {
   position: absolute;
   top: 80%;
   right: 15px;
- 
-  /* color: green; */
+  background-color: #fff;
+  color: #19c119;
   padding: 8px 15px;
   border-radius: 5px;
   font-weight: bold;
@@ -216,36 +191,30 @@ width: 800px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.follow-button{
-  background-color: #fff;
-  color:  #19c119; 
+.follow-button:hover {
+  background-color: #f0f0f0;
 }
 
-/* PHẦN 2 + 3: Hai thẻ dưới */
+/* Nội dung chi tiết */
 .company-content {
   display: flex;
-  margin-top: 20px;
   gap: 20px;
+  padding: 20px;
 }
 
-/* Cột trái chiếm nhiều diện tích hơn */
 .company-left {
-  flex: 2;  /* Chiếm khoảng 65% */
+  flex: 2;
   background-color: #e9f5ff;
   padding: 20px;
   border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .company-right {
-  flex: 1;  /* Chiếm khoảng 35% */
+  flex: 1;
   background-color: #f8f9fa;
   padding: 20px;
   border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-
-
 
 .company-left h3,
 .company-right h3 {
@@ -260,7 +229,6 @@ width: 800px;
   color: #333;
 }
 
-/* Bản đồ */
 .map {
   margin-top: 10px;
   width: 100%;
@@ -269,12 +237,13 @@ width: 800px;
   text-align: center;
   line-height: 200px;
   color: #555;
+  border-radius: 5px;
 }
 
 /* Nút Góp ý */
 .feedback-button {
   position: fixed;
-  right: 10px;
+  right: 20px;
   bottom: 20px;
   background-color: #007bff;
   color: white;
@@ -288,22 +257,33 @@ width: 800px;
   background-color: #0056b3;
 }
 
-/* Khi màn hình nhỏ, logo nằm trong .company-header */
+/* Responsive */
 @media (max-width: 1200px) {
   .company-logo {
-    position: relative;
-    top: -83px;
-    left: auto;
-    transform: none;
-    margin: 10px auto;
-    
+      position: relative;
+      top: -83px;
+      left: auto;
+      transform: none;
+      margin: 10px auto;
   }
-  .company-header{
-    padding-bottom: 50px
+  .company-header {
+      padding-bottom: 50px;
   }
+}
 
-  .company-header div:nth-child(3) {
-   
-    color: white;
+@media (max-width: 768px) {
+  .header .left-section {
+      flex-direction: column;
+      text-align: center;
+  }
+  .header .nav {
+      flex-direction: column;
+      gap: 10px;
+  }
+  .search-bar input {
+      width: 100%;
+  }
+  .company-content {
+      flex-direction: column;
   }
 }

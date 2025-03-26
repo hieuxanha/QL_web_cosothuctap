@@ -47,19 +47,7 @@ CREATE TABLE `co_so_thuc_tap` (
   PRIMARY KEY (`stt_cstt`)
 );
 
--- Companies table
-CREATE TABLE `cong_ty` (
-  `stt_cty` int(11) NOT NULL AUTO_INCREMENT,
-  `ten_cong_ty` varchar(255) NOT NULL UNIQUE,
-  `dia_chi` varchar(255) NOT NULL,
-  `so_dien_thoai` varchar(20) NOT NULL,
-  `email` varchar(100) NOT NULL UNIQUE,
-  `gioi_thieu` text DEFAULT NULL,
-  `trang_thai` enum('Chờ duyệt','Đã duyệt','Bị từ chối') DEFAULT 'Chờ duyệt',
-  `logo` varchar(255) DEFAULT NULL,
-   `anh_bia` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`stt_cty`)
-);
+
 
 -- Internship registrations table
 CREATE TABLE `dang_ky_thuc_tap` (
@@ -85,7 +73,25 @@ CREATE TABLE `bao_cao_thuc_tap` (
   FOREIGN KEY (`ma_dang_ky`) REFERENCES `dang_ky_thuc_tap`(`stt_dky`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Recruitment/job postings table
+
+
+-- Cập nhật bảng cong_ty
+CREATE TABLE `cong_ty` (
+  `stt_cty` int(11) NOT NULL AUTO_INCREMENT,
+  `ten_cong_ty` varchar(255) NOT NULL UNIQUE,
+  `dia_chi` varchar(255) NOT NULL,
+  `so_dien_thoai` varchar(20) NOT NULL,
+  `email` varchar(100) NOT NULL UNIQUE,
+  `gioi_thieu` text DEFAULT NULL,
+  `trang_thai` enum('Chờ duyệt','Đã duyệt','Bị từ chối') DEFAULT 'Chờ duyệt',
+  `logo` varchar(255) DEFAULT NULL,
+  `anh_bia` varchar(255) DEFAULT NULL,
+  `quy_mo` varchar(255) DEFAULT NULL,  -- Đã di chuyển từ bảng tuyen_dung
+  `linh_vuc` varchar(255) DEFAULT NULL,  -- Đã di chuyển từ bảng tuyen_dung
+  PRIMARY KEY (`stt_cty`)
+);
+
+-- Cập nhật bảng tuyen_dung (đã loại bỏ các cột không cần thiết)
 CREATE TABLE `tuyen_dung` (
   `stt_tuyendung` int(11) NOT NULL AUTO_INCREMENT,
   `ma_tuyen_dung` varchar(50) NOT NULL UNIQUE,
@@ -95,10 +101,10 @@ CREATE TABLE `tuyen_dung` (
   `yeu_cau` text DEFAULT NULL,
   `so_luong` int(11) DEFAULT 1 CHECK (`so_luong` > 0),
   `han_nop` date NOT NULL,
-  `trang_thai` enum('Đang tuyển','Đã đóng') DEFAULT 'Đang tuyển',
-  `hinh_anh` varchar(255) DEFAULT NULL,
-  `quy_mo` varchar(255) DEFAULT NULL,
-  `khoa` varchar(255) DEFAULT NULL,
+  `trang_thai` enum('Đang chờ','Đã duyệt','Bị từ chối') DEFAULT 'Đang chờ',
+  `dia_chi` varchar(255) NOT NULL,
+  `hinh_thuc` enum('Full-time', 'Part-time') NOT NULL,
+  `gioi_tinh` enum('Nam', 'Nữ', 'Không giới hạn') NOT NULL,
   PRIMARY KEY (`stt_tuyendung`),
   FOREIGN KEY (`stt_cty`) REFERENCES `cong_ty`(`stt_cty`) ON DELETE CASCADE ON UPDATE CASCADE
 );

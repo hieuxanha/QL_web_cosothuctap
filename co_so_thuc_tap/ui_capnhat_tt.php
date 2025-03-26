@@ -10,7 +10,7 @@
       rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
     <link
@@ -21,9 +21,27 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="./ui_capnhat.css" />
-   
   </head>
   <body>
+    <?php
+    session_start();
+    require_once '../db.php'; // Kết nối CSDL
+
+    // Hiển thị thông báo nếu có
+    if (isset($_SESSION['message'])) {
+        echo "<script>alert('" . $_SESSION['message'] . "');</script>";
+        unset($_SESSION['message']);
+    }
+    if (isset($_SESSION['error'])) {
+        echo "<script>alert('" . $_SESSION['error'] . "');</script>";
+        unset($_SESSION['error']);
+    }
+
+    // Lấy danh sách công ty đã được duyệt
+    $sql = "SELECT stt_cty, ten_cong_ty FROM cong_ty WHERE trang_thai = 'Đã duyệt'";
+    $result = $conn->query($sql);
+    ?>
+
     <div class="sidebar" id="sidebar">
       <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
       <div class="icons">
@@ -77,69 +95,73 @@
           </svg>
         </div>
         <div class="profile">
-          <span>Nguyễn Thị My</span>
+          <span>Nguyễn.....</span>
           <img src="profile.jpg" alt="Ảnh đại diện" />
         </div>
       </div>
 
-      <div class="tuyendung" >
-        <form id="formTuyenDung" action="../logic_cstt/logic_tuyendung.php" method="post" enctype="multipart/form-data">
-
+      <div class="tuyendung">
+        <form id="formTuyenDung" action="../logic_cstt/logic_tuyendung.php" method="post">
           <h2>Tin tuyển dụng</h2>
+
+          <label for="stt_cty">Công ty:</label>
+          <select name="stt_cty" required>
+            <option value="">Chọn công ty</option>
+            <?php
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo "<option value='" . $row['stt_cty'] . "'>" . $row['ten_cong_ty'] . "</option>";
+                }
+            } else {
+                echo "<option value='' disabled>Không có công ty nào được duyệt</option>";
+            }
+            ?>
+          </select><br>
+
           <label for="tieu_de">Tiêu đề:</label>
-        <input type="text" name="tieu_de_tuyen_dung" required><br>
+          <input type="text" name="tieu_de_tuyen_dung" required><br>
 
-        <label for="linh_vuc">Lĩnh vực:</label>
-        <input type="text" name="linh_vuc" required><br>
+          <label for="dia_chi">Địa chỉ:</label>
+          <input type="text" name="dia_chi" required><br>
 
-        <label for="quy_mo">Quy mô:</label>
-        <input type="number" name="quy_mo" required><br>
+          <label for="hinh_thuc">Hình thức làm việc:</label>
+          <select name="hinh_thuc" required>
+            <option value="fulltime">Full-time</option>
+            <option value="parttime">Part-time</option>
+          </select><br>
 
-        <label for="khoa">Khoa:</label>
-        <input type="text" name="khoa"><br>
+          <label for="gioi_tinh">Giới tính:</label>
+          <select name="gioi_tinh" required>
+            <option value="nam">Nam</option>
+            <option value="nu">Nữ</option>
+            <option value="Không giới hạn">Không giới hạn</option>
+          </select><br>
 
-        <label for="mo_ta">Mô tả:</label>
-        <textarea name="mo_ta"></textarea><br>
+          <label for="mo_ta">Mô tả:</label>
+          <textarea name="mo_ta"></textarea><br>
 
-        <label for="so_luong">Số lượng tuyển:</label>
-        <input type="number" name="so_luong" required><br>
+          <label for="so_luong">Số lượng tuyển:</label>
+          <input type="number" name="so_luong" required><br>
 
-        <label for="yeu_cau">Yêu cầu:</label>
-        <textarea name="yeu_cau"></textarea><br>
+          <label for="yeu_cau">Yêu cầu:</label>
+          <textarea name="yeu_cau"></textarea><br>
 
-    
-        <label for="han_nop">Hạn nộp:</label>
-        <input type="date" name="han_nop" required><br>
+          <label for="han_nop">Hạn nộp:</label>
+          <input type="date" name="han_nop" required><br>
 
-        <label for="anh">Hình ảnh:</label>
-        <input type="file" name="anh" accept="image/*"><br>
-
-        <button type="submit"  class="submit-btn">Đăng tin</button>
-      </form>
+          <input type="hidden" name="them_tuyen_dung" value="1">
+          <button type="submit" class="submit-btn">Đăng tin</button>
+        </form>
       </div>
-    
-
-     
     </div>
 
     <script>
-      function toggleSidebar() {
-        let sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("collapsed");
-      }
-
       function toggleSidebar() {
         const sidebar = document.getElementById("sidebar");
         const content = document.getElementById("content");
         sidebar.classList.toggle("collapsed");
         content.classList.toggle("collapsed");
       }
-
-
-
-      
     </script>
-  
-    
   </body>
 </html>

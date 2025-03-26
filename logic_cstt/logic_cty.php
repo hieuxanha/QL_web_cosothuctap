@@ -46,13 +46,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Câu lệnh SQL để thêm công ty vào database
-    $sql = "INSERT INTO cong_ty (ten_cong_ty, dia_chi, so_dien_thoai, email, gioi_thieu, logo, anh_bia) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-    // Sử dụng prepared statement để tránh SQL injection
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssss", $ten_cong_ty, $dia_chi, $so_dien_thoai, $email, $gioi_thieu, $logo, $anh_bia);
-
+    $sql = "INSERT INTO cong_ty (ten_cong_ty, dia_chi, so_dien_thoai, email, gioi_thieu, logo, anh_bia, trang_thai) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'Chờ duyệt')";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sssssss", $ten_cong_ty, $dia_chi, $so_dien_thoai, $email, $gioi_thieu, $logo, $anh_bia);
     // Thực thi câu lệnh
     if ($stmt->execute()) {
         echo "Thêm công ty thành công!";

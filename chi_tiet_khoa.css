@@ -1,0 +1,277 @@
+
+    /* Global styles */
+body {
+    font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+    background-color: #fff;
+    padding: 20px 20px;
+    display: flex;
+    justify-content: space-between; /* Logo + tiêu đề ở một bên, menu ở một bên */
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .header .left-section {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Khoảng cách giữa logo và tiêu đề */
+  }
+  
+  .header .logo img {
+    height: 70px;
+  }
+  
+  .header .ten_trg {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  
+  .header .ten_trg h3,
+  .header .ten_trg p {
+    margin: 0;
+  }
+  
+  .header .nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .header .nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 19px;
+    
+  
+  }
+  .header .nav a:hover {
+    text-decoration: none;
+    color: #20e74f;
+    
+    
+  
+  }
+  
+  
+  .header .nav .btn {
+    background-color: #28a745;
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 5px;
+  }
+  
+  .header .nav .btn-secondary {
+    background-color: #343a40;
+  }
+
+
+
+.timkiem-job{
+    background-color: #19734e;
+    font-family: Inter, sans-serif;
+    font-style: normal;
+    max-height: 72px;
+    padding: 25px 0;
+    padding: 20px;
+   text-align: center;
+
+}
+
+
+
+.search-bar {
+    background-color: #fff;
+    padding: 12px;
+   
+    display: inline-flex;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar select,
+.search-bar input,
+.search-bar button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+.search-bar select,
+.search-bar input {
+    width: 200px;
+}
+
+.search-bar input{
+
+width: 800px;
+}
+
+.search-bar button {
+    background-color: #28a745;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* Main Content */
+.main-content {
+  display: flex;
+  margin-top: 20px;
+}
+
+/* Sidebar Filters */
+.sidebar {
+  width: 25%;
+  /* background-color: #fff; */
+  padding: 20px;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+}
+
+.filter-group h4 {
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.filter-group label {
+  display: block;
+  margin: 5px 0;
+}
+
+/* Job Listings */
+.job-listings {
+  width: 75%;
+  margin-left: 20px;
+}
+
+.job-card {
+  background-color: #fff;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+ 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+
+.job-card:hover{
+    border-radius: 15px solid #0daa14;
+}
+
+.job-card h4 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.job-card p {
+  margin: 5px 0 0;
+  color: #777;
+}
+.job-card {
+  display: flex; /* Sử dụng flexbox để bố trí ảnh và nội dung */
+  align-items: center;
+  background-color: #fff;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.job-card img.job-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover; /* Đảm bảo ảnh được cắt phù hợp */
+  margin-right: 15px; /* Khoảng cách giữa ảnh và nội dung */
+  border-radius: 8px; /* Bo góc cho ảnh */
+}
+
+.job-card .job-info {
+  flex: 1; /* Đảm bảo phần nội dung chiếm hết không gian còn lại */
+}
+
+.job-card h4 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.job-card p {
+  margin: 5px 0 0;
+  color: #777;
+}
+
+
+
+  
+
+/*end  footer */
+.footer {
+    background-color: #fff;
+    padding: 40px 20px;
+    color: #333;
+    font-family: Arial, sans-serif;
+  }
+  
+  .footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .footer-section {
+    flex: 1 1 200px;
+    margin: 10px;
+  }
+  
+  .footer-logo {
+    width: 150px;
+    margin-bottom: 10px;
+  }
+  
+  .footer-section h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .footer-section ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .footer-section ul li {
+    margin-bottom: 5px;
+  }
+  
+  .footer-section ul li a {
+    text-decoration: none;
+    color: #007bff;
+  }
+  
+  .footer-section ul li a:hover {
+    text-decoration: underline;
+  }
+  
+  .app-links img {
+    width: 120px;
+    margin-right: 10px;
+  }
+  
+  .social-icons img {
+    width: 30px;
+    margin: 5px;
+  }

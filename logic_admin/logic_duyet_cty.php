@@ -1,25 +1,47 @@
 <?php
-include '../db.php'; // Kết nối CSDL
+require '../db.php'; // Kết nối CSDL
+
+header('Content-Type: application/json'); // Trả về JSON
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stt_cty = $_POST['stt_cty'];
-    $action = $_POST['action']; // "approve" hoặc "reject"
+    $action = $_POST['action'];
 
-    // Xác định trạng thái mới
-    $trang_thai_moi = ($action == "approve") ? "Đã duyệt" : "Bị từ chối";
+    if ($action == 'approve') {
+        $sql = "UPDATE cong_ty SET trang_thai = 'Đã duyệt' WHERE stt_cty = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $stt_cty);
 
-    // Cập nhật trạng thái công ty trong CSDL
-    $sql = "UPDATE cong_ty SET trang_thai = ? WHERE stt_cty = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $trang_thai_moi, $stt_cty);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'trang_thai' => 'Đã duyệt']);
+        } else {
+            echo json_encode(['success' => false, 'error' => $stmt->error]);
+        }
+    } elseif ($action == 'reject') {
+        $sql = "UPDATE cong_ty SET trang_thai = 'Bị từ chối' WHERE stt_cty = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $stt_cty);
 
-    if ($stmt->execute()) {
-        echo json_encode(["success" => true, "message" => "Cập nhật thành công!"]);
-    } else {
-        echo json_encode(["success" => false, "message" => "Lỗi khi cập nhật!"]);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'trang_thai' => 'Bị từ chối']);
+        } else {
+            echo json_encode(['success' => false, 'error' => $stmt->error]);
+        }
+    } elseif ($action == 'restore' || $action == 'cancel') {
+        // Khôi phục hoặc hủy duyệt: đặt lại trạng thái thành 'Chờ duyệt'
+        $sql = "UPDATE cong_ty SET trang_thai = 'Chờ duyệt' WHERE stt_cty = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $stt_cty);
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'trang_thai' => 'Chờ duyệt']);
+        } else {
+            echo json_encode(['success' => false, 'error' => $stmt->error]);
+        }
     }
 
     $stmt->close();
-    $conn->close();
 }
+
+$conn->close();
 ?>

@@ -95,6 +95,10 @@
         <input type="text" id="dia_chi" name="dia_chi" required>
     </div>
 
+<!--     
+    <label for="linh_vuc">Lĩnh vực:</label>
+    <input type="text" name="linh_vuc" required><br> -->
+
     <div class="form-group">
         <label for="so_dien_thoai">Số Điện Thoại:</label>
         <input type="text" id="so_dien_thoai" name="so_dien_thoai" required>

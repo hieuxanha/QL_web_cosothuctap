@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Chuyển hướng dựa trên vai trò
                 switch ($user["role"]) {
                     case "admin":
-                        header("Location: ui_admin.php");
+                        header("Location: ../admin/ui_admin.php");
                         break;
                     case "giang_vien":
                         header("Location: ../giang_vien/ui_giangvien.html");
