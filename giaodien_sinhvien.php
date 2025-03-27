@@ -57,7 +57,7 @@
   <div class="header">
     <div class="left-section">
         <div class="logo">
-            <img alt="TopCV Logo" height="40" src="/logo.png" width="100%" />
+            <img alt="TopCV Logo" height="40" src="./logo.png" width="100%" />
         </div>
         <div class="ten_trg">
             <h3>ĐẠI HỌC TRƯỜNG NGUYÊN MÔI TRƯỜNG HÀ NỘI</h3>
@@ -67,8 +67,8 @@
     <div class="nav">
         <a href="#">Việc làm</a>
         <a href="#">Hồ sơ &amp; CV</a>
-        <a class="btn" href="./form_dn.html">Đăng nhập</a>
-        <a class="btn" href="./form_dk.html">Đăng ký</a>
+        <a class="btn" href="../Ql_web_cosothuctap/dang_nhap_dang_ki/form_dk.php">Đăng nhập</a>
+        <a class="btn" href="../Ql_web_cosothuctap/dang_nhap_dang_ki/form_dn.php">Đăng ký</a>
         <a href="#"><i class="fa-solid fa-user"></i></a>
     </div>
 </div>
@@ -222,16 +222,44 @@
     <div class="main-content">
         <div class="job-list">
             <h2>Việc làm tốt nhất</h2>
-          
+            <div class="job-container">
+    <?php
+    // Kết nối CSDL
+    require_once './db.php';
 
+    // Lấy danh sách tin tuyển dụng có trạng thái 'Đã duyệt'
+    $sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.dia_chi, ct.ten_cong_ty, ct.logo
+            FROM tuyen_dung td
+            JOIN cong_ty ct ON td.stt_cty = ct.stt_cty
+            WHERE td.trang_thai = 'Đã duyệt'";
+    $result = $conn->query($sql);
 
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            echo '<div class="job">';
+            // Hiển thị logo công ty, nếu không có logo thì dùng logo mặc định
+            $logo = !empty($row['logo']) ? htmlspecialchars($row['logo']) : 'logo.png';
+            echo '<img alt="Logo" src="' . $logo . '" />';
+            echo '<div class="job-content">';
+            echo '<h3>' . htmlspecialchars($row['tieu_de']) . '</h3>';
+            echo '<p>' . htmlspecialchars($row['ten_cong_ty']) . '</p>';
+            echo '<p class="location">' . htmlspecialchars($row['dia_chi']) . '</p>';
+            echo '<button class="apply-btn" onclick="applyJob(\'' . htmlspecialchars($row['ma_tuyen_dung']) . '\')">Ứng tuyển</button>';
+            echo '</div>';
+            echo '</div>';
+        }
+    } else {
+        echo '<p>Chưa có tin tuyển dụng nào được duyệt.</p>';
+    }
+    ?>
+</div>
+        
             <div class="job-container">
               <div class="job">
                 <img alt="Logo" src="logo.png" />
                 <div class="job-content">
                     <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
                     <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                    <p><span class="salary">7 - 8 triệu</span></p>
                     <p class="location">Đồng Nai</p>
                 </div>
             </div>
@@ -240,7 +268,6 @@
                 <div class="job-content">
                     <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
                     <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                    <p><span class="salary">7 - 8 triệu</span></p>
                     <p class="location">Đồng Nai</p>
                 </div>
             </div>
@@ -250,7 +277,7 @@
                     <div class="job-content">
                         <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
                         <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                        <p><span class="salary">7 - 8 triệu</span></p>
+  
                         <p class="location">Đồng Nai</p>
                     </div>
                 </div>
@@ -260,7 +287,7 @@
                     <div class="job-content">
                         <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
                         <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                        <p><span class="salary">7 - 8 triệu</span></p>
+  
                         <p class="location">Đồng Nai</p>
                     </div>
                 </div>
@@ -269,7 +296,7 @@
                     <div class="job-content">
                         <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
                         <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                        <p><span class="salary">7 - 8 triệu</span></p>
+  
                         <p class="location">Đồng Nai</p>
                     </div>
                 </div>
@@ -278,7 +305,7 @@
                     <div class="job-content">
                         <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
                         <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                        <p><span class="salary">7 - 8 triệu</span></p>
+  
                         <p class="location">Đồng Nai</p>
                     </div>
                 </div>
@@ -287,7 +314,7 @@
                     <div class="job-content">
                         <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
                         <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                        <p><span class="salary">7 - 8 triệu</span></p>
+  
                         <p class="location">Đồng Nai</p>
                     </div>
                 </div>
@@ -297,7 +324,7 @@
                     <div class="job-content">
                         <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
                         <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                        <p><span class="salary">7 - 8 triệu</span></p>
+  
                         <p class="location">Đồng Nai</p>
                     </div>
                 </div>
@@ -306,7 +333,7 @@
         </div>
     </div>
 <!-- a4 -->
-    <section class="featured-industries">
+<section class="featured-industries">
       <h2>Các Khoa và bộ môn</h2>
       <p>Bạn muốn tìm việc mới? Xem danh sách việc làm <a href="#">tại đây</a></p>
       <div class="industries-grid responsive">
@@ -391,19 +418,19 @@
         </div>
        
       </div>
-    </section>
+</section>
 
 
 
 
 
         <!-- Slide chạy   -->
-    <div class="slider-container">
+<div class="slider-container">
       <div class="slider">
           <div class="slides">
-              <img class="hoo" src="/anh.png" alt="Image 1" />
-              <img class="hoo" src="/img/anh_mag.jpg" alt="Image 2" />
-              <img class="hoo" src="/header-bg.webp" alt="Image 3" />
+              <img class="hoo" src="./anh.png" alt="Image 1" />
+              <img class="hoo" src="./img/anh_mag.jpg" alt="Image 2" />
+              <img class="hoo" src="./header-bg.webp" alt="Image 3" />
               <img class="hoo" src="./img/469877645_1005404278278078_3153280250481528893_n.jpg" alt="Image 4" />
           </div>
       </div>
@@ -414,13 +441,13 @@
 
       <!-- Dots -->
       <div class="dots" id="dots-container"></div>
-  </div>
+</div>
       
 
 
     
 <!-- endend -->
-    <footer class="footer">
+<footer class="footer">
         <div class="footer-container">
           <div class="footer-section">
             <img src="logo.png" alt="TopCV Logo" class="footer-logo" />
@@ -476,13 +503,8 @@
             </ul>
           </div>
         </div>
-      </footer>
+</footer>
       
-
-
-
-
-
 
     <!-- <canvas id="snowCanvas"> </canvas> -->
 <script>

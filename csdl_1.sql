@@ -83,7 +83,7 @@ CREATE TABLE `cong_ty` (
   `so_dien_thoai` varchar(20) NOT NULL,
   `email` varchar(100) NOT NULL UNIQUE,
   `gioi_thieu` text DEFAULT NULL,
-  `trang_thai` enum('Chờ duyệt','Đã duyệt','Bị từ chối') DEFAULT 'Chờ duyệt',
+  `trang_thai` enum('Đang chờ','Đã duyệt','Bị từ chối') DEFAULT 'Đang chờ',
   `logo` varchar(255) DEFAULT NULL,
   `anh_bia` varchar(255) DEFAULT NULL,
   `quy_mo` varchar(255) DEFAULT NULL,  -- Đã di chuyển từ bảng tuyen_dung

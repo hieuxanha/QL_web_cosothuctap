@@ -94,6 +94,15 @@
         <label for="dia_chi">Địa Chỉ:</label>
         <input type="text" id="dia_chi" name="dia_chi" required>
     </div>
+    <div class="form-group">
+        <label for="quy_mo">Quy Mô:</label>
+        <input type="text" id="quy_mo" name="quy_mo" placeholder="Ví dụ: 50-100 nhân viên">
+    </div>
+
+    <div class="form-group">
+        <label for="linh_vuc">Lĩnh Vực:</label>
+        <input type="text" id="linh_vuc" name="linh_vuc" placeholder="Ví dụ: Công nghệ thông tin">
+    </div>
 
 <!--     
     <label for="linh_vuc">Lĩnh vực:</label>
@@ -120,11 +129,11 @@
     <img id="previewLogo" src="" alt="Xem trước logo" class="preview-image">
 </div>
 
-<div class="form-group">
-    <label for="anh_bia">Ảnh Bìa Công Ty:</label>
-    <input type="file" id="anh_bia" name="anh_bia" accept="image/*" onchange="previewImage(event, 'previewAnhBia')">
-    <img id="previewAnhBia" src="" alt="Xem trước ảnh bìa" class="preview-image">
-</div>
+      <div class="form-group">
+             <label for="anh_bia">Ảnh Bìa Công Ty:</label>
+            <input type="file" id="anh_bia" name="anh_bia" accept="image/*" onchange="previewImage(event, 'previewAnhBia')">
+            <img id="previewAnhBia" src="" alt="Xem trước ảnh bìa" class="preview-image">
+      </div>
 
          <button type="submit" class="nut">Thêm Công Ty</button>
    </form>

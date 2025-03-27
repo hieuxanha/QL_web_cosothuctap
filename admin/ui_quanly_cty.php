@@ -46,17 +46,19 @@ $result = $conn->query($sql);
                 </svg>
             </div>
             <div class="profile">
-                <span>Nguyễn công hiếu</span>
+                <span>Nguyễn Công Hiếu</span>
                 <img src="profile.jpg" alt="Ảnh đại diện" />
             </div>
         </div>
 
         <?php
         if (isset($_SESSION['message'])) {
-            echo "<div style='padding: 10px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; margin: 10px; border-radius: 5px;'>";
-            echo $_SESSION['message'];
-            echo "</div>";
+            echo "<div class='message success'>" . htmlspecialchars($_SESSION['message']) . "</div>";
             unset($_SESSION['message']);
+        }
+        if (isset($_SESSION['error'])) {
+            echo "<div class='message error'>" . htmlspecialchars($_SESSION['error']) . "</div>";
+            unset($_SESSION['error']);
         }
         ?>
 
@@ -74,20 +76,22 @@ $result = $conn->query($sql);
                 </thead>
                 <tbody>
                     <?php if ($result->num_rows > 0): ?>
+                        <?php $stt = 1; ?>
                         <?php while ($row = $result->fetch_assoc()): ?>
-                            <tr data-stt-cty="<?php echo $row['stt_cty']; ?>">
-                                <td><?php echo $row['stt_cty']; ?></td>
-                                <td><?php echo $row['ten_cong_ty']; ?></td>
-                                <td><?php echo $row['dia_chi']; ?></td>
-                                <td class="trang-thai"><?php echo $row['trang_thai']; ?></td>
+                            <?php $trang_thai = trim($row['trang_thai']) ?: 'Đang chờ'; ?>
+                            <tr data-stt-cty="<?php echo htmlspecialchars($row['stt_cty']); ?>">
+                                <td><?php echo $stt++; ?></td>
+                                <td><?php echo htmlspecialchars($row['ten_cong_ty']); ?></td>
+                                <td><?php echo htmlspecialchars($row['dia_chi']); ?></td>
+                                <td class="trang-thai"><?php echo htmlspecialchars($trang_thai); ?></td>
                                 <td class="action-buttons">
-                                    <?php if ($row['trang_thai'] == 'Chờ duyệt'): ?>
+                                    <?php if ($trang_thai == 'Đang chờ'): ?>
                                         <button class="approve" onclick="updateStatus(<?php echo $row['stt_cty']; ?>, 'approve')">Duyệt</button>
                                         <button class="reject" onclick="updateStatus(<?php echo $row['stt_cty']; ?>, 'reject')">Từ chối</button>
-                                    <?php elseif ($row['trang_thai'] == 'Đã duyệt'): ?>
+                                    <?php elseif ($trang_thai == 'Đã duyệt'): ?>
                                         <button class="cancel" onclick="updateStatus(<?php echo $row['stt_cty']; ?>, 'cancel')">Hủy duyệt</button>
                                         <button class="reject" onclick="updateStatus(<?php echo $row['stt_cty']; ?>, 'reject')">Từ chối</button>
-                                    <?php elseif ($row['trang_thai'] == 'Bị từ chối'): ?>
+                                    <?php elseif ($trang_thai == 'Bị từ chối'): ?>
                                         <button class="restore" onclick="updateStatus(<?php echo $row['stt_cty']; ?>, 'restore')">Khôi phục</button>
                                         <button class="approve" onclick="updateStatus(<?php echo $row['stt_cty']; ?>, 'approve')">Duyệt</button>
                                     <?php endif; ?>
@@ -113,6 +117,9 @@ $result = $conn->query($sql);
             const statusCell = row.querySelector('.trang-thai');
             const buttonsCell = row.querySelector('.action-buttons');
 
+            // Thêm chỉ báo đang xử lý
+            buttonsCell.innerHTML += '<span class="loading">Đang xử lý...</span>';
+
             // Gửi yêu cầu AJAX
             fetch('../logic_admin/logic_duyet_cty.php', {
                 method: 'POST',
@@ -123,12 +130,13 @@ $result = $conn->query($sql);
             })
             .then(response => response.json())
             .then(data => {
+                buttonsCell.querySelector('.loading')?.remove(); // Xóa chỉ báo
                 if (data.success) {
                     // Cập nhật cột trạng thái
                     statusCell.textContent = data.trang_thai;
 
                     // Cập nhật các nút dựa trên trạng thái mới
-                    if (data.trang_thai === 'Chờ duyệt') {
+                    if (data.trang_thai === 'Đang chờ') {
                         buttonsCell.innerHTML = `
                             <button class="approve" onclick="updateStatus(${stt_cty}, 'approve')">Duyệt</button>
                             <button class="reject" onclick="updateStatus(${stt_cty}, 'reject')">Từ chối</button>
@@ -144,11 +152,14 @@ $result = $conn->query($sql);
                             <button class="approve" onclick="updateStatus(${stt_cty}, 'approve')">Duyệt</button>
                         `;
                     }
+                    // Tải lại trang để hiển thị thông báo từ session
+                    setTimeout(() => location.reload(), 500);
                 } else {
                     alert('Lỗi: ' + data.error);
                 }
             })
             .catch(error => {
+                buttonsCell.querySelector('.loading')?.remove();
                 console.error('Lỗi:', error);
                 alert('Đã có lỗi xảy ra!');
             });

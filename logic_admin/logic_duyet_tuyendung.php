@@ -1,58 +1,99 @@
 <?php
 session_start();
-require_once '../db.php'; // Kết nối CSDL
+require_once '../db.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && isset($_POST['ma_tuyen_dung'])) {
-    $ma_tuyen_dung = $_POST['ma_tuyen_dung'];
-    $action = $_POST['action'];
+header('Content-Type: application/json');
 
-    // Kiểm tra xem tin tuyển dụng có tồn tại và đang ở trạng thái "Đang chờ" không
-    $sql_check = "SELECT trang_thai FROM tuyen_dung WHERE ma_tuyen_dung = ? AND trang_thai = 'Đang chờ'";
-    $stmt_check = $conn->prepare($sql_check);
-    $stmt_check->bind_param("s", $ma_tuyen_dung);
-    $stmt_check->execute();
-    $result_check = $stmt_check->get_result();
-
-    if ($result_check->num_rows == 0) {
-        $_SESSION['error'] = "Tin tuyển dụng không tồn tại hoặc không ở trạng thái chờ duyệt!";
-        header("Location: ../admin/ui_quanlytt.php");
-        exit();
-    }
-    $stmt_check->close();
-
-    // Xử lý hành động
-    if ($action == 'approve') {
-        // Cập nhật trạng thái thành "Đang tuyển"
-        $sql = "UPDATE tuyen_dung SET trang_thai = 'Đang tuyển' WHERE ma_tuyen_dung = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $ma_tuyen_dung);
-
-        if ($stmt->execute()) {
-            $_SESSION['message'] = "Duyệt tin tuyển dụng thành công! Tin đã được chuyển sang trạng thái 'Đang tuyển'.";
-        } else {
-            $_SESSION['error'] = "Lỗi khi duyệt tin: " . $stmt->error;
-        }
-    } elseif ($action == 'reject') {
-        // Cập nhật trạng thái thành "Bị từ chối"
-        $sql = "UPDATE tuyen_dung SET trang_thai = 'Bị từ chối' WHERE ma_tuyen_dung = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $ma_tuyen_dung);
-
-        if ($stmt->execute()) {
-            $_SESSION['message'] = "Đã từ chối tin tuyển dụng! Tin đã được chuyển sang trạng thái 'Bị từ chối'.";
-        } else {
-            $_SESSION['error'] = "Lỗi khi từ chối tin: " . $stmt->error;
-        }
-    } else {
-        $_SESSION['error'] = "Hành động không hợp lệ!";
-    }
-
-    $stmt->close();
-    $conn->close();
-} else {
-    $_SESSION['error'] = "Yêu cầu không hợp lệ!";
+if ($_SERVER["REQUEST_METHOD"] != "POST" || !isset($_POST['action']) || !isset($_POST['ma_tuyen_dung'])) {
+    echo json_encode(['success' => false, 'error' => 'Yêu cầu không hợp lệ!']);
+    exit;
 }
 
-header("Location: ../admin/ui_quanlytt.php");
-exit();
+$ma_tuyen_dung = $_POST['ma_tuyen_dung'];
+$action = $_POST['action'];
+
+if (!$conn) {
+    echo json_encode(['success' => false, 'error' => 'Không thể kết nối cơ sở dữ liệu!']);
+    exit;
+}
+
+// Kiểm tra trạng thái hiện tại của tin tuyển dụng
+$sql_check = "SELECT trang_thai FROM tuyen_dung WHERE ma_tuyen_dung = ?";
+$stmt_check = $conn->prepare($sql_check);
+$stmt_check->bind_param("s", $ma_tuyen_dung);
+$stmt_check->execute();
+$result_check = $stmt_check->get_result();
+
+if ($result_check->num_rows == 0) {
+    echo json_encode(['success' => false, 'error' => 'Tin tuyển dụng không tồn tại!']);
+    $stmt_check->close();
+    $conn->close();
+    exit;
+}
+
+$row = $result_check->fetch_assoc();
+$current_status = trim($row['trang_thai']);
+$stmt_check->close();
+
+// Kiểm tra trạng thái hợp lệ cho hành động
+if ($action === 'approve' || $action === 'reject') {
+    if ($current_status !== 'Đang chờ' && $current_status !== 'Bị từ chối') {
+        echo json_encode(['success' => false, 'error' => 'Tin tuyển dụng không ở trạng thái phù hợp để thực hiện hành động này! Trạng thái hiện tại: ' . $current_status]);
+        $conn->close();
+        exit;
+    }
+} elseif ($action === 'restore') {
+    if ($current_status !== 'Bị từ chối') {
+        echo json_encode(['success' => false, 'error' => 'Tin tuyển dụng không ở trạng thái bị từ chối! Trạng thái hiện tại: ' . $current_status]);
+        $conn->close();
+        exit;
+    }
+} elseif ($action === 'cancel') {
+    if ($current_status !== 'Đã duyệt') {
+        echo json_encode(['success' => false, 'error' => 'Tin tuyển dụng không ở trạng thái đã duyệt! Trạng thái hiện tại: ' . $current_status]);
+        $conn->close();
+        exit;
+    }
+}
+
+$trang_thai = '';
+$message = '';
+
+switch ($action) {
+    case 'approve':
+        $trang_thai = 'Đã duyệt';
+        $message = "Duyệt tin tuyển dụng thành công!";
+        break;
+    case 'reject':
+        $trang_thai = 'Bị từ chối';
+        $message = "Đã từ chối tin tuyển dụng!";
+        break;
+    case 'restore':
+        $trang_thai = 'Đang chờ';
+        $message = "Đã khôi phục tin tuyển dụng!";
+        break;
+    case 'cancel':
+        $trang_thai = 'Đang chờ';
+        $message = "Đã hủy duyệt tin tuyển dụng!";
+        break;
+    default:
+        echo json_encode(['success' => false, 'error' => 'Hành động không hợp lệ!']);
+        $conn->close();
+        exit;
+}
+
+$sql = "UPDATE tuyen_dung SET trang_thai = ? WHERE ma_tuyen_dung = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ss", $trang_thai, $ma_tuyen_dung);
+
+if ($stmt->execute()) {
+    $_SESSION['message'] = $message;
+    echo json_encode(['success' => true, 'message' => $message, 'trang_thai' => $trang_thai]);
+} else {
+    $_SESSION['error'] = "Lỗi khi cập nhật tin tuyển dụng: " . $stmt->error;
+    echo json_encode(['success' => false, 'error' => "Lỗi khi cập nhật tin tuyển dụng: " . $stmt->error]);
+}
+
+$stmt->close();
+$conn->close();
 ?>
