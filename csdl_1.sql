@@ -105,6 +105,7 @@ CREATE TABLE `tuyen_dung` (
   `dia_chi` varchar(255) NOT NULL,
   `hinh_thuc` enum('Full-time', 'Part-time') NOT NULL,
   `gioi_tinh` enum('Nam', 'Nữ', 'Không giới hạn') NOT NULL,
+  `noi_bat` TINYINT(1) DEFAULT 0, -- Cột nổi bật: 0 = không, 1 = có
   PRIMARY KEY (`stt_tuyendung`),
   FOREIGN KEY (`stt_cty`) REFERENCES `cong_ty`(`stt_cty`) ON DELETE CASCADE ON UPDATE CASCADE
 );

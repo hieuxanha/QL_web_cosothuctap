@@ -176,7 +176,7 @@ button:hover {
                     <button class="linkedin">LinkedIn</button>
                 </div> -->
 
-                <p>Bạn chưa có tài khoản? <a href="dang_ky.php">Đăng ký ngay</a></p>
+                <p>Bạn chưa có tài khoản? <a href="../dang_nhap_dang_ki/form_dk.php">Đăng ký ngay</a></p>
             </form>
         </div>
 

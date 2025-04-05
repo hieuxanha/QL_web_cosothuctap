@@ -2,98 +2,46 @@
 session_start();
 require_once '../db.php';
 
-header('Content-Type: application/json');
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['them_tuyen_dung'])) {
+    // Lấy dữ liệu từ form
+    $ma_tuyen_dung = rand(1000, 9999); // Tạo mã ngẫu nhiên
+    $stt_cty = $_POST['stt_cty'];
+    $tieu_de = $_POST['tieu_de_tuyen_dung'];
+    $dia_chi = $_POST['dia_chi'];
+    $hinh_thuc = $_POST['hinh_thuc'];
+    $gioi_tinh = $_POST['gioi_tinh'];
+    $mo_ta = $_POST['mo_ta'] ?? '';
+    $so_luong = $_POST['so_luong'];
+    $yeu_cau = $_POST['yeu_cau'] ?? '';
+    $han_nop = $_POST['han_nop'];
+    $noi_bat = isset($_POST['noi_bat']) ? 1 : 0;
 
-if ($_SERVER["REQUEST_METHOD"] != "POST" || !isset($_POST['action']) || !isset($_POST['ma_tuyen_dung'])) {
-    echo json_encode(['success' => false, 'error' => 'Yêu cầu không hợp lệ!']);
-    exit;
-}
+    // Kiểm tra các trường bắt buộc
+    if (empty($stt_cty) || empty($tieu_de) || empty($dia_chi) || empty($hinh_thuc) || empty($gioi_tinh) || empty($so_luong) || empty($han_nop)) {
+        $_SESSION['error'] = "Vui lòng điền đầy đủ các trường bắt buộc!";
+        header("Location: ../co_so_thuc_tap/ui_capnhat_tt.php");
+        exit;
+    }
 
-$ma_tuyen_dung = $_POST['ma_tuyen_dung'];
-$action = $_POST['action'];
+    // Thêm tin tuyển dụng vào cơ sở dữ liệu
+    $sql = "INSERT INTO tuyen_dung (ma_tuyen_dung, stt_cty, tieu_de, dia_chi, hinh_thuc, gioi_tinh, mo_ta, so_luong, yeu_cau, han_nop, noi_bat, trang_thai) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Đang chờ')";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iisssssisss", $ma_tuyen_dung, $stt_cty, $tieu_de, $dia_chi, $hinh_thuc, $gioi_tinh, $mo_ta, $so_luong, $yeu_cau, $han_nop, $noi_bat);
 
-if (!$conn) {
-    echo json_encode(['success' => false, 'error' => 'Không thể kết nối cơ sở dữ liệu!']);
-    exit;
-}
+    if ($stmt->execute()) {
+        $_SESSION['message'] = "Tin tuyển dụng đã được gửi để chờ duyệt!";
+    } else {
+        $_SESSION['error'] = "Lỗi khi thêm tin tuyển dụng: " . $stmt->error;
+    }
 
-// Kiểm tra trạng thái hiện tại của tin tuyển dụng
-$sql_check = "SELECT trang_thai FROM tuyen_dung WHERE ma_tuyen_dung = ?";
-$stmt_check = $conn->prepare($sql_check);
-$stmt_check->bind_param("s", $ma_tuyen_dung);
-$stmt_check->execute();
-$result_check = $stmt_check->get_result();
-
-if ($result_check->num_rows == 0) {
-    echo json_encode(['success' => false, 'error' => 'Tin tuyển dụng không tồn tại!']);
-    $stmt_check->close();
+    $stmt->close();
     $conn->close();
+    header("Location: ../co_so_thuc_tap/ui_capnhat_tt.php");
+    exit;
+} else {
+    $_SESSION['error'] = "Yêu cầu không hợp lệ!";
+    header("Location: ../co_so_thuc_tap/ui_capnhat_tt.php");
     exit;
 }
-
-$row = $result_check->fetch_assoc();
-$current_status = trim($row['trang_thai']);
-$stmt_check->close();
-
-// Kiểm tra trạng thái hợp lệ cho hành động
-if ($action === 'approve' || $action === 'reject') {
-    if ($current_status !== 'Đang chờ' && $current_status !== 'Bị từ chối') {
-        echo json_encode(['success' => false, 'error' => 'Tin tuyển dụng không ở trạng thái phù hợp để thực hiện hành động này!']);
-        $conn->close();
-        exit;
-    }
-} elseif ($action === 'restore') {
-    if ($current_status !== 'Bị từ chối') {
-        echo json_encode(['success' => false, 'error' => 'Tin tuyển dụng không ở trạng thái bị từ chối!']);
-        $conn->close();
-        exit;
-    }
-} elseif ($action === 'cancel') {
-    if ($current_status !== 'Đã duyệt') {
-        echo json_encode(['success' => false, 'error' => 'Tin tuyển dụng không ở trạng thái đã duyệt!']);
-        $conn->close();
-        exit;
-    }
-}
-
-$trang_thai = '';
-$message = '';
-
-switch ($action) {
-    case 'approve':
-        $trang_thai = 'Đã duyệt';
-        $message = "Duyệt tin tuyển dụng thành công!";
-        break;
-    case 'reject':
-        $trang_thai = 'Bị từ chối';
-        $message = "Đã từ chối tin tuyển dụng!";
-        break;
-    case 'restore':
-        $trang_thai = 'Đang chờ';
-        $message = "Đã khôi phục tin tuyển dụng!";
-        break;
-    case 'cancel':
-        $trang_thai = 'Đang chờ';
-        $message = "Đã hủy duyệt tin tuyển dụng!";
-        break;
-    default:
-        echo json_encode(['success' => false, 'error' => 'Hành động không hợp lệ!']);
-        $conn->close();
-        exit;
-}
-
-$sql = "UPDATE tuyen_dung SET trang_thai = ? WHERE ma_tuyen_dung = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("ss", $trang_thai, $ma_tuyen_dung);
-
-if ($stmt->execute()) {
-    $_SESSION['message'] = $message;
-    echo json_encode(['success' => true, 'message' => $message, 'trang_thai' => $trang_thai]);
-} else {
-    $_SESSION['error'] = "Lỗi khi cập nhật tin tuyển dụng: " . $stmt->error;
-    echo json_encode(['success' => false, 'error' => "Lỗi khi cập nhật tin tuyển dụng: " . $stmt->error]);
-}
-
-$stmt->close();
-$conn->close();
 ?>

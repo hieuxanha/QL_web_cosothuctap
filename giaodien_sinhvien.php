@@ -227,107 +227,35 @@
     // Kết nối CSDL
     require_once './db.php';
 
-    // Lấy danh sách tin tuyển dụng có trạng thái 'Đã duyệt'
-    $sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.dia_chi, ct.ten_cong_ty, ct.logo
+    // Lấy danh sách tin tuyển dụng có trạng thái 'Đã duyệt' và nổi bật
+    $sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.dia_chi, ct.stt_cty, ct.ten_cong_ty, ct.logo
             FROM tuyen_dung td
             JOIN cong_ty ct ON td.stt_cty = ct.stt_cty
-            WHERE td.trang_thai = 'Đã duyệt'";
+            WHERE td.trang_thai = 'Đã duyệt' AND td.noi_bat = 1";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             echo '<div class="job">';
             // Hiển thị logo công ty, nếu không có logo thì dùng logo mặc định
-            $logo = !empty($row['logo']) ? htmlspecialchars($row['logo']) : 'logo.png';
+            $logo = !empty($row['logo']) ? 'uploads/' . htmlspecialchars($row['logo']) : 'uploads/logo.png';
             echo '<img alt="Logo" src="' . $logo . '" />';
             echo '<div class="job-content">';
-            echo '<h3>' . htmlspecialchars($row['tieu_de']) . '</h3>';
-            echo '<p>' . htmlspecialchars($row['ten_cong_ty']) . '</p>';
+            // Liên kết đến trang chi tiết tin tuyển dụng
+            echo '<h3><a href="chi_tiet.php?ma_tuyen_dung=' . htmlspecialchars($row['ma_tuyen_dung']) . '">' . htmlspecialchars($row['tieu_de']) . '</a></h3>';
+            // Liên kết đến trang chi tiết công ty, sử dụng stt_cty
+            echo '<p><a href="giaodien_thongtincty.php?stt_cty=' . htmlspecialchars($row['stt_cty']) . '">' . htmlspecialchars($row['ten_cong_ty']) . '</a></p>';
             echo '<p class="location">' . htmlspecialchars($row['dia_chi']) . '</p>';
             echo '<button class="apply-btn" onclick="applyJob(\'' . htmlspecialchars($row['ma_tuyen_dung']) . '\')">Ứng tuyển</button>';
             echo '</div>';
             echo '</div>';
         }
     } else {
-        echo '<p>Chưa có tin tuyển dụng nào được duyệt.</p>';
+        echo '<p>Chưa có tin tuyển dụng nổi bật nào được duyệt.</p>';
     }
     ?>
 </div>
         
-            <div class="job-container">
-              <div class="job">
-                <img alt="Logo" src="logo.png" />
-                <div class="job-content">
-                    <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
-                    <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                    <p class="location">Đồng Nai</p>
-                </div>
-            </div>
-              <div class="job">
-                <img alt="Logo" src="logo.png" />
-                <div class="job-content">
-                    <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
-                    <p>Công ty TNHH Horoo-Nanpao Paint</p>
-                    <p class="location">Đồng Nai</p>
-                </div>
-            </div>
-            
-                <div class="job">
-                    <img alt="Logo" src="logo.png" />
-                    <div class="job-content">
-                        <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
-                        <p>Công ty TNHH Horoo-Nanpao Paint</p>
-  
-                        <p class="location">Đồng Nai</p>
-                    </div>
-                </div>
-                <!-- Thêm các job khác -->
-                <div class="job">
-                    <img alt="Logo" src="logo.png" />
-                    <div class="job-content">
-                        <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
-                        <p>Công ty TNHH Horoo-Nanpao Paint</p>
-  
-                        <p class="location">Đồng Nai</p>
-                    </div>
-                </div>
-                <div class="job">
-                    <img alt="Logo" src="logo.png" />
-                    <div class="job-content">
-                        <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
-                        <p>Công ty TNHH Horoo-Nanpao Paint</p>
-  
-                        <p class="location">Đồng Nai</p>
-                    </div>
-                </div>
-                <div class="job">
-                    <img alt="Logo" src="logo.png" />
-                    <div class="job-content">
-                        <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
-                        <p>Công ty TNHH Horoo-Nanpao Paint</p>
-  
-                        <p class="location">Đồng Nai</p>
-                    </div>
-                </div>
-                <div class="job">
-                    <img alt="Logo" src="logo.png" />
-                    <div class="job-content">
-                        <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
-                        <p>Công ty TNHH Horoo-Nanpao Paint</p>
-  
-                        <p class="location">Đồng Nai</p>
-                    </div>
-                </div>
-
-                <div class="job">
-                    <img alt="Logo" src="logo.png" />
-                    <div class="job-content">
-                        <h3>Nhân Viên Kho Tại Đồng Nai (Nam)</h3>
-                        <p>Công ty TNHH Horoo-Nanpao Paint</p>
-  
-                        <p class="location">Đồng Nai</p>
-                    </div>
-                </div>
             </div>
             
         </div>

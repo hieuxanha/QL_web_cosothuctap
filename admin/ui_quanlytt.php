@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý Tuyển Dụng</title>
@@ -11,35 +11,36 @@
     <link rel="stylesheet" href="./giaodien_quanlytt.css" />
 
     <style>
-      .pending-list table {
-        width: 100%;
-        table-layout: fixed;
-        border-collapse: collapse;
-      }
-      .pending-list th, .pending-list td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        text-align: left;
-        word-wrap: break-word;
-        white-space: normal;
-      }
-      .pending-list th:nth-child(1), .pending-list td:nth-child(1) { width: 5%; }
-      .pending-list th:nth-child(2), .pending-list td:nth-child(2) { width: 25%; }
-      .pending-list th:nth-child(3), .pending-list td:nth-child(3) { width: 35%; }
-      .pending-list th:nth-child(4), .pending-list td:nth-child(4) { width: 15%; }
-      .pending-list th:nth-child(5), .pending-list td:nth-child(5) { width: 20%; }
-      .approve { background-color: #28a745; color: white; padding: 5px 10px; border: none; cursor: pointer; }
-      .reject { background-color: #dc3545; color: white; padding: 5px 10px; border: none; cursor: pointer; }
+        .pending-list table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+        .pending-list th, .pending-list td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        .pending-list th:nth-child(1), .pending-list td:nth-child(1) { width: 3%; }
+        .pending-list th:nth-child(2), .pending-list td:nth-child(2) { width: 20%; }
+        .pending-list th:nth-child(3), .pending-list td:nth-child(3) { width: 30%; }
+        .pending-list th:nth-child(4), .pending-list td:nth-child(4) { width: 15%; }
+        .pending-list th:nth-child(5), .pending-list td:nth-child(5) { width: 5%; }
+        .pending-list th:nth-child(6), .pending-list td:nth-child(6) { width: 20%; }
+        .approve { background-color: #28a745; color: white; padding: 5px 10px; border: none; cursor: pointer; }
+        .reject { background-color: #dc3545; color: white; padding: 5px 10px; border: none; cursor: pointer; }
     </style>
-  </head>
+</head>
 
-  <body>
+<body>
     <?php
     session_start();
     require_once '../db.php'; // Kết nối CSDL
 
-    // Lấy danh sách tất cả tin tuyển dụng (không chỉ 'Đang chờ')
-    $sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.trang_thai, ct.ten_cong_ty
+    // Lấy danh sách tất cả tin tuyển dụng
+    $sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.trang_thai, td.noi_bat, ct.ten_cong_ty
             FROM tuyen_dung td
             JOIN cong_ty ct ON td.stt_cty = ct.stt_cty";
     $result = $conn->query($sql);
@@ -99,6 +100,7 @@
                         <th>Tên công ty</th>
                         <th>Tiêu đề tuyển dụng</th>
                         <th>Trạng thái</th>
+                        <th>Nổi bật</th>
                         <th>Hành động</th>
                     </tr>
                 </thead>
@@ -108,11 +110,13 @@
                         $stt = 1;
                         while ($row = $result->fetch_assoc()) {
                             $trang_thai = trim($row['trang_thai']) ?: 'Đang chờ';
+                            $noi_bat = $row['noi_bat'] ? 'Có' : 'Không';
                             echo "<tr data-ma-tuyen-dung='" . htmlspecialchars($row['ma_tuyen_dung']) . "'>";
                             echo "<td>" . $stt++ . "</td>";
                             echo "<td data-tooltip='" . htmlspecialchars($row['ten_cong_ty']) . "'>" . htmlspecialchars($row['ten_cong_ty']) . "</td>";
                             echo "<td data-tooltip='" . htmlspecialchars($row['tieu_de']) . "'>" . htmlspecialchars($row['tieu_de']) . "</td>";
                             echo "<td class='trang-thai'>" . htmlspecialchars($trang_thai) . "</td>";
+                            echo "<td>" . htmlspecialchars($noi_bat) . "</td>";
                             echo "<td class='action-buttons'>";
                             if ($trang_thai == 'Đang chờ') {
                                 echo "<button class='approve' onclick=\"updateStatus('" . htmlspecialchars($row['ma_tuyen_dung']) . "', 'approve')\">Duyệt</button>";
@@ -128,7 +132,7 @@
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='5'>Không có tin tuyển dụng nào.</td></tr>";
+                        echo "<tr><td colspan='6'>Không có tin tuyển dụng nào.</td></tr>";
                     }
                     ?>
                 </tbody>
@@ -149,10 +153,8 @@
             const statusCell = row.querySelector('.trang-thai');
             const buttonsCell = row.querySelector('.action-buttons');
 
-            // Thêm chỉ báo đang xử lý
             buttonsCell.innerHTML += '<span class="loading">Đang xử lý...</span>';
 
-            // Gửi yêu cầu AJAX
             fetch('../logic_admin/logic_duyet_tuyendung.php', {
                 method: 'POST',
                 headers: {
@@ -162,12 +164,10 @@
             })
             .then(response => response.json())
             .then(data => {
-                buttonsCell.querySelector('.loading')?.remove(); // Xóa chỉ báo
+                buttonsCell.querySelector('.loading')?.remove();
                 if (data.success) {
-                    // Cập nhật trạng thái
                     statusCell.textContent = data.trang_thai;
 
-                    // Cập nhật các nút dựa trên trạng thái mới
                     if (data.trang_thai === 'Đang chờ') {
                         buttonsCell.innerHTML = `
                             <button class="approve" onclick="updateStatus('${ma_tuyen_dung}', 'approve')">Duyệt</button>
@@ -185,7 +185,6 @@
                         `;
                     }
 
-                    // Hiển thị thông báo
                     const messageDiv = document.createElement('div');
                     messageDiv.className = 'message success';
                     messageDiv.textContent = data.message;

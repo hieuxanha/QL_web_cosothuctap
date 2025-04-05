@@ -151,10 +151,15 @@
 
                 <label for="yeu_cau">Yêu cầu:</label>
                 <textarea name="yeu_cau"></textarea>
+                
+                <label for="noi_bat">Nổi bật:</label>
+                <input type="checkbox" name="noi_bat" value="1"> <!-- Thêm checkbox cho nổi bật -->
+
 
                 <label for="han_nop">Hạn nộp:</label>
                 <input type="date" name="han_nop" required>
 
+              
                 <input type="hidden" name="them_tuyen_dung" value="1">
                 <button type="submit" class="submit-btn">Đăng tin</button>
             </form>

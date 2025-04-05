@@ -471,7 +471,7 @@ body {
   display: flex;
   flex-wrap: wrap; /* Để hiển thị theo hàng */
   gap: 16px; /* Khoảng cách giữa các box */
-  /* justify-content: space-between; */
+  justify-content: space-between;
 }
 
 .job {
@@ -483,8 +483,9 @@ body {
   padding: 15px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: calc(33% - 10px); /* Để chia 3 box trên 1 hàng */
-  max-width: 350px;
+  max-width: 380px;
   box-sizing: border-box;
+  height: 210px;
 }
 
 .job img {
@@ -496,10 +497,10 @@ body {
 }
 
 .job-content {
-  display: flex;
+  /* display: flex; */
   flex-direction: column;
 }
-
+/* 
 .job-content h3 {
   font-size: 18px;
   font-weight: bold;
@@ -511,9 +512,27 @@ body {
   margin: 0;
   font-size: 14px;
   color: #555;
+} */
+
+
+.job-content h3 a {
+  text-decoration: none; /* Loại bỏ gạch chân */
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+  color: #333;
 }
 
-.job-content .salary {
+.job-content p a {
+  text-decoration: none; /* Loại bỏ gạch chân */
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+} 
+
+
+
+/* .job-content .salary {
   color: green;
   font-weight: bold;
 }
@@ -521,7 +540,21 @@ body {
 .job-content .location {
   color: #777;
   font-size: 12px;
+} */
+.job-content h3 a, 
+.job-content p a {
+  display: block;
+  overflow: hidden; /* Ẩn nội dung vượt quá */
+  text-overflow: ellipsis; /* Hiển thị "..." khi bị cắt */
+  word-wrap: break-word; /* Xuống dòng khi nội dung quá dài */
+  overflow-wrap: break-word; /* Đảm bảo xuống dòng đúng */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Giới hạn số dòng hiển thị */
+  -webkit-box-orient: vertical;
+  max-width: 100%; /* Đảm bảo phù hợp với bố cục */
+  max-height: 3em; /* Điều chỉnh chiều cao phù hợp (tương đương 2 dòng) */
 }
+
 
 /*  */
 .tags .tag {
