@@ -27,12 +27,15 @@
         <div class="menu">
             <hr />
             <ul>
-                <h2>Quản lý</h2>
-                <li><i class="fa-brands fa-windows"></i><a href="">Quản lý tk người dùng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Kiểm tra và phê duyệt</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Quản lý thông báo</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Cập nhật, bảo trì hệ thống</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Thêm thông tin các cơ sở</a></li>
+             <h2>Quản lý</h2>
+              
+             <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_admin.php">admin..</a></li>
+             <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
+             <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanly_cty.php">Phê duyệt công ty</a></li>
+             <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
+             <li><i class="fa-brands fa-windows"></i><a href="#">Thông báo</a></li>
+             <li><i class="fa-brands fa-windows"></i><a href="#">Bảo trì hệ thống</a></li>
+             <li><i class="fa-brands fa-windows"></i><a href="#">Cơ sở</a></li>
             </ul>
         </div>
     </div>

@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet" />
 
 
-    <link rel="stylesheet" href="giaodien_chinh.css">
+    <link rel="stylesheet" href="/QL_web_cosothuctap/sinh_vien/giaodien_chinh.css?v=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick.css"/>
@@ -57,14 +57,38 @@
   <div class="header">
     <div class="left-section">
         <div class="logo">
-            <img alt="TopCV Logo" height="40" src="./logo.png" width="100%" />
+            <img alt="TopCV Logo" height="40" src="../img/logo.png" width="100%" />
         </div>
         <div class="ten_trg">
             <h3>ĐẠI HỌC TRƯỜNG NGUYÊN MÔI TRƯỜNG HÀ NỘI</h3>
             <p>Hanoi University of Natural Resources and Environment</p>
         </div>
     </div>
+    
     <div class="nav">
+    <div class="account">
+                <?php
+             if (session_status() == PHP_SESSION_NONE) {
+              session_start();
+              }
+
+              if (isset($_SESSION['name'])) {
+ 
+              echo '<div class="dropdown">';
+              echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+              echo '<div class="dropdown-content">';
+              echo '<a href="../Backend_dkdn/dangxuat.php">Đăng xuất</a>'; 
+              echo '</div>';
+              echo '</div>';
+            } else {
+    
+            //  echo '<a href="./formdangnhapky.php">Tài khoản</a>';
+           }
+
+                ?>
+          
+  
+            </div>
         <a href="#">Việc làm</a>
         <a href="#">Hồ sơ &amp; CV</a>
         <a class="btn" href="../Ql_web_cosothuctap/dang_nhap_dang_ki/form_dk.php">Đăng nhập</a>
@@ -208,7 +232,7 @@
         </div>
     
           <div class="a">
-               <img src="./img/469877645_1005404278278078_3153280250481528893_n.jpg" alt="">
+               <img src="../img/469877645_1005404278278078_3153280250481528893_n.jpg" alt="">
           </div>
          
       </div>
@@ -225,7 +249,7 @@
             <div class="job-container">
     <?php
     // Kết nối CSDL
-    require_once './db.php';
+    require_once '../db.php';
 
     // Lấy danh sách tin tuyển dụng có trạng thái 'Đã duyệt' và nổi bật
     $sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.dia_chi, ct.stt_cty, ct.ten_cong_ty, ct.logo
@@ -254,7 +278,7 @@
         echo '<p>Chưa có tin tuyển dụng nổi bật nào được duyệt.</p>';
     }
     ?>
-</div>
+  </div>
         
             </div>
             
@@ -356,10 +380,10 @@
 <div class="slider-container">
       <div class="slider">
           <div class="slides">
-              <img class="hoo" src="./anh.png" alt="Image 1" />
-              <img class="hoo" src="./img/anh_mag.jpg" alt="Image 2" />
-              <img class="hoo" src="./header-bg.webp" alt="Image 3" />
-              <img class="hoo" src="./img/469877645_1005404278278078_3153280250481528893_n.jpg" alt="Image 4" />
+              <img class="hoo" src="../img/anh.png" alt="Image 1" />
+              <img class="hoo" src="../img/anh_mag.jpg" alt="Image 2" />
+              <img class="hoo" src="../img/header-bg.webp" alt="Image 3" />
+              <img class="hoo" src="../img/469877645_1005404278278078_3153280250481528893_n.jpg" alt="Image 4" />
           </div>
       </div>
 
@@ -378,22 +402,22 @@
 <footer class="footer">
         <div class="footer-container">
           <div class="footer-section">
-            <img src="logo.png" alt="TopCV Logo" class="footer-logo" />
+            <img src="../img/logo.png" alt="TopCV Logo" class="footer-logo" />
             <p>Tiếp lợi thế - Nối thành công</p>
-            <img src="./img/google_for_startup.webp" alt="Google for Startups" />
+            <img src="../img/google_for_startup.webp" alt="Google for Startups" />
             <p>Liên hệ</p>
             <p>Hotline: <a href="tel:02466805958">(024) 6680 5958</a> (Giờ hành chính)</p>
             <p>Email: <a href="mailto:hotro@topcv.vn">hotro@topcv.vn</a></p>
             <p>Ứng dụng tải xuống</p>
             <div class="app-links">
-              <img src="./img/app_store.webp" alt="App Store" />
-              <img src="./img/chplay.webp" alt="Google Play" />
+              <img src="../img/app_store.webp" alt="App Store" />
+              <img src="../img/chplay.webp" alt="Google Play" />
             </div>
             <div class="social-icons">
-              <a href="#"><img src="./img/facebook.webp" alt="Facebook" /></a>
-              <a href="#"><img src="./img/youtube.webp" alt="YouTube" /></a>
-              <a href="#"><img src="./img/linkedin.webp" alt="LinkedIn" /></a>
-              <a href="#"><img src="./img/tiktok.webp" alt="TikTok" /></a>
+              <a href="#"><img src="../img/facebook.webp" alt="Facebook" /></a>
+              <a href="#"><img src="../img/youtube.webp" alt="YouTube" /></a>
+              <a href="#"><img src="../img/linkedin.webp" alt="LinkedIn" /></a>
+              <a href="#"><img src="../img/tiktok.webp" alt="TikTok" /></a>
             </div>
           </div>
           <div class="footer-section">
@@ -469,7 +493,7 @@
 
 </script>
 
-   <script src="./js/giaodienchinh.js" ></script>
+   <script src="../js/giaodienchinh.js" ></script>
   <!-- của slide -->
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 

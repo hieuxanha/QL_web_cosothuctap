@@ -4,7 +4,7 @@ session_start();
 
 
 // Kết nối CSDL
-require_once './db.php';
+require_once '../db.php';
 
 // Lấy ma_tuyen_dung từ URL
 $ma_tuyen_dung = isset($_GET['ma_tuyen_dung']) ? $_GET['ma_tuyen_dung'] : null;
@@ -61,7 +61,7 @@ $conn->close();
     <div class="header">
         <div class="left-section">
             <div class="logo">
-                <img alt="TopCV Logo" height="40" src="/logo.png" width="100%" />
+                <img alt="TopCV Logo" height="40" src="../img/logo.png" width="100%" />
             </div>
             <div class="ten_trg">
                 <h3>ĐẠI HỌC TRƯỜNG NGUYÊN MÔI TRƯỜNG HÀ NỘI</h3>
@@ -182,22 +182,22 @@ $conn->close();
     <footer class="footer">
         <div class="footer-container">
           <div class="footer-section">
-            <img src="logo.png" alt="TopCV Logo" class="footer-logo" />
+            <img src="../img/logo.png" alt="TopCV Logo" class="footer-logo" />
             <p>Tiếp lợi thế - Nối thành công</p>
-            <img src="./img/google_for_startup.webp" alt="Google for Startups" />
+            <img src="../img/google_for_startup.webp" alt="Google for Startups" />
             <p>Liên hệ</p>
             <p>Hotline: <a href="tel:02466805958">(024) 6680 5958</a> (Giờ hành chính)</p>
             <p>Email: <a href="mailto:hotro@topcv.vn">hotro@topcv.vn</a></p>
             <p>Ứng dụng tải xuống</p>
             <div class="app-links">
-              <img src="./img/app_store.webp" alt="App Store" />
-              <img src="./img/chplay.webp" alt="Google Play" />
+              <img src="../img/app_store.webp" alt="App Store" />
+              <img src="../img/chplay.webp" alt="Google Play" />
             </div>
             <div class="social-icons">
-              <a href="#"><img src="./img/facebook.webp" alt="Facebook" /></a>
-              <a href="#"><img src="./img/youtube.webp" alt="YouTube" /></a>
-              <a href="#"><img src="./img/linkedin.webp" alt="LinkedIn" /></a>
-              <a href="#"><img src="./img/tiktok.webp" alt="TikTok" /></a>
+              <a href="#"><img src="../img/facebook.webp" alt="Facebook" /></a>
+              <a href="#"><img src="../img/youtube.webp" alt="YouTube" /></a>
+              <a href="#"><img src="../img/linkedin.webp" alt="LinkedIn" /></a>
+              <a href="#"><img src="../img/tiktok.webp" alt="TikTok" /></a>
             </div>
           </div>
           <div class="footer-section">

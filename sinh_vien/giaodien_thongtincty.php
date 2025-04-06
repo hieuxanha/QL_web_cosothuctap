@@ -1,5 +1,5 @@
 <?php
-require 'db.php'; // Kết nối CSDL
+ require_once '../db.php';
 
 // Lấy stt_cty từ tham số URL
 $stt_cty = isset($_GET['stt_cty']) ? (int)$_GET['stt_cty'] : 0;
@@ -38,7 +38,7 @@ if (!$row) {
     <div class="header">
         <div class="left-section">
             <div class="logo">
-                <img alt="Logo" height="40" src="./logo.png" width="100%" />
+                <img alt="Logo" height="40" src="../img/logo.png" width="100%" />
             </div>
             <div class="ten_trg">
                 <h3>ĐẠI HỌC TÀI NGUYÊN VÀ MÔI TRƯỜNG HÀ NỘI</h3>
