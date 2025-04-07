@@ -162,7 +162,7 @@ document.getElementById('registerForm').addEventListener('submit', function(even
     .then(data => {
         if (data.status === 'success') {
             alert(data.message);
-            window.location.href = './dang_nhap_dang_ki/form_dn.html'; // Chuyển hướng nếu thành công
+            window.location.href = '../dang_nhap_dang_ki/form_dn.php'; // Chuyển hướng nếu thành công
         } else {
             alert(data.message); // Hiển thị lỗi
         }

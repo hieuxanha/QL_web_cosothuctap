@@ -57,16 +57,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         header("Location: ../admin/ui_admin.php");
                         break;
                     case "giang_vien":
-                        header("Location: ../giang_vien/ui_giangvien.html");
+                        header("Location: ../giang_vien/ui_giangvien.php");
                         break;
                     case "sinh_vien":
-                        header("Location: ../giaodien_chung.html");
+                        header("Location: ../sinh_vien/giaodien_chung.php");
                         break;
                     case "co_so_thuc_tap":
-                        header("Location: ../co_so_thuc_tap/ui_cstt.html");
+                        header("Location: ../co_so_thuc_tap/ui_cstt.php");
                         break;
                     default:
-                        header("Location: giaodien_chung.html");
+                        header("Location: giaodien_chung.php");
                         break;
                 }
                 exit();
