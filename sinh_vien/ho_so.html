@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CƠ SỞ DỮ LIỆU NGÀNH GIÁO DỤC VÀ ĐÀO TẠO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #a64d79;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .container {
+            display: flex;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .profile-section {
+            width: 20%;
+            padding-right: 20px;
+            text-align: center;
+        }
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+        }
+        .id-section {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: #0078d4;
+        }
+        .verification-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .verification-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .verification-text {
+            color: #0078d4;
+            text-align: center;
+            font-size: 14px;
+        }
+        .form-section {
+            width: 80%;
+        }
+        .form-group {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .form-label {
+            width: 150px;
+            font-weight: bold;
+        }
+        .form-number {
+            color: red;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .form-input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .date-input {
+            display: flex;
+            align-items: center;
+        }
+        .date-icon {
+            margin-left: 10px;
+            color: #666;
+        }
+        .form-select {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+        .section-title {
+            font-size: 18px;
+            color: #0078d4;
+            margin-bottom: 15px;
+            margin-top: 30px;
+        }
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .submit-button {
+            background-color: #0078d4;
+            color: white;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="/api/placeholder/30/30" alt="Education Logo">
+        <h2>Đại học tài nguyên môi trường</h2>
+    </div>
+
+    <div class="container">
+        <div class="profile-section">
+            <div class="profile-image">
+                <span>NO IMAGES</span>
+            </div>
+            <div class="id-section">
+                <div>Mã định danh Bộ GD&ĐT:</div>
+                <div><strong>0138704968</strong></div>
+            </div>
+            <div class="verification-section">
+                <div class="verification-icon">✓</div>
+                <div class="verification-text">
+                    Đã xác thực Số<br>
+                    định danh cá nhân<br>
+                    với CSDLQG về<br>
+                    Dân Cư
+                </div>
+                <div style="color: #0078d4; margin-top: 10px;">
+                    <strong>001215030349</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <div class="form-label">Khối học</div>
+                <div class="form-number">[1]</div>
+                <select class="form-select">
+                    <option selected>Khối 4</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Lớp học</div>
+                <div class="form-number">[2]</div>
+                <select class="form-select">
+                    <option selected>4A4</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Họ và tên</div>
+                <div class="form-number">[3]</div>
+                <input type="text" class="form-input" value="Đỗ Đình Nam Anh">
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Tên gọi khác</div>
+                <div class="form-number">[4]</div>
+                <input type="text" class="form-input" value="">
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Ngày sinh</div>
+                <div class="form-number">[5]</div>
+                <div class="date-input" style="flex-grow: 1;">
+                    <input type="text" class="form-input" value="22/06/2015">
+                    <div class="date-icon">📅</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Giới tính</div>
+                <div class="form-number">[6]</div>
+                <select class="form-select">
+                    <option selected>Nam</option>
+                    <option>Nữ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Trạng thái HS</div>
+                <div class="form-number">[7]</div>
+                <select class="form-select">
+                    <option selected>Đang học</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Ngày nhập học</div>
+                <div class="form-number">[7.1]</div>
+                <div class="date-input" style="flex-grow: 1;">
+                    <input type="text" class="form-input" value="05/09/2024">
+                    <div class="date-icon">📅</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Dân tộc</div>
+                <div class="form-number">[8]</div>
+                <select class="form-select">
+                    <option selected>Kinh</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">ĐT trên giấy KS</div>
+                <div class="form-number">[9]</div>
+                <input type="text" class="form-input" value="Kinh">
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Quốc tịch</div>
+                <div class="form-number">[10]</div>
+                <select class="form-select">
+                    <option selected>Việt Nam</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Tôn giáo</div>
+                <div class="form-number">[11]</div>
+                <select class="form-select">
+                    <option selected>Chọn</option>
+                </select>
+            </div>
+
+            <div class="section-title">Thông tin hộ khẩu, quê quán</div>
+
+            <div class="form-group">
+                <div class="form-label">Hộ khẩu thường trú</div>
+                <div class="form-number">[14]</div>
+                <select class="form-select">
+                    <option selected>Thành phố Hà Nội</option>
+                </select>
+            </div>
+
+            <div class="address-grid">
+                <select class="form-select">
+                    <option selected>Huyện Phúc Thọ</option>
+                </select>
+                <select class="form-select">
+                    <option selected>Xã Hiệp Thuận</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-input" value="Thôn Hiệp Thuận 3">
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-input" placeholder="Chi tiết Tổ/Thôn/Xóm (nếu có)">
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Quê quán</div>
+                <div class="form-number">[15]</div>
+                <select class="form-select">
+                    <option selected>Thành phố Hà Nội</option>
+                </select>
+            </div>
+
+            <div class="address-grid">
+                <select class="form-select">
+                    <option selected>Huyện Phúc Thọ</option>
+                </select>
+                <select class="form-select">
+                    <option selected>Xã Hiệp Thuận</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-input" placeholder="Nhập Tổ/Thôn/Xóm quê quán chi tiết">
+            </div>
+
+            <div class="section-title">Thông tin khác</div>
+
+            <div class="form-group">
+                <div class="form-label">Nơi sinh</div>
+                <div class="form-number">[16]</div>
+                <select class="form-select">
+                    <option selected>Thành phố Hà Nội</option>
+                </select>
+                <select class="form-select" style="margin-left: 10px;">
+                    <option selected>Chọn theo quận/huyện</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-input" value="Xã Hiệp Thuận">
+            </div>
+
+            <button class="submit-button">Ghi</button>
+        </div>
+    </div>
+</body>
+</html>

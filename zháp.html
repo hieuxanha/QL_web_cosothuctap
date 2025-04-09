@@ -1,240 +1,464 @@
-
-
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
-
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    />
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <link rel="stylesheet" href="./ui_capnhat_cty.css" />
-   
-  </head>
-  <body>
-  <div class="sidebar" id="sidebar">
-      <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-      <div class="icons">
-        <i class="fa-solid fa-circle-user"></i>
-      </div>
-      <div class="menu">
-        <hr />
-        <ul>
-          <h2>Quản lý</h2>
-          <li>
-            <i class="fa-brands fa-windows"></i
-            ><a href="">Cập nhật thông tin</a>
-          </li>
-          <li>
-            <i class="fa-brands fa-windows"></i
-            ><a href="">Duyệt đơn đăng ký của sv</a>
-          </li>
-          <li>
-            <i class="fa-brands fa-windows"></i
-            ><a href="">Quản lý ds tts tại công ty</a>
-          </li>
-          <li>
-            <i class="fa-brands fa-windows"></i
-            ><a href="">Theo dõi và đánh giá qtrinh tt của tts</a>
-          </li>
-          <li>
-            <i class="fa-brands fa-windows"></i
-            ><a href=""> Xác nhận ht thực tập cho tts</a>
-          </li>
-        </ul>
-      </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CƠ SỞ DỮ LIỆU NGÀNH GIÁO DỤC VÀ ĐÀO TẠO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        /* Header */
+        .top-header {
+            background-color: white;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        
+        .main-header {
+            background-color: #a64d79;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+        }
+        
+        .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .school-name {
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+        
+        .school-title {
+            background-color: #8b1a4d;
+            color: yellow;
+            padding: 8px 15px;
+            font-weight: bold;
+            margin: 0 15px;
+        }
+        
+        .dropdown-box {
+            flex-grow: 1;
+            display: flex;
+            background-color: white;
+            margin: 8px 15px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            align-items: center;
+            color: #333;
+        }
+        
+        .dropdown-box select {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 14px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 14px;
+        }
+        
+        .user-info i {
+            margin-right: 5px;
+        }
+        
+        /* Navigation */
+        .navigation {
+            background-color: #f0f0f0;
+            padding: 8px;
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .nav-item {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 15px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: #0078d4;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .nav-item i {
+            margin-right: 5px;
+        }
+        
+        .nav-item:hover {
+            background-color: #e0e0e0;
+        }
+        
+        /* Subnavigation */
+        .subnav {
+            padding: 10px 8px;
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .subnav-title {
+            display: flex;
+            align-items: center;
+            color: #0078d4;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+        
+        .subnav-title img {
+            width: 24px;
+            height: 24px;
+            margin-right: 5px;
+        }
+        
+        .youtube-icon {
+            background-color: red;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .button-group {
+            margin-left: auto;
+            display: flex;
+        }
+        
+        .btn {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        
+        /* Filter Section */
+        .filter-section {
+            padding: 15px 8px;
+            background-color: white;
+        }
+        
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .filter-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .filter-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        
+        .filter-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .filter-select {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 150px;
+        }
+        
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+        
+        .data-table th {
+            background-color: #0078d4;
+            color: white;
+            text-align: left;
+            padding: 10px;
+            font-weight: normal;
+        }
+        
+        .data-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .action-icon {
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        
+        .center-text {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="top-header">
+        <img src="/api/placeholder/16/16" alt="Logo">
+        <span>CƠ SỞ DỮ LIỆU NGÀNH GIÁO DỤC VÀ ĐÀO TẠO</span>
     </div>
-
-    <div class="content" id="content">
-      <div class="header">
-        <div class="search-bar">
-          <input type="text" placeholder="Tìm kiếm..." />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+    
+    <!-- Main Header -->
+    <div class="main-header">
+        <div class="logo">
+            <img src="/api/placeholder/40/40" alt="School Logo">
+            <div class="school-name">HANOI-EDU</div>
         </div>
-        <div class="profile">
-          <span>Nguyễn Thị My</span>
-          <img src="profile.jpg" alt="Ảnh đại diện" />
+        <div class="school-title">TIỂU HỌC HIỆP THUẬN</div>
+        
+        <div class="dropdown-box">
+            <span>Quản lý giáo dục Tiểu học</span>
+            <span style="margin-left: auto;">▼</span>
         </div>
-      </div>
-
-      <div class="pending-list">
-        <h2>Thêm Công Ty Mới</h2>
-        <form id="companyForm" action="../logic_cstt/logic_cty.php" method="POST">
-            <div class="form-group">
-                <label for="ten_cong_ty">Tên Công Ty:</label>
-                <input type="text" id="ten_cong_ty" name="ten_cong_ty" required>
-            </div>
+        
+        <div class="user-info">
+            <i>👤</i>
+            <span>[Nguyễn Thị Lan]</span>
+        </div>
+        
+        <div class="user-info">
+            Học kỳ II 2024-2025
+        </div>
+        
+        <div class="user-info">
+            Hướng dẫn
+        </div>
+        
+        <div class="user-info">
+            <i>⋮</i>
+        </div>
+    </div>
     
-            <div class="form-group">
-                <label for="dia_chi">Địa Chỉ:</label>
-                <input type="text" id="dia_chi" name="dia_chi" required>
-            </div>
+    <!-- Navigation -->
+    <div class="navigation">
+        <a href="#" class="nav-item"><i>🏢</i> 1. Trường học</a>
+        <a href="#" class="nav-item"><i>👥</i> 2. Lớp học</a>
+        <a href="#" class="nav-item"><i>👤</i> 3. Nhân sự ▼</a>
+        <a href="#" class="nav-item"><i>👨‍🎓</i> 4. Học sinh ▼</a>
+        <a href="#" class="nav-item"><i>📝</i> 5. Nhập liệu ▼</a>
+        <a href="#" class="nav-item"><i>📊</i> 6. Tổng Kết ▼</a>
+        <a href="#" class="nav-item"><i>📁</i> 7. In ấn ▼</a>
+        <a href="#" class="nav-item"><i>📈</i> 8. Thống kê</a>
+        <a href="#" class="nav-item"><i>📊</i> 9. Báo cáo ▼</a>
+        <a href="#" class="nav-item"><i>🔧</i> 10. Công cụ hỗ trợ ▼</a>
+    </div>
     
-            <div class="form-group">
-                <label for="so_dien_thoai">Số Điện Thoại:</label>
-                <input type="text" id="so_dien_thoai" name="so_dien_thoai" required>
-            </div>
+    <!-- Subnavigation -->
+    <div class="subnav">
+        <div class="subnav-title">
+            <img src="/api/placeholder/24/24" alt="Icon">
+            4.1.1. Quản lý hồ sơ học sinh
+            <span class="youtube-icon">▶</span>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn">Tìm kiếm</button>
+            <button class="btn">Xuất Excel</button>
+            <button class="btn">Cấu hình cột hiển thị</button>
+        </div>
+    </div>
     
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-title">Hướng dẫn/ Ghi chú:</div>
+        
+        <div class="filter-row">
+            <div class="filter-item">
+                <div class="filter-label">Khối:</div>
+                <select class="filter-select">
+                    <option>Khối 4</option>
+                </select>
             </div>
             
-    
-            <!-- <div class="form-group">
-                <label for="website">Website:</label>
-                <input type="text" id="website" name="website">
-            </div> -->
-                <!-- Trường tải lên logo -->
-           <div class="form-group">
-            <label for="logo">Logo Công Ty:</label>
-            <input type="file" id="logo" name="logo" accept="image/*">
-           </div>
-    
-            <div class="form-group">
-                <label for="gioi_thieu">Giới Thiệu:</label>
-                <textarea id="gioi_thieu" name="gioi_thieu"></textarea>
+            <div class="filter-item">
+                <div class="filter-label">Lớp:</div>
+                <select class="filter-select">
+                    <option>4A4</option>
+                </select>
             </div>
-    
-            <button type="submit">Thêm Công Ty</button>
-        </form>
+            
+            <div class="filter-item">
+                <div class="filter-label">Trạng thái:</div>
+                <select class="filter-select">
+                    <option>Chọn trạng thái</option>
+                </select>
+            </div>
+        </div>
     </div>
     
+    <!-- Data Table -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 50px;">STT</th>
+                <th style="width: 40px;"><input type="checkbox"></th>
+                <th style="width: 60px;">Sửa</th>
+                <th style="width: 60px;">Hồ sơ</th>
+                <th style="width: 50px;">Thứ tự</th>
+                <th style="width: 150px;">Mã định danh Bộ GD&ĐT</th>
+                <th style="width: 200px;">Họ tên</th>
+                <th style="width: 100px;">Ngày sinh</th>
+                <th style="width: 80px;">Giới tính</th>
+                <th style="width: 80px;">Dân tộc</th>
+                <th style="width: 100px;">Trạng thái</th>
+                <th style="width: 100px;">SĐT liên hệ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="center-text">1</td>
+                <td class="center-text"><input type="checkbox"></td>
+                <td class="center-text">✏️</td>
+                <td class="center-text">📄</td>
+                <td class="center-text">1</td>
+                <td>0138704968</td>
+                <td>Đỗ Đình Nam Anh</td>
+                <td>22/06/2015</td>
+                <td>Nam</td>
+                <td>Kinh</td>
+                <td>Đang học</td>
+                <td>0399439436</td>
+            </tr>
+            <tr>
+                <td class="center-text">2</td>
+                <td class="center-text"><input type="checkbox"></td>
+                <td class="center-text">✏️</td>
+                <td class="center-text">📄</td>
+                <td class="center-text">2</td>
+                <td>0132390483</td>
+                <td>Nguyễn Diệu Anh</td>
+                <td>28/08/2015</td>
+                <td>Nữ</td>
+                <td>Kinh</td>
+                <td>Đang học</td>
+                <td>0374121193</td>
+            </tr>
+            <tr>
+                <td class="center-text">3</td>
+                <td class="center-text"><input type="checkbox"></td>
+                <td class="center-text">✏️</td>
+                <td class="center-text">📄</td>
+                <td class="center-text">3</td>
+                <td>0132390491</td>
+                <td>Đỗ Thị Kim Chi</td>
+                <td>07/09/2015</td>
+                <td>Nữ</td>
+                <td>Kinh</td>
+                <td>Đang học</td>
+                <td>0362109546</td>
+            </tr>
+            <tr>
+                <td class="center-text">4</td>
+                <td class="center-text"><input type="checkbox"></td>
+                <td class="center-text">✏️</td>
+                <td class="center-text">📄</td>
+                <td class="center-text">4</td>
+                <td>0138704016</td>
+                <td>Đỗ Đình Đông</td>
+                <td>30/10/2015</td>
+                <td>Nam</td>
+                <td>Kinh</td>
+                <td>Đang học</td>
+                <td>0386227388</td>
+            </tr>
+            <tr>
+                <td class="center-text">5</td>
+                <td class="center-text"><input type="checkbox"></td>
+                <td class="center-text">✏️</td>
+                <td class="center-text">📄</td>
+                <td class="center-text">5</td>
+                <td>0132390421</td>
+                <td>Đỗ Thị Minh Hằng</td>
+                <td>18/02/2015</td>
+                <td>Nữ</td>
+                <td>Kinh</td>
+                <td>Đang học</td>
+                <td>0983466042</td>
+            </tr>
+            <tr>
+                <td class="center-text">6</td>
+                <td class="center-text"><input type="checkbox"></td>
+                <td class="center-text">✏️</td>
+                <td class="center-text">📄</td>
+                <td class="center-text">6</td>
+                <td>0132390521</td>
+                <td>Đỗ Quang Huy</td>
+                <td>05/09/2015</td>
+                <td>Nam</td>
+                <td>Kinh</td>
+                <td>Đang học</td>
+                <td>0358504772</td>
+            </tr>
+            <tr>
+                <td class="center-text">7</td>
+                <td class="center-text"><input type="checkbox"></td>
+                <td class="center-text">✏️</td>
+                <td class="center-text">📄</td>
+                <td class="center-text">7</td>
+                <td>2549233647</td>
+                <td>Nguyễn Quốc Huy</td>
+                <td>06/01/2015</td>
+                <td>Nam</td>
+                <td>Kinh</td>
+                <td>Đang học</td>
+                <td>0987644543</td>
+            </tr>
+            <tr>
+                <td class="center-text">8</td>
+                <td class="center-text"><input type="checkbox"></td>
+                <td class="center-text">✏️</td>
+                <td class="center-text">📄</td>
+                <td class="center-text">8</td>
+                <td>0132390518</td>
+                <td>Đỗ Đình Hưng</td>
+                <td>24/02/2015</td>
+                <td>Nam</td>
+                <td>Kinh</td>
+                <td>Đang học</td>
+                <td>0386340760</td>
+            </tr>
+        </tbody>
+    </table>
     
-    
-
-     
-    </div>
-
-
     <script>
-        function addRow() {
-            let table = document.getElementById("pendingTable").getElementsByTagName('tbody')[0];
-            let rowCount = table.rows.length;
-            let newRow = table.insertRow(rowCount);
-        
-            newRow.innerHTML = `
-                <td>${rowCount + 1}</td>
-                <td><input type="text" placeholder="Nhập tên cơ sở" /></td>
-                <td><input type="text" placeholder="Nhập địa chỉ" /></td>
-                <td><input type="text" placeholder="Nhập lĩnh vực" /></td>
-                <td>
-                    <select>
-                        <option value="Đang hoạt động">Đang hoạt động</option>
-                        <option value="Ngừng hoạt động">Ngừng hoạt động</option>
-                    </select>
-                </td>
-                <td>
-                    <button class="delete" onclick="deleteRow(this)">Xóa</button>
-                </td>
-            `;
-        }
-        
-        function deleteRow(button) {
-            let row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-        }
-        </script>
-        
-    <script>
-      function toggleSidebar() {
-        let sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("collapsed");
-      }
-
-      function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        const content = document.getElementById("content");
-        sidebar.classList.toggle("collapsed");
-        content.classList.toggle("collapsed");
-      }
-
-    
-
-
+        // Add any JavaScript functionality here
     </script>
-  </body>
+</body>
 </html>
-
-
-
-
-/* cty */
-.pending-list {
-   max-width: 1200px;
-   margin: 20px auto;
-   padding: 20px;
-   background: #fff;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-   border-radius: 8px;
-}
-
-.form-group {
-   display: flex;
-   flex-direction: column;
-   margin-bottom: 15px;
-}
-
-.form-group label {
-   font-weight: 500;
-   margin-bottom: 5px;
-}
-
-.form-group input,
-.form-group textarea {
-   padding: 8px;
-   border: 1px solid #ccc;
-   border-radius: 5px;
-   font-size: 16px;
-   
-}
-
-button {
-   width: 100%;
-   padding: 10px;
-   background: #007bff;
-   color: white;
-   border: none;
-   border-radius: 5px;
-   cursor: pointer;
-   font-size: 16px;
-}
-
-button:hover {
-   background: #0056b3;
-}
-
-.form-group textarea {
-   width: 100%; /* Giữ ô textarea căn chỉnh theo form */
-   max-width: 100%; /* Ngăn chặn kéo rộng quá khung */
-   min-width: 100%; /* Giữ đúng kích thước */
-   height: 100px; /* Đặt chiều cao mặc định */
-   resize: vertical; /* Chỉ cho phép kéo lên/xuống */
-}

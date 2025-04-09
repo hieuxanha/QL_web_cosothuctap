@@ -77,7 +77,7 @@
               echo '<div class="dropdown">';
               echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
               echo '<div class="dropdown-content">';
-              echo '<a href="../Backend_dkdn/dangxuat.php">Đăng xuất</a>'; 
+              echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>'; 
               echo '</div>';
               echo '</div>';
             } else {
@@ -91,9 +91,15 @@
             </div>
         <a href="#">Việc làm</a>
         <a href="#">Hồ sơ &amp; CV</a>
-        <a class="btn" href="../Ql_web_cosothuctap/dang_nhap_dang_ki/form_dk.php">Đăng nhập</a>
-        <a class="btn" href="../Ql_web_cosothuctap/dang_nhap_dang_ki/form_dn.php">Đăng ký</a>
-        <a href="#"><i class="fa-solid fa-user"></i></a>
+        <a class="btn" href="../dang_nhap_dang_ki/form_dk.php">Đăng nhập</a>
+        <a class="btn" href="../dang_nhap_dang_ki/form_dn.php">Đăng ký</a>
+        <?php
+            if (isset($_SESSION['name'])) {
+                echo '<a href="./profile.php"><i class="fa-solid fa-user"></i></a>';
+            } else {
+                echo '<a href="../dang_nhap_dang_ki/form_dn.php"><i class="fa-solid fa-user"></i></a>';
+            }
+            ?>
     </div>
 </div>
 

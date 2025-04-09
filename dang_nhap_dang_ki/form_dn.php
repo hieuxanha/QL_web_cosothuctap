@@ -9,7 +9,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = trim($_POST["password"]);
 
     if (!empty($email) && !empty($password)) {
-        // Danh sách các bảng cần kiểm tra
         $tables = [
             'admin' => 'id',
             'giang_vien' => 'stt_gv',
@@ -27,31 +26,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if ($result->num_rows == 1) {
                 $user = $result->fetch_assoc();
-                $user['table'] = $table; // Xác định bảng tìm thấy
-                break; // Dừng khi tìm thấy user
+                $user['table'] = $table;
+                break;
             }
         }
 
         if ($user) {
-            // Kiểm tra mật khẩu
             $isValidPassword = false;
-
-            // Nếu là admin và mật khẩu không mã hóa
             if ($user['table'] == 'admin' && $user['password'] === $password) {
                 $isValidPassword = true;
-            }
-            // Kiểm tra mật khẩu đã mã hóa
-            elseif (password_verify($password, $user['password'])) {
+            } elseif (password_verify($password, $user['password'])) {
                 $isValidPassword = true;
             }
 
             if ($isValidPassword) {
-                // Lưu thông tin vào SESSION
                 $_SESSION["user_id"] = $user[$tables[$user['table']]];
-                $_SESSION["user_name"] = $user["ho_ten"] ?? $user["ten_co_so"] ?? "User";
+                $_SESSION["name"] = $user["ho_ten"] ?? $user["ten_co_so"] ?? "User"; // Sửa key
                 $_SESSION["role"] = $user["role"];
 
-                // Chuyển hướng dựa trên vai trò
                 switch ($user["role"]) {
                     case "admin":
                         header("Location: ../admin/ui_admin.php");
@@ -60,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         header("Location: ../giang_vien/ui_giangvien.php");
                         break;
                     case "sinh_vien":
-                        header("Location: ../sinh_vien/giaodien_chung.php");
+                        header("Location: ../sinh_vien/giaodien_sinhvien.php"); // Đảm bảo đúng file
                         break;
                     case "co_so_thuc_tap":
                         header("Location: ../co_so_thuc_tap/ui_cstt.php");
@@ -79,6 +71,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error = "Vui lòng nhập đầy đủ thông tin!";
     }
+}
+
+
+$error = "";
+$logout_message = "";
+
+if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
+    $logout_message = "Bạn đã đăng xuất thành công!";
 }
 ?>
 

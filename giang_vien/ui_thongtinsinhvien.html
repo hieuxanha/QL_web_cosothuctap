@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản Lý Sinh Viên</title>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="/giang_vien/ui_thongtinsinhvien.css" />
+    <style>
+      .container {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 99%;
+        margin: 0 auto;
+        padding: 20px 0;
+      }
+
+      .subnav {
+        padding: 10px 8px;
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .subnav-title {
+        display: flex;
+        align-items: center;
+        color: #0078d4;
+        font-weight: bold;
+        margin-right: 20px;
+      }
+
+      .subnav-title img {
+        width: 24px;
+        height: 24px;
+        margin-right: 5px;
+      }
+
+      .youtube-icon {
+        background-color: red;
+        color: white;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-size: 12px;
+        margin-left: 10px;
+      }
+
+      .button-group {
+        margin-left: auto;
+        display: flex;
+      }
+
+      .btn {
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        margin-left: 5px;
+        cursor: pointer;
+      }
+
+      .filter-section {
+        padding: 15px 8px;
+        background-color: white;
+      }
+
+      .filter-title {
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      .filter-row {
+        display: flex;
+        margin-bottom: 10px;
+      }
+
+      .filter-item {
+        display: flex;
+        align-items: center;
+        margin-right: 15px;
+      }
+
+      .filter-label {
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .filter-select {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-width: 150px;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+      }
+
+      .data-table th {
+        background-color: #0078d4;
+        color: white;
+        text-align: left;
+        padding: 10px;
+        font-weight: normal;
+      }
+
+      .data-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .data-table tr:hover {
+        background-color: #f0f0f0;
+      }
+
+      .action-icon {
+        margin: 0 5px;
+        cursor: pointer;
+      }
+
+      .center-text {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar">
+      <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+      <div class="icons">
+        <i class="fa-solid fa-circle-user"></i>
+      </div>
+
+      <div class="menu">
+        <hr />
+        <ul>
+          <h2>Quản lý</h2>
+          <li><i class="fa-brands fa-windows"></i><a href="">Cập nhật thông tin</a></li>
+          <li><i class="fa-brands fa-windows"></i><a href="">Duyệt đơn đăng ký của sv</a></li>
+          <li><i class="fa-brands fa-windows"></i><a href="">Quản lý ds tts tại công ty</a></li>
+          <li><i class="fa-brands fa-windows"></i><a href="">Theo dõi và đánh giá qtrinh tt của tts</a></li>
+          <li><i class="fa-brands fa-windows"></i><a href="">Xác nhận ht thực tập cho tts</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="content" id="content">
+      <div class="header">
+        <div class="search-bar">
+          <input type="text" placeholder="Tìm kiếm..." />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            viewBox="0 0 24 24"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <div class="profile">
+          <span>Nguyễn Thị My</span>
+          <img src="profile.jpg" alt="Ảnh đại diện" />
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="subnav">
+          <div class="subnav-title">
+            <img src="/api/placeholder/24/24" alt="Icon" />
+            Quản lý thông tin sinh viên
+            <span class="youtube-icon">▶</span>
+          </div>
+          <div class="button-group">
+            <button class="btn">Xuất Excel</button>
+            <button class="btn">Cấu hình cột hiển thị</button>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-title">Hướng dẫn/ Ghi chú:</div>
+          <div class="filter-row">
+            <div class="filter-item">
+              <div class="filter-label">Khoa:</div>
+              <select class="filter-select">
+                <option>Tất cả</option>
+                <option>Khoa CNTT</option>
+                <option>Khoa Kinh tế</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <div class="filter-label">Lớp:</div>
+              <select class="filter-select">
+                <option>Tất cả</option>
+                <option> CNTT K45</option>
+                <option>Kinh tế K46</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">STT</th>
+              <th style="width: 60px;">Sửa</th>
+              <th style="width: 150px;">Mã sinh viên</th>
+              <th style="width: 200px;">Họ tên</th>
+              <th style="width: 200px;">Email</th>
+              <th style="width: 100px;">Lớp</th>
+              <th style="width: 100px;">Khoa</th>
+              <th style="width: 120px;">Số điện thoại</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="center-text">1</td>
+              <td class="center-text">✏️</td>
+              <td>SV001</td>
+              <td>Nguyễn Văn A</td>
+              <td>nguyenvana@example.com</td>
+              <td>CNTT K45</td>
+              <td>Khoa CNTT</td>
+              <td>0123456789</td>
+            </tr>
+            <tr>
+              <td class="center-text">2</td>
+              <td class="center-text">✏️</td>
+              <td>SV002</td>
+              <td>Trần Thị B</td>
+              <td>tranthib@example.com</td>
+              <td>Kinh tế K46</td>
+              <td>Khoa Kinh tế</td>
+              <td>0987654321</td>
+            </tr>
+            <tr>
+              <td class="center-text">3</td>
+              <td class="center-text">✏️</td>
+              <td>SV003</td>
+              <td>Lê Văn C</td>
+              <td>levanc@example.com</td>
+              <td>CNTT K45</td>
+              <td>Khoa CNTT</td>
+              <td>0369874123</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const content = document.getElementById("content");
+        sidebar.classList.toggle("collapsed");
+        content.classList.toggle("collapsed");
+      }
+    </script>
+  </body>
+</html>
