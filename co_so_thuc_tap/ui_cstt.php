@@ -38,9 +38,10 @@
          <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_cstt.php">cstttt..</a></li>
          <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_capnhat_cty.php">Đăng ký thông tin cty</a></li>
          <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_capnhat_tt.php">Cập nhật thông tin tuyển dụng</a></li>
-         <li><i class="fa-brands fa-windows"></i> <a href="#">Quản lý DS TTS tại công ty</a></li>
+         <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_cv.php">Quản lý DS TTS tại công ty</a></li>
          <li><i class="fa-brands fa-windows"></i> <a href="#">Theo dõi & đánh giá quá trình TT</a></li>
          <li><i class="fa-brands fa-windows"></i> <a href="#">Xác nhận hoàn thành TT</a></li>
+
       
         </ul>
     </div>

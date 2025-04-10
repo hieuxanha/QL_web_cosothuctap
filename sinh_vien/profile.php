@@ -10,17 +10,16 @@ if (!isset($_SESSION['name'])) {
 // Kết nối cơ sở dữ liệu
 require_once '../db.php';
 
-// Lấy mã sinh viên từ session (giả sử session lưu mã sinh viên)
+// Lấy mã sinh viên từ session
 $ma_sinh_vien = isset($_SESSION['ma_sinh_vien']) ? $_SESSION['ma_sinh_vien'] : null;
 
+// Truy vấn thông tin sinh viên
 if (!$ma_sinh_vien) {
-    // Nếu không có mã sinh viên trong session, có thể dùng $_SESSION['name'] để truy vấn
     $name = $_SESSION['name'];
     $sql = "SELECT * FROM sinh_vien WHERE ho_ten = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $name);
 } else {
-    // Truy vấn thông tin sinh viên dựa trên mã sinh viên
     $sql = "SELECT * FROM sinh_vien WHERE ma_sinh_vien = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $ma_sinh_vien);
@@ -57,9 +56,6 @@ if (!$sinh_vien) {
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="../sinh_vien/profile.css">
-    <style>
-       
-    </style>
 </head>
 <body>
     <div class="header">
@@ -73,12 +69,11 @@ if (!$sinh_vien) {
             </div>
         </div>
         <div class="nav">
-             <button><a href="./giaodien_sinhvien.php">aaaa</a></button>
-            <a href="../index.php">Việc làm</a> <!-- Quay lại trang chính -->
+            <button><a href="./giaodien_sinhvien.php">aaaa</a></button>
+            <a href="../index.php">Việc làm</a>
             <a href="#">Hồ sơ & CV</a>
             <a href="../dang_nhap_dang_ki/logic_dangxuat.php" class="btn btn-login"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
             <a href="#"><i class="fas fa-user"></i></a>
-         
         </div>
     </div>
 
@@ -121,7 +116,7 @@ if (!$sinh_vien) {
                         </div>
                     </div>
                 </div>
-                <a href="edit_profile.php" class="edit-profile-btn"><i class="fas fa-edit"></i> Sửa hồ sơ</a>
+                <a href="./sua_profile.php" class="edit-profile-btn"><i class="fas fa-edit"></i> Sửa hồ sơ</a>
             </div>
         </div>
 

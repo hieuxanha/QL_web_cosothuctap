@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Đảm bảo thư mục uploads tồn tại
-    $target_dir = "../uploads/";
+    $target_dir = "../sinh_vien/uploads/";
     if (!is_dir($target_dir)) {
         mkdir($target_dir, 0777, true);
     }

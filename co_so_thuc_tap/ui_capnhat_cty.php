@@ -152,7 +152,7 @@
       
     </script>
 
-<script>
+<!-- <script>
 function previewImage(event, previewId) {
     var reader = new FileReader();
     reader.onload = function () {
@@ -162,7 +162,7 @@ function previewImage(event, previewId) {
     };
     reader.readAsDataURL(event.target.files[0]);
 }
-</script>
+</script> -->
 
   
     
