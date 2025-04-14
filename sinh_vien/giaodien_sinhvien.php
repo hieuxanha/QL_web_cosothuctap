@@ -91,8 +91,8 @@
             </div>
         <a href="#">Việc làm</a>
         <a href="#">Hồ sơ &amp; CV</a>
-        <a class="btn" href="../dang_nhap_dang_ki/form_dk.php">Đăng nhập</a>
-        <a class="btn" href="../dang_nhap_dang_ki/form_dn.php">Đăng ký</a>
+        <a class="btn" href="../dang_nhap_dang_ki/form_dn.php">Đăng nhập</a>
+        <a class="btn" href="../dang_nhap_dang_ki/form_dk.php">Đăng ký</a>
         <?php
             if (isset($_SESSION['name'])) {
                 echo '<a href="./profile.php"><i class="fa-solid fa-user"></i></a>';
@@ -128,97 +128,97 @@
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Kinh tế</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Môi trường</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Quản lý đất đai</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Khí tượng thủy văn</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Trắc địa bản đồ và Thông tin địa lý</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Địa chất</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Tài nguyên nước</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Công nghệ thông tin</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Lý luận chính trị</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Khoa học Biển và Hải đảo</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Khoa học Đại cương</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Khoa Giáo dục thể chất và Giáo dục quốc phòng</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Bộ môn Luật</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Bộ môn Biến đổi khí hậu và PT bền vững</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
             <span class="danhmuc_test">Bộ môn Ngoại ngữ</span>  
             <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-            <div class="danhmuc_1_option_child">abc</div>
+            
         </div>
         
         <div class="danhmuc_1_option">
           <span class="danhmuc_test">.........</span>  
           <a class="cach" href=""><i class="fa-solid fa-angle-right"></i></a>
-          <div class="danhmuc_1_option_child">abc</div>
+          
       </div>
         
 

@@ -109,3 +109,20 @@ CREATE TABLE `tuyen_dung` (
   PRIMARY KEY (`stt_tuyendung`),
   FOREIGN KEY (`stt_cty`) REFERENCES `cong_ty`(`stt_cty`) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+CREATE TABLE ung_tuyen (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Khóa chính, tự động tăng
+    ma_tuyen_dung VARCHAR(50) NOT NULL, -- Mã tin tuyển dụng
+    stt_sv INT NOT NULL, -- Số thứ tự sinh viên
+    ho_ten VARCHAR(100) NOT NULL, -- Họ và tên sinh viên
+    email VARCHAR(100) NOT NULL, -- Email sinh viên
+    so_dien_thoai VARCHAR(20) NOT NULL, -- Số điện thoại sinh viên
+    thu_gioi_thieu TEXT, -- Thư giới thiệu (có thể để trống)
+    cv_path VARCHAR(255) NOT NULL, -- Đường dẫn file CV
+    ngay_ung_tuyen DATETIME NOT NULL, -- Ngày giờ ứng tuyển
+    FOREIGN KEY (ma_tuyen_dung) REFERENCES tuyen_dung(ma_tuyen_dung), -- Khóa ngoại tới bảng tuyen_dung
+    FOREIGN KEY (stt_sv) REFERENCES sinh_vien(stt_sv) -- Khóa ngoại tới bảng sinh_vien
+);
+ALTER TABLE ung_tuyen
+ADD COLUMN trang_thai ENUM('Chờ duyệt', 'Đồng ý', 'Không đồng ý') DEFAULT 'Chờ duyệt';

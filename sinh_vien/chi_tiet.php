@@ -138,7 +138,7 @@ $conn->close();
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="./chi_tiet.css">
-    <style>
+<style>
         .modal {
             display: none;
             position: fixed;
@@ -342,7 +342,7 @@ $conn->close();
         }
         .message.success { background: #e8f5e9; color: #2e7d32; }
         .message.error { background: #ffebee; color: #c62828; }
-    </style>
+</style>
 </head>
 <body>
     <div class="header">
@@ -356,21 +356,28 @@ $conn->close();
             </div>
         </div>
         <div class="nav">
-            <div class="account">
+        <div class="account">
                 <?php
-                if (isset($_SESSION['name']) && !empty($_SESSION['name'])) {
-                    echo '<div class="dropdown">';
-                    echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
-                    echo '<div class="dropdown-content">';
-                    echo '</div>';
-                    echo '</div>';
-                } else {
-                    echo '<div class="auth-links">';
-                    echo '<a class="btn" href="../dang_nhap_dang_ki/form_dn.php">Đăng nhập</a>';
-                    echo '<a class="btn" href="../dang_nhap_dang_ki/form_dk.php">Đăng ký</a>';
-                    echo '</div>';
-                }
+             if (session_status() == PHP_SESSION_NONE) {
+              session_start();
+              }
+
+              if (isset($_SESSION['name'])) {
+ 
+              echo '<div class="dropdown">';
+              echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+              echo '<div class="dropdown-content">';
+              echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>'; 
+              echo '</div>';
+              echo '</div>';
+            } else {
+    
+            //  echo '<a href="./formdangnhapky.php">Tài khoản</a>';
+           }
+
                 ?>
+          
+  
             </div>
             <a href="#">Việc làm</a>
             <a href="#">Hồ sơ & CV</a>
@@ -404,7 +411,7 @@ $conn->close();
                 </div>
                 <div class="section">
                     <h2>Chi tiết tin tuyển dụng</h2>
-                    <p><strong>Chuyên môn:</strong> Chăm sóc khách hàng</p>
+                    <!-- <p><strong>Chuyên môn:</strong> Chăm sóc khách hàng</p> -->
                     <h3>Mô tả công việc:</h3>
                     <div><?php echo nl2br(htmlspecialchars($job['mo_ta'])); ?></div>
                     <h3>Yêu cầu công việc:</h3>

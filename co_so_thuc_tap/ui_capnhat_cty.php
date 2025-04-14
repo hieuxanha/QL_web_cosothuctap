@@ -1,3 +1,12 @@
+<?php
+
+if (session_status() == PHP_SESSION_NONE) {
+  session_start();
+}
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
   <head>
@@ -21,6 +30,53 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="./ui_capnhat_cty.css" />
+    <style>
+        
+/* CSS cho menu thả xuống */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  
+}
+
+.user-name {
+  cursor: pointer;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+}
+
+.dropdown-content {
+  display: none; /* Ẩn menu thả xuống mặc định */
+  position: absolute;
+  background-color: #ffffff;
+  min-width: 150px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 15px;
+  top: 20px;
+  
+}
+
+.dropdown-content a {
+  color: black;
+  text-decoration: none;
+  display: block;
+  padding: 8px 12px;
+
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+/* Hiển thị menu thả xuống khi di chuột vào */
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+    </style>
    
   </head>
   <body>
@@ -34,13 +90,13 @@
         <ul>
          <h2>Quản lý</h2>
       
+      
          <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_cstt.php">cstttt..</a></li>
          <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_capnhat_cty.php">Đăng ký thông tin cty</a></li>
          <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_capnhat_tt.php">Cập nhật thông tin tuyển dụng</a></li>
-         <li><i class="fa-brands fa-windows"></i> <a href="#">Quản lý DS TTS tại công ty</a></li>
+         <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_duyet_cv.php">-	Xét duyệt hồ sơ ứng tuyển</a></li>
          <li><i class="fa-brands fa-windows"></i> <a href="#">Theo dõi & đánh giá quá trình TT</a></li>
          <li><i class="fa-brands fa-windows"></i> <a href="#">Xác nhận hoàn thành TT</a></li>
-      
         </ul>
      </div>
     </div>
@@ -64,10 +120,25 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <div class="profile">
-          <span>Nguyễn Thị My</span>
-          <img src="profile.jpg" alt="Ảnh đại diện" />
-        </div>
+        <div class="account">
+                <?php
+                if (isset($_SESSION['name']) && !empty($_SESSION['name'])) {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
+                    echo '</div>';
+                    echo '</div>';
+                } else {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, Khách</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/dang_nhap.php">Đăng nhập</a>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+                ?>
+            </div>
       </div>
 
       <div class="pending-list">

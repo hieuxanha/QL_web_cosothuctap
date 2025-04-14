@@ -3,6 +3,8 @@ session_start();
 require '../db.php'; // Kết nối database
 
 $error = "";
+$error1 = ""; // Initialize $error1 to avoid undefined variable issues
+$logout_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"]);
@@ -41,8 +43,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if ($isValidPassword) {
                 $_SESSION["user_id"] = $user[$tables[$user['table']]];
-                $_SESSION["name"] = $user["ho_ten"] ?? $user["ten_co_so"] ?? "User"; // Sửa key
+                $_SESSION["name"] = $user["ho_ten"] ?? $user["ten_co_so"] ?? "User";
                 $_SESSION["role"] = $user["role"];
+
+                // Lưu thêm thông tin cho giảng viên
+                if ($user["role"] == "giang_vien") {
+                    $_SESSION["so_hieu_giang_vien"] = $user["so_hieu_giang_vien"];
+                    $_SESSION["khoa"] = $user["khoa"]; // Nếu cần dùng khoa
+                }
 
                 switch ($user["role"]) {
                     case "admin":
@@ -52,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         header("Location: ../giang_vien/ui_giangvien.php");
                         break;
                     case "sinh_vien":
-                        header("Location: ../sinh_vien/giaodien_sinhvien.php"); // Đảm bảo đúng file
+                        header("Location: ../sinh_vien/giaodien_sinhvien.php");
                         break;
                     case "co_so_thuc_tap":
                         header("Location: ../co_so_thuc_tap/ui_cstt.php");
@@ -73,15 +81,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-
-$error = "";
-$logout_message = "";
-
 if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
     $logout_message = "Bạn đã đăng xuất thành công!";
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -93,7 +96,7 @@ if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
     <style>
         /* CSS cho modal */
         .modal {
-            display: none; /* Ẩn mặc định */
+            display: none;
             position: fixed;
             z-index: 9999;
             left: 0;
@@ -133,7 +136,6 @@ if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
     </style>
 </head>
 <body>
@@ -142,24 +144,16 @@ if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
             <h2>Chào mừng bạn đến</h2>
             <p>Cùng xây dựng một hồ sơ nổi bật và nhận được các cơ hội sự nghiệp lý tưởng</p>
 
-           
             <form action="" method="POST" onsubmit="return validateForm()">
                 <div class="input-group">
                     <label>Email</label>
                     <input type="email" name="email" placeholder="Nhập email" required>
                 </div>
-                <?php if (!empty($error)): ?>
-                <p style="color: red;"><?php echo $error; ?></p>
-             <?php endif; ?>
 
                 <div class="input-group">
                     <label>Mật khẩu</label>
                     <input type="password" name="password" placeholder="Nhập mật khẩu" required>
                 </div>
-
-                <?php if (!empty($error1)): ?>
-                <p style="color: red;"><?php echo $error1; ?></p>
-               <?php endif; ?>
 
                 <div class="checkbox-group">
                     <input type="checkbox" id="agree">
@@ -168,14 +162,6 @@ if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
 
                 <button type="submit" class="btn">Đăng nhập</button>
 
-                <!-- <p class="or">Hoặc đăng nhập bằng</p> -->
-
-                <!-- <div class="social-buttons">
-                    <button class="google">Google</button>
-                    <button class="facebook">Facebook</button>
-                    <button class="linkedin">LinkedIn</button>
-                </div> -->
-
                 <p>Bạn chưa có tài khoản? <a href="../dang_nhap_dang_ki/form_dk.php">Đăng ký ngay</a></p>
             </form>
         </div>
@@ -183,61 +169,63 @@ if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
         <div class="right">
             <img src="../img/dk_dn.jpg" alt="Banner">
         </div>
-   
     </div>
- <!-- Modal thông báo -->
-<div id="customModal" class="modal" style="display: none;">
-    <div class="modal-content" id="modalContent">
-        <!-- Nội dung sẽ được chèn động -->
+
+    <!-- Modal thông báo -->
+    <div id="customModal" class="modal" style="display: none;">
+        <div class="modal-content" id="modalContent">
+            <!-- Nội dung sẽ được chèn động -->
+        </div>
     </div>
-</div>
 
-<script>
-// Kiểm tra checkbox trước khi gửi form
-function validateForm() {
-    const checkBox = document.getElementById('agree');
-    if (!checkBox.checked) {
-        showModal("Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật!");
-        return false; // Ngăn form gửi đi
-    }
-    return true; // Cho phép gửi form
-}
+    <script>
+        // Kiểm tra checkbox trước khi gửi form
+        function validateForm() {
+            const checkBox = document.getElementById('agree');
+            if (!checkBox.checked) {
+                showModal("Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật!");
+                return false; // Ngăn form gửi đi
+            }
+            return true; // Cho phép gửi form
+        }
 
-// Hiển thị modal thông báo
-function showModal(message) {
-    const modal = document.getElementById('customModal');
-    const modalContent = document.getElementById('modalContent');
+        // Hiển thị modal thông báo
+        function showModal(message) {
+            const modal = document.getElementById('customModal');
+            const modalContent = document.getElementById('modalContent');
 
-    // Xóa nội dung cũ (nếu có)
-    modalContent.innerHTML = '';
+            // Xóa nội dung cũ (nếu có)
+            modalContent.innerHTML = '';
 
-    // Tạo nội dung mới
-    const messageElement = document.createElement('p');
-    messageElement.textContent = message;
+            // Tạo nội dung mới
+            const messageElement = document.createElement('p');
+            messageElement.textContent = message;
 
-    const closeButton = document.createElement('button');
-    closeButton.textContent = 'Đóng';
-    closeButton.onclick = closeModal;
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Đóng';
+            closeButton.onclick = closeModal;
 
-    // Chèn nội dung vào modal
-    modalContent.appendChild(messageElement);
-    modalContent.appendChild(closeButton);
+            // Chèn nội dung vào modal
+            modalContent.appendChild(messageElement);
+            modalContent.appendChild(closeButton);
 
-    // Hiển thị modal
-    modal.style.display = 'flex';
-}
+            // Hiển thị modal
+            modal.style.display = 'flex';
+        }
 
-// Đóng modal
-function closeModal() {
-    document.getElementById('customModal').style.display = 'none';
-}
+        // Đóng modal
+        function closeModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
 
-
-</script>
-
-
-
-
-  
+        // Hiển thị thông báo lỗi hoặc logout từ PHP
+        <?php if (!empty($error)): ?>
+            showModal(<?php echo json_encode($error); ?>);
+        <?php elseif (!empty($error1)): ?>
+            showModal(<?php echo json_encode($error1); ?>);
+        <?php elseif (!empty($logout_message)): ?>
+            showModal(<?php echo json_encode($logout_message); ?>);
+        <?php endif; ?>
+    </script>
 </body>
 </html>

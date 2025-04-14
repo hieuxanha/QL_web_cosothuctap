@@ -32,16 +32,16 @@
       <div class="menu">
         <hr />
         <ul>
-          <h2>Quản lý</h2>
-      
+        <h2>Quản lý</h2>
              <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_admin.php">admin..</a></li>
              <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
              <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanly_cty.php">Phê duyệt công ty</a></li>
              <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
+             <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></a></li>
+
              <li><i class="fa-brands fa-windows"></i><a href="#">Thông báo</a></li>
              <li><i class="fa-brands fa-windows"></i><a href="#">Bảo trì hệ thống</a></li>
              <li><i class="fa-brands fa-windows"></i><a href="#">Cơ sở</a></li>
-       
 
         </ul>
       </div>
