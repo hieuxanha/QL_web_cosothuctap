@@ -8,13 +8,14 @@ CREATE TABLE `admin` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Bảng bao_cao_thuc_tap
+
+--nhap
 CREATE TABLE `bao_cao_thuc_tap` (
   `stt_baocao` int(11) NOT NULL AUTO_INCREMENT,
   `ma_dang_ky` int(11) NOT NULL,
+  `ma_tuyen_dung` VARCHAR(50) NOT NULL,
   `noi_dung` text NOT NULL,
   `ngay_gui` date DEFAULT curdate(),
-  `trang_thai` enum('Đang chờ','Đã duyệt','Bị từ chối') DEFAULT 'Đang chờ',
   PRIMARY KEY (`stt_baocao`),
   KEY `ma_dang_ky` (`ma_dang_ky`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

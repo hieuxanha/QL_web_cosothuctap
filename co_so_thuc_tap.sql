@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 10, 2025 at 02:31 PM
+-- Generation Time: Apr 14, 2025 at 05:32 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -50,10 +50,18 @@ INSERT INTO `admin` (`id`, `email`, `password`, `role`) VALUES
 CREATE TABLE `bao_cao_thuc_tap` (
   `stt_baocao` int(11) NOT NULL,
   `ma_dang_ky` int(11) NOT NULL,
+  `ma_tuyen_dung` varchar(50) NOT NULL,
   `noi_dung` text NOT NULL,
   `ngay_gui` date DEFAULT curdate(),
-  `trang_thai` enum('Đang chờ','Đã duyệt','Bị từ chối') DEFAULT 'Đang chờ'
+  `file_path` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bao_cao_thuc_tap`
+--
+
+INSERT INTO `bao_cao_thuc_tap` (`stt_baocao`, `ma_dang_ky`, `ma_tuyen_dung`, `noi_dung`, `ngay_gui`, `file_path`) VALUES
+(1, 5, '3766', 'hieudzzz', '2025-04-14', '../uploads/baocao_1744600086_aa.docx');
 
 -- --------------------------------------------------------
 
@@ -80,7 +88,8 @@ CREATE TABLE `cong_ty` (
 --
 
 INSERT INTO `cong_ty` (`stt_cty`, `ten_cong_ty`, `dia_chi`, `so_dien_thoai`, `email`, `gioi_thieu`, `trang_thai`, `logo`, `anh_bia`, `quy_mo`, `linh_vuc`) VALUES
-(5, 'CHI NHÁNH CÔNG TY CỔ PHẦN ALTIUS LINK VIỆT NAM TẠI THÀNH PHỐ HỒ CHÍ MINH', 'hồ tùng mậu', '0987654321', '924@gmail.com', '1', 'Đã duyệt', '1743069732_logo_Picture1.jpg', '1743069732_anhbia_Picture2.jpg', '111', '1');
+(5, 'CHI NHÁNH CÔNG TY CỔ PHẦN ALTIUS LINK VIỆT NAM TẠI THÀNH PHỐ HỒ CHÍ MINH', 'hồ tùng mậu', '0987654321', '924@gmail.com', '1', 'Đã duyệt', '1743069732_logo_Picture1.jpg', '1743069732_anhbia_Picture2.jpg', '111', '1'),
+(8, 'CÔNG TY TNHH AN BÌNH VN', 'hồ tùng mậu', '123', 'nchieu79224@gmail.com', '123', 'Đang chờ', '1744482156_logo_1742990881_anhbia_Picture1.jpg', '1744482156_anhbia_1742990881_logo_Picture_2.png', '123', '123');
 
 -- --------------------------------------------------------
 
@@ -102,42 +111,7 @@ CREATE TABLE `co_so_thuc_tap` (
 --
 
 INSERT INTO `co_so_thuc_tap` (`stt_cstt`, `ma_co_so`, `ten_co_so`, `email`, `password`, `role`) VALUES
-(1, '123', '123', 'cstt123@gmail.com', '$2y$10$WzPOcwlrzm4bI3kQ2XX/Iugk9l6iAcKPLEjKeqj1Lc80EFyVM/20a', 'co_so_thuc_tap'),
-(2, 'c', '123', 'nguyenconghieu7924@gmail.com', '$2y$10$Qkr7YZYjXnwAaFJYBUNxm.TUWwOmcdzeV0dP/KMTb6xzI6DADyjZ2', 'co_so_thuc_tap');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `cv_da_nop`
---
-
-CREATE TABLE `cv_da_nop` (
-  `id` int(11) NOT NULL,
-  `ma_tuyen_dung` varchar(50) NOT NULL,
-  `ma_sinh_vien` varchar(50) NOT NULL,
-  `stt_cstt` int(11) NOT NULL,
-  `ho_ten` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `so_dien_thoai` varchar(15) NOT NULL,
-  `thu_gioi_thieu` text DEFAULT NULL,
-  `cv_path` varchar(255) NOT NULL,
-  `ngay_nop` datetime NOT NULL,
-  `trang_thai` enum('Chờ duyệt','Đã duyệt','Bị từ chối') DEFAULT 'Chờ duyệt'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `dang_ky_thuc_tap`
---
-
-CREATE TABLE `dang_ky_thuc_tap` (
-  `stt_dky` int(11) NOT NULL,
-  `ma_sinh_vien` varchar(50) NOT NULL,
-  `ma_co_so` varchar(50) NOT NULL,
-  `ngay_dang_ky` date DEFAULT curdate(),
-  `trang_thai` enum('Chờ duyệt','Đã duyệt','Bị từ chối') DEFAULT 'Chờ duyệt'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(4, '123123', 'abc', 'cstt123@gmail.com', '$2y$10$jbRk.8JbenOODm/chE7mZueYZkiDiM7SYB/3A32ZhQY4TwMSfC8/a', 'co_so_thuc_tap');
 
 -- --------------------------------------------------------
 
@@ -161,9 +135,9 @@ CREATE TABLE `giang_vien` (
 --
 
 INSERT INTO `giang_vien` (`stt_gv`, `so_hieu_giang_vien`, `ho_ten`, `email`, `password`, `khoa`, `so_dien_thoai`, `role`) VALUES
-(1, '1231232', 'hieu123', 'gv123@gmail.com', '$2y$10$SqCiyVnk7Fali0Cg/m6/SONZy2zd7EWTOM.XzVNuXZ7UJ.WA9RsJG', 'the_chat_quoc_phong', NULL, 'giang_vien'),
-(4, '123', 'b', 'nguyenconghieu7924@gmail.com', '$2y$10$K2hnZXuamu4XMKQw.FuCXuPSnsenDSD5gyTkxR8P6hvPMNbkMfXE.', 'bo_mon_luat', NULL, 'giang_vien'),
-(5, '1', '1', 'LouisNeLson12119@hihicute.com', '$2y$10$bRkCdCKdva7zv0hQ0f/1k.XmKd/0ReUsWL.vDW90Hh/tYh3rYWDrq', 'bo_mon_luat', NULL, 'giang_vien');
+(7, '1234567890', 'A', 'A123@gmail.com', '$2y$10$hdm9O1OjqtNnBx4GoqnCPeveINS9sA9cOcsbyzEhnxFS0PDYwhHBy', 'kinh_te', NULL, 'giang_vien'),
+(9, '123456789', 'B', 'B123@gmail.com', '$2y$10$kodosKy1Zw7HLhqt/0Vm3OmOtmdFUwoksOQKcI7uXvockskjJhP0u', 'moi_truong', NULL, 'giang_vien'),
+(11, '1234567898', 'c', 'c123@gmail.com', '$2y$10$K/uYJV7qTBLK8sg8ClEKV.JqsXM8D3b77Jd7rhya80qfQxLPeZ87y', 'bo_mon_luat', NULL, 'giang_vien');
 
 -- --------------------------------------------------------
 
@@ -189,13 +163,15 @@ CREATE TABLE `sinh_vien` (
 --
 
 INSERT INTO `sinh_vien` (`stt_sv`, `ma_sinh_vien`, `ho_ten`, `email`, `password`, `lop`, `khoa`, `so_hieu`, `so_dien_thoai`, `role`) VALUES
-(1, '001', 'hieu123', 'sv123@gmail.com', '$2y$10$rX9rwq3RM3zKEvt3a0jvpOAFYZmYrIh2cAOsmi4XUpEosN0acGoe6', 'dh12c3', 'the_chat_quoc_phong', NULL, NULL, 'sinh_vien'),
-(43, '123123123', 'hieu', 'cb12324@gmail.com', '$2y$10$ZwPAgF4At4gOoKZDO.LvC.ZySmqBH7zQKG9ZEVL3LVpKc5LLNjH.q', NULL, 'the_chat_quoc_phong', NULL, NULL, 'sinh_vien'),
-(49, '11111111', '1', 'nchieu7911124@gmail.com', '$2y$10$lsOvfdW/fJyz3FDA1hlTBOgJcm08bumhrdIiB.vNHW7ZVE2fZqhi6', NULL, 'bo_mon_luat', NULL, NULL, 'sinh_vien'),
-(50, '111', '1', 'nchieu792224@gmail.com', '$2y$10$lMHZSTYOSQzNoqWOplB7YO8tjoNmkpLw.4CYowtE4dc7gDGi6GcDq', NULL, 'the_chat_quoc_phong', NULL, NULL, 'sinh_vien'),
-(52, '1', '1h', 'nchieu7921324@gmail.com', '$2y$10$b1Xz0Wx9E7gnM/bovBrlZ.4Fmti4LuwTVntFVur0IF/vKucKcQj7q', NULL, 'bien_hai_dao', NULL, NULL, 'sinh_vien'),
-(56, '222222', 'vanhvanh', 'nchieu7924@gmail.com', '$2y$10$HG2icJqlPACiGRPWYFSuxefrY3kgHth5nnaolBo1fN.cQk/0EJaUG', 'dh12c33', 'khoa_hoc_dai_cuong', NULL, '0987654321', 'sinh_vien'),
-(57, '211111111', 'Le Thi Bii', 'nv112@gmail.com', '$2y$10$iYyrrjB3.jVYOplAQZ/xwukKho4qf7ucxJg2QynoLSWAGvn5PPvkW', NULL, 'kinh_te', NULL, NULL, 'sinh_vien');
+(58, '22111061351', 'ĐẶNG NAM ANH', '22111061351@hunre.edu.vn', '$2y$10$xdOCClqYuVHlV31wU/T1v.DzQkgJN7mpPJZiTK05/Mc97u9Jz40UG', 'a1', 'kinh_te', '1234567890', NULL, 'sinh_vien'),
+(59, '22111061425', 'HÀ MINH QUANG ANH', '22111061425@hunre.edu.vn', '$2y$10$R6m2jrfGc1h7Dl5OHZavZ.eFkuqYgZdZsuQSvHa1Rk3joUzkTvddW', 'a1', 'kinh_te', '1234567890', '0954569450', 'sinh_vien'),
+(60, '22111061031', 'NGUYỄN THỊ MINH ANH', '22111061031@hunre.edu.vn', '$2y$10$e7GgoarB0lB0gfqoPV/SzOvStNFrn6BN3wnKJgwrYBtnxfBVDtN9G', 'a2', 'moi_truong', NULL, NULL, 'sinh_vien'),
+(61, '22111061314', 'NGUYỄN THỊ VÂN ANH', '22111061314@hunre.edu.vn', '$2y$10$aWNZh.kFvBTjJDSXHzrKYemxljt/x9j6PgCbEFHf2l2w5CaBu7aVK', 'a2', 'moi_truong', NULL, NULL, 'sinh_vien'),
+(62, '22111060935', 'TRẦN HẢI ANH', '22111060935@hunre.edu.vn', '$2y$10$0L7jVLR6NzC.NjBhVqy1lekWFnN/4I21YDyN3AosUjEgkUrqqkYYC', NULL, 'quan_ly_dat_dai', NULL, NULL, 'sinh_vien'),
+(63, '22111060967', 'LƯƠNG QUYẾT CHIẾN', '22111060967@hunre.edu.vn', '$2y$10$qHDxGUkw6aUS5u9RdeFv8eakmZViWCntC6kwH5.VdYQZwRoSDEDMW', NULL, 'quan_ly_dat_dai', NULL, NULL, 'sinh_vien'),
+(64, '1234567890', 'TRẦN THI NHƯ HOA', 'trannhuhoa28@gmail.com', '$2y$10$YVc62G2GxxEeMNorYq.rce9nr6SH4ECmcb8L9aCTa9vM9RvI0TKhe', 'a3', 'bo_mon_luat', '1234567898', '1234567890', 'sinh_vien'),
+(66, '1234567891', 'Nguyễn Thị Hằng', 'nghang20052003@gmail.com', '$2y$10$KKIkIj2Gcw5R1mhvEjKqEOEZfGjdTKyGugNpKHf77Cd51qrNq/aoK', 'a3', 'bo_mon_luat', '1234567898', '1234567890', 'sinh_vien'),
+(67, '1234567892', 'Vũ Thảo Vân', 'vuthaovan088@gmail.com', '$2y$10$1.JAfPTQxcEWZqvdZYPKpeVWIpp1f7IbDFgnsSk9/6azL97cfI7LC', 'a3', 'bo_mon_luat', '1234567898', '1234267890', 'sinh_vien');
 
 -- --------------------------------------------------------
 
@@ -258,9 +234,9 @@ CREATE TABLE `ung_tuyen` (
 --
 
 INSERT INTO `ung_tuyen` (`id`, `ma_tuyen_dung`, `stt_sv`, `ho_ten`, `email`, `so_dien_thoai`, `thu_gioi_thieu`, `cv_path`, `ngay_ung_tuyen`, `trang_thai`) VALUES
-(1, 'TD20250327536', 56, 'vanhvanh', 'nchieu7924@gmail.com', '0987654321', '1', '../uploads/cv/1744248467_CV-_Nguy___n_Th____H___ng_-_TTSPL.pdf', '2025-04-10 08:27:47', 'Chờ duyệt'),
-(3, '8840', 56, 'vanhvanh', 'nchieu7924@gmail.com', '0987654321', '123', '../uploads/cv/1744249440_CV_Vu___Tha__o_Va__n_-_CV-KHCN-VU___THA__O_VA__N-TopCV.vn__1_.pdf', '2025-04-10 08:44:00', 'Chờ duyệt'),
-(4, '4053', 1, 'hieu123', 'sv123@gmail.com', '0987654321', '1', '../uploads/cv/1744249498_CV_TRAN_THI_NHU_HOA_NHAN_VIEN_PHAP_CHE.pdf', '2025-04-10 08:44:58', 'Đồng ý');
+(5, '3766', 64, 'TRẦN THI NHƯ HOA', 'trannhuhoa28@gmail.com', '1234567890', '123', '../uploads/cv/1744482872_CV_TRAN_THI_NHU_HOA_NHAN_VIEN_PHAP_CHE.pdf', '2025-04-13 01:34:32', 'Đồng ý'),
+(6, '9414', 66, 'Nguyễn Thị Hằng', 'nghang20052003@gmail.com', '1234567890', '123', '../uploads/cv/1744482978_CV-_Nguy___n_Th____H___ng_-_TTSPL.pdf', '2025-04-13 01:36:18', 'Chờ duyệt'),
+(7, '8771', 67, 'Vũ Thảo Vân', 'vuthaovan088@gmail.com', '1234267890', '123', '../uploads/cv/1744483018_CV_Vu___Tha__o_Va__n_-_CV-KHCN-VU___THA__O_VA__N-TopCV.vn__1_.pdf', '2025-04-13 01:36:58', 'Chờ duyệt');
 
 --
 -- Indexes for dumped tables
@@ -295,23 +271,6 @@ ALTER TABLE `co_so_thuc_tap`
   ADD PRIMARY KEY (`stt_cstt`),
   ADD UNIQUE KEY `ma_co_so` (`ma_co_so`),
   ADD UNIQUE KEY `email` (`email`);
-
---
--- Indexes for table `cv_da_nop`
---
-ALTER TABLE `cv_da_nop`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `ma_tuyen_dung` (`ma_tuyen_dung`),
-  ADD KEY `ma_sinh_vien` (`ma_sinh_vien`),
-  ADD KEY `stt_cstt` (`stt_cstt`);
-
---
--- Indexes for table `dang_ky_thuc_tap`
---
-ALTER TABLE `dang_ky_thuc_tap`
-  ADD PRIMARY KEY (`stt_dky`),
-  ADD UNIQUE KEY `ma_sinh_vien` (`ma_sinh_vien`,`ma_co_so`),
-  ADD KEY `fk_dky_coso` (`ma_co_so`);
 
 --
 -- Indexes for table `giang_vien`
@@ -361,43 +320,31 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `bao_cao_thuc_tap`
 --
 ALTER TABLE `bao_cao_thuc_tap`
-  MODIFY `stt_baocao` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `stt_baocao` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `cong_ty`
 --
 ALTER TABLE `cong_ty`
-  MODIFY `stt_cty` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `stt_cty` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `co_so_thuc_tap`
 --
 ALTER TABLE `co_so_thuc_tap`
-  MODIFY `stt_cstt` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `cv_da_nop`
---
-ALTER TABLE `cv_da_nop`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `dang_ky_thuc_tap`
---
-ALTER TABLE `dang_ky_thuc_tap`
-  MODIFY `stt_dky` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `stt_cstt` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `giang_vien`
 --
 ALTER TABLE `giang_vien`
-  MODIFY `stt_gv` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `stt_gv` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `sinh_vien`
 --
 ALTER TABLE `sinh_vien`
-  MODIFY `stt_sv` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `stt_sv` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT for table `tuyen_dung`
@@ -409,7 +356,7 @@ ALTER TABLE `tuyen_dung`
 -- AUTO_INCREMENT for table `ung_tuyen`
 --
 ALTER TABLE `ung_tuyen`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
@@ -419,22 +366,7 @@ ALTER TABLE `ung_tuyen`
 -- Constraints for table `bao_cao_thuc_tap`
 --
 ALTER TABLE `bao_cao_thuc_tap`
-  ADD CONSTRAINT `bao_cao_thuc_tap_ibfk_1` FOREIGN KEY (`ma_dang_ky`) REFERENCES `dang_ky_thuc_tap` (`stt_dky`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `cv_da_nop`
---
-ALTER TABLE `cv_da_nop`
-  ADD CONSTRAINT `cv_da_nop_ibfk_1` FOREIGN KEY (`ma_tuyen_dung`) REFERENCES `tuyen_dung` (`ma_tuyen_dung`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `cv_da_nop_ibfk_2` FOREIGN KEY (`ma_sinh_vien`) REFERENCES `sinh_vien` (`ma_sinh_vien`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `cv_da_nop_ibfk_3` FOREIGN KEY (`stt_cstt`) REFERENCES `co_so_thuc_tap` (`stt_cstt`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `dang_ky_thuc_tap`
---
-ALTER TABLE `dang_ky_thuc_tap`
-  ADD CONSTRAINT `fk_dky_coso` FOREIGN KEY (`ma_co_so`) REFERENCES `co_so_thuc_tap` (`ma_co_so`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_dky_sinhvien` FOREIGN KEY (`ma_sinh_vien`) REFERENCES `sinh_vien` (`ma_sinh_vien`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `bao_cao_thuc_tap_ibfk_1` FOREIGN KEY (`ma_dang_ky`) REFERENCES `ung_tuyen` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `sinh_vien`

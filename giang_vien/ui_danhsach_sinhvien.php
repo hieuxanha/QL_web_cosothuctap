@@ -212,7 +212,7 @@ $stmt_students->close();
             <ul>
                 <h2>Quản lý</h2>
                 <li><i class="fa-brands fa-windows"></i><a href="./ui_giangvien.php">giangv vien</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Cập nhật thông tin</a></li>
+          
                 <li><i class="fa-brands fa-windows"></i><a href="./Danh sách sinh viên.php">Danh sách sinh viên</a></li>
                 <li><i class="fa-brands fa-windows"></i><a href="">Quản lý ds tts tại công ty</a></li>
                 <li><i class="fa-brands fa-windows"></i><a href="">Theo dõi và đánh giá qtrinh tt của tts</a></li>

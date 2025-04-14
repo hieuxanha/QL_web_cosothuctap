@@ -46,7 +46,7 @@ if (!$sinh_vien) {
 // Truy vấn danh sách đơn đăng ký thực tập của sinh viên
 $don_dang_ky_list = [];
 if ($sinh_vien['stt_sv']) {
-    $sql = "SELECT ut.ngay_ung_tuyen, ut.trang_thai, td.tieu_de
+    $sql = "SELECT ut.id, ut.ma_tuyen_dung, ut.ngay_ung_tuyen, ut.trang_thai, td.tieu_de
             FROM ung_tuyen ut
             JOIN tuyen_dung td ON ut.ma_tuyen_dung = td.ma_tuyen_dung
             WHERE ut.stt_sv = ?
@@ -57,6 +57,95 @@ if ($sinh_vien['stt_sv']) {
     $result = $stmt->get_result();
     $don_dang_ky_list = $result->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
+}
+
+// Truy vấn danh sách báo cáo hằng tuần đã gửi
+$bao_cao_list = [];
+if ($sinh_vien['stt_sv']) {
+    $sql = "SELECT bct.stt_baocao, bct.noi_dung, bct.ngay_gui, bct.file_path, td.tieu_de
+            FROM bao_cao_thuc_tap bct
+            JOIN ung_tuyen ut ON bct.ma_dang_ky = ut.id
+            JOIN tuyen_dung td ON ut.ma_tuyen_dung = td.ma_tuyen_dung
+            WHERE ut.stt_sv = ?
+            ORDER BY bct.ngay_gui DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $sinh_vien['stt_sv']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $bao_cao_list = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+}
+
+// Xử lý gửi báo cáo hằng tuần
+$errors = [];
+$success = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['gui_bao_cao'])) {
+    $ma_dang_ky = $_POST['ma_dang_ky'];
+    $ma_tuyen_dung = $_POST['ma_tuyen_dung'];
+    $noi_dung = trim($_POST['noi_dung']);
+    $file_path = null;
+
+    // Kiểm tra nội dung báo cáo
+    if (empty($noi_dung)) {
+        $errors[] = "Nội dung báo cáo không được để trống.";
+    }
+
+    // Xử lý file đính kèm
+    if (isset($_FILES['file_dinh_kem']) && $_FILES['file_dinh_kem']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['file_dinh_kem'];
+        $allowed_types = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        $max_size = 5 * 1024 * 1024; // 5MB
+
+        // Kiểm tra loại file
+        if (!in_array($file['type'], $allowed_types)) {
+            $errors[] = "Chỉ hỗ trợ file PDF hoặc DOC/DOCX.";
+        }
+
+        // Kiểm tra kích thước file
+        if ($file['size'] > $max_size) {
+            $errors[] = "File không được lớn hơn 5MB.";
+        }
+
+        // Lưu file nếu không có lỗi
+        if (empty($errors)) {
+            $upload_dir = '../uploads/';
+            $file_name = 'baocao_' . time() . '_' . basename($file['name']);
+            $file_path = $upload_dir . $file_name;
+
+            if (!move_uploaded_file($file['tmp_name'], $file_path)) {
+                $errors[] = "Không thể tải file lên.";
+            }
+        }
+    }
+
+    // Lưu báo cáo vào cơ sở dữ liệu nếu không có lỗi
+    if (empty($errors)) {
+        $sql = "INSERT INTO bao_cao_thuc_tap (ma_dang_ky, ma_tuyen_dung, noi_dung, ngay_gui, file_path)
+                VALUES (?, ?, ?, CURDATE(), ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("isss", $ma_dang_ky, $ma_tuyen_dung, $noi_dung, $file_path);
+        if ($stmt->execute()) {
+            $success = "Báo cáo hằng tuần đã được gửi thành công!";
+            $stmt->close();
+
+            // Làm mới danh sách báo cáo
+            $sql = "SELECT bct.stt_baocao, bct.noi_dung, bct.ngay_gui, bct.file_path, td.tieu_de
+                    FROM bao_cao_thuc_tap bct
+                    JOIN ung_tuyen ut ON bct.ma_dang_ky = ut.id
+                    JOIN tuyen_dung td ON ut.ma_tuyen_dung = td.ma_tuyen_dung
+                    WHERE ut.stt_sv = ?
+                    ORDER BY bct.ngay_gui DESC";
+            $stmt_refresh = $conn->prepare($sql);
+            $stmt_refresh->bind_param("i", $sinh_vien['stt_sv']);
+            $stmt_refresh->execute();
+            $result = $stmt_refresh->get_result();
+            $bao_cao_list = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt_refresh->close();
+        } else {
+            $errors[] = "Có lỗi xảy ra khi gửi báo cáo.";
+            $stmt->close();
+        }
+    }
 }
 
 // Đóng kết nối
@@ -108,6 +197,76 @@ $conn->close();
         }
         .notification-item.pending i {
             color: #ff9800;
+        }
+        .btn-report {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-report:hover {
+            background-color: #45a049;
+        }
+        .btn-report i {
+            margin-right: 5px;
+        }
+        .bao-cao-form {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .bao-cao-form h4 {
+            margin-bottom: 15px;
+            color: #0078d4;
+        }
+        .bao-cao-form textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 10px;
+        }
+        .bao-cao-form input[type="file"] {
+            margin-bottom: 10px;
+        }
+        .bao-cao-form button {
+            padding: 8px 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .bao-cao-form button:hover {
+            background-color: #45a049;
+        }
+        .error, .success {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .file-link {
+            color: #0078d4;
+            text-decoration: none;
+        }
+        .file-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -186,12 +345,13 @@ $conn->close();
                             <th>Đơn đăng ký</th>
                             <th>Trạng thái</th>
                             <th>Ngày ứng tuyển</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($don_dang_ky_list)): ?>
                             <tr>
-                                <td colspan="3">Bạn chưa đăng ký thực tập.</td>
+                                <td colspan="4">Bạn chưa đăng ký thực tập.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($don_dang_ky_list as $don): ?>
@@ -202,11 +362,81 @@ $conn->close();
                                         <?php echo htmlspecialchars($trang_thai); ?>
                                     </td>
                                     <td><?php echo htmlspecialchars(date('d/m/Y', strtotime($don['ngay_ung_tuyen']))); ?></td>
+                                    <td>
+                                        <?php if ($trang_thai === 'Đồng ý'): ?>
+                                            <button class="btn-report" onclick="showBaoCaoForm(<?php echo $don['id']; ?>, '<?php echo htmlspecialchars($don['ma_tuyen_dung']); ?>', '<?php echo htmlspecialchars($don['tieu_de']); ?>')">
+                                                <i class="fas fa-file-alt"></i> Gửi báo cáo hằng tuần
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
+
+                <!-- Form gửi báo cáo hằng tuần (ẩn mặc định) -->
+                <div id="bao-cao-form" class="bao-cao-form" style="display: none;">
+                    <h4 id="bao-cao-title">Gửi báo cáo hằng tuần</h4>
+                    <?php if (!empty($errors)): ?>
+                        <div class="error">
+                            <?php foreach ($errors as $error): ?>
+                                <p><?php echo htmlspecialchars($error); ?></p>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($success): ?>
+                        <div class="success">
+                            <p><?php echo htmlspecialchars($success); ?></p>
+                        </div>
+                    <?php endif; ?>
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="ma_dang_ky" id="ma_dang_ky">
+                        <input type="hidden" name="ma_tuyen_dung" id="ma_tuyen_dung">
+                        <input type="hidden" name="gui_bao_cao" value="1">
+                        <textarea name="noi_dung" placeholder="Nhập nội dung báo cáo hằng tuần..." required></textarea>
+                        <input type="file" name="file_dinh_kem" accept=".pdf,.doc,.docx">
+                        <button type="submit"><i class="fas fa-paper-plane"></i> Gửi báo cáo</button>
+                    </form>
+                </div>
+
+                <!-- Danh sách báo cáo hằng tuần đã gửi -->
+                <div class="bao-cao-list">
+                    <h3>Danh sách báo cáo hằng tuần đã gửi</h3>
+                    <table class="status-table">
+                        <thead>
+                            <tr>
+                                <th>Đơn đăng ký</th>
+                                <th>Nội dung</th>
+                                <th>File đính kèm</th>
+                                <th>Ngày gửi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($bao_cao_list)): ?>
+                                <tr>
+                                    <td colspan="4">Bạn chưa gửi báo cáo hằng tuần nào.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($bao_cao_list as $bao_cao): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($bao_cao['tieu_de']); ?></td>
+                                        <td><?php echo htmlspecialchars(substr($bao_cao['noi_dung'], 0, 50)) . (strlen($bao_cao['noi_dung']) > 50 ? '...' : ''); ?></td>
+                                        <td>
+                                            <?php if ($bao_cao['file_path']): ?>
+                                                <a href="<?php echo htmlspecialchars($bao_cao['file_path']); ?>" class="file-link" target="_blank">Tải xuống</a>
+                                            <?php else: ?>
+                                                Không có
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?php echo htmlspecialchars(date('d/m/Y', strtotime($bao_cao['ngay_gui']))); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
                 <div class="notifications">
                     <h3>Thông báo từ hệ thống</h3>
                     <?php if (empty($don_dang_ky_list)): ?>
@@ -231,5 +461,15 @@ $conn->close();
             </div>
         </div>
     </div>
+
+    <script>
+        function showBaoCaoForm(ma_dang_ky, ma_tuyen_dung, tieu_de) {
+            document.getElementById('bao-cao-form').style.display = 'block';
+            document.getElementById('bao-cao-title').innerText = 'Gửi báo cáo hằng tuần: ' + tieu_de;
+            document.getElementById('ma_dang_ky').value = ma_dang_ky;
+            document.getElementById('ma_tuyen_dung').value = ma_tuyen_dung;
+            window.scrollTo(0, document.getElementById('bao-cao-form').offsetTop);
+        }
+    </script>
 </body>
 </html>
