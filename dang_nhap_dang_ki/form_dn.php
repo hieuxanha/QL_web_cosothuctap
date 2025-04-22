@@ -93,7 +93,7 @@ if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - TopCV</title>
     <link rel="stylesheet" href="./dn_dk.css">
-    <style>
+<style>
         /* CSS cho modal */
         .modal {
             display: none;

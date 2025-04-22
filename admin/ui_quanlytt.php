@@ -31,6 +31,14 @@
         .pending-list th:nth-child(6), .pending-list td:nth-child(6) { width: 20%; }
         .approve { background-color: #28a745; color: white; padding: 5px 10px; border: none; cursor: pointer; }
         .reject { background-color: #dc3545; color: white; padding: 5px 10px; border: none; cursor: pointer; }
+        .delete {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    margin-left: 5px;
+}
     </style>
 </head>
 
@@ -80,9 +88,24 @@
                 <input type="text" placeholder="Tìm kiếm..." />
                 <i class="fas fa-search"></i>
             </div>
-            <div class="profile">
-                <span>Nguyễn Thị My</span>
-                <img src="profile.jpg" alt="Ảnh đại diện" />
+            <div class="account">
+                <?php
+                if (isset($_SESSION['name']) && !empty($_SESSION['name'])) {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
+                    echo '</div>';
+                    echo '</div>';
+                } else {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, Khách</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/form_dn.php">Đăng nhập</a>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+                ?>
             </div>
         </div>
 
@@ -127,12 +150,15 @@
                             if ($trang_thai == 'Đang chờ') {
                                 echo "<button class='approve' onclick=\"updateStatus('" . htmlspecialchars($row['ma_tuyen_dung']) . "', 'approve')\">Duyệt</button>";
                                 echo "<button class='reject' onclick=\"updateStatus('" . htmlspecialchars($row['ma_tuyen_dung']) . "', 'reject')\">Từ chối</button>";
+                                echo "<button class='delete' onclick=\"deleteTuyenDung('" . htmlspecialchars($row['ma_tuyen_dung']) . "')\">Xóa</button>";
                             } elseif ($trang_thai == 'Đã duyệt') {
                                 echo "<button class='cancel' onclick=\"updateStatus('" . htmlspecialchars($row['ma_tuyen_dung']) . "', 'cancel')\">Hủy duyệt</button>";
                                 echo "<button class='reject' onclick=\"updateStatus('" . htmlspecialchars($row['ma_tuyen_dung']) . "', 'reject')\">Từ chối</button>";
+                                echo "<button class='delete' onclick=\"deleteTuyenDung('" . htmlspecialchars($row['ma_tuyen_dung']) . "')\">Xóa</button>";
                             } elseif ($trang_thai == 'Bị từ chối') {
                                 echo "<button class='restore' onclick=\"updateStatus('" . htmlspecialchars($row['ma_tuyen_dung']) . "', 'restore')\">Khôi phục</button>";
                                 echo "<button class='approve' onclick=\"updateStatus('" . htmlspecialchars($row['ma_tuyen_dung']) . "', 'approve')\">Duyệt</button>";
+                                echo "<button class='delete' onclick=\"deleteTuyenDung('" . htmlspecialchars($row['ma_tuyen_dung']) . "')\">Xóa</button>";
                             }
                             echo "</td>";
                             echo "</tr>";
@@ -214,6 +240,51 @@
                 setTimeout(() => errorDiv.remove(), 3000);
             });
         }
+        function deleteTuyenDung(ma_tuyen_dung) {
+    if (!confirm('Bạn có chắc chắn muốn xóa tin tuyển dụng này?')) {
+        return;
+    }
+
+    const row = document.querySelector(`tr[data-ma-tuyen-dung="${ma_tuyen_dung}"]`);
+    const buttonsCell = row.querySelector('.action-buttons');
+    
+    buttonsCell.innerHTML += '<span class="loading">Đang xóa...</span>';
+
+    fetch('../logic_admin/logic_xoa_tuyendung.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `ma_tuyen_dung=${encodeURIComponent(ma_tuyen_dung)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        buttonsCell.querySelector('.loading')?.remove();
+        if (data.success) {
+            row.remove(); // Xóa hàng khỏi bảng
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message success';
+            messageDiv.textContent = 'Xóa tin tuyển dụng thành công!';
+            document.querySelector('.content').prepend(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        } else {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'message error';
+            errorDiv.textContent = data.error || 'Lỗi khi xóa tin tuyển dụng!';
+            document.querySelector('.content').prepend(errorDiv);
+            setTimeout(() => errorDiv.remove(), 3000);
+        }
+    })
+    .catch(error => {
+        buttonsCell.querySelector('.loading')?.remove();
+        console.error('Lỗi:', error);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'message error';
+        errorDiv.textContent = 'Đã có lỗi xảy ra!';
+        document.querySelector('.content').prepend(errorDiv);
+        setTimeout(() => errorDiv.remove(), 3000);
+    });
+}
     </script>
 </body>
 </html>

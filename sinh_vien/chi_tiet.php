@@ -3,7 +3,7 @@ session_start();
 require_once '../db.php';
 
 // Lấy ma_tuyen_dung từ URL
-$ma_tuyen_dung = isset($_GET['ma_tuyen_dung']) ? $_GET['ma_tuyen_dung'] : null;
+$ma_tuyen_dung = isset($_GET['ma_tuyen_dung']) ? trim($_GET['ma_tuyen_dung']) : null;
 
 if (!$ma_tuyen_dung) {
     echo "<p>Không tìm thấy mã tuyển dụng!</p>";
@@ -11,7 +11,9 @@ if (!$ma_tuyen_dung) {
 }
 
 // Truy vấn thông tin tin tuyển dụng và công ty
-$sql = "SELECT td.*, ct.ten_cong_ty, ct.dia_chi AS dia_chi_cty, ct.quy_mo, ct.linh_vuc, ct.logo
+$sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.dia_chi, td.han_nop, td.mo_ta, 
+               td.trinh_do, td.so_luong, td.hinh_thuc, td.gioi_tinh, td.stt_cty, 
+               ct.ten_cong_ty, ct.dia_chi AS dia_chi_cty, ct.quy_mo, ct.linh_vuc, ct.logo
         FROM tuyen_dung td
         JOIN cong_ty ct ON td.stt_cty = ct.stt_cty
         WHERE td.ma_tuyen_dung = ? AND td.trang_thai = 'Đã duyệt'";
@@ -46,7 +48,7 @@ if (isset($_SESSION['name'])) {
     $result = $stmt->get_result();
     if ($result->num_rows > 0) {
         $sinh_vien = $result->fetch_assoc();
-        $_SESSION['ma_sinh_vien'] = $sinh_vien['ma_sinh_vien']; // Lưu ma_sinh_vien vào session nếu chưa có
+        $_SESSION['ma_sinh_vien'] = $sinh_vien['ma_sinh_vien'];
     }
     $stmt->close();
 }
@@ -59,16 +61,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_application']))
     } elseif (!isset($_SESSION['ma_sinh_vien'])) {
         $application_error = "Không tìm thấy mã sinh viên. Vui lòng đăng nhập lại!";
     } else {
-        $ho_ten = trim($_POST['ho_ten']);
-        $email = trim($_POST['email']);
-        $so_dien_thoai = trim($_POST['so_dien_thoai']);
-        $thu_gioi_thieu = trim($_POST['thu_gioi_thieu']);
-        $cv_file = $_FILES['cv_file'];
+        $ho_ten = trim($_POST['ho_ten'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $so_dien_thoai = trim($_POST['so_dien_thoai'] ?? '');
+        $thu_gioi_thieu = trim($_POST['thu_gioi_thieu'] ?? '');
+        $cv_file = $_FILES['cv_file'] ?? null;
 
         // Kiểm tra thông tin bắt buộc
         if (empty($ho_ten) || empty($email) || empty($so_dien_thoai)) {
             $application_error = "Vui lòng nhập đầy đủ thông tin bắt buộc!";
-        } elseif ($cv_file['size'] == 0) {
+        } elseif (!$cv_file || $cv_file['size'] == 0) {
             $application_error = "Vui lòng tải lên CV!";
         } else {
             // Lấy stt_sv từ ma_sinh_vien
@@ -88,7 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_application']))
                 // Xử lý upload file CV
                 $allowed_types = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
                 $max_size = 5 * 1024 * 1024; // 5MB
-                $upload_dir = '../uploads/cv/';
+                $upload_dir = '../Uploads/cv/';
 
                 // Tạo thư mục nếu chưa tồn tại
                 if (!file_exists($upload_dir)) {
@@ -103,7 +105,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_application']))
                     $application_error = "CV phải là file .doc, .docx hoặc .pdf!";
                 } elseif ($cv_file['size'] > $max_size) {
                     $application_error = "CV phải dưới 5MB!";
-                } elseif (move_uploaded_file($cv_file['tmp_name'], $cv_path)) {
+                } elseif (!move_uploaded_file($cv_file['tmp_name'], $cv_path)) {
+                    $application_error = "Lỗi khi tải lên CV! Kiểm tra quyền thư mục uploads/cv/.";
+                } else {
                     // Lưu thông tin ứng tuyển vào database
                     $sql = "INSERT INTO ung_tuyen (ma_tuyen_dung, stt_sv, ho_ten, email, so_dien_thoai, thu_gioi_thieu, cv_path, ngay_ung_tuyen) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
@@ -111,13 +115,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_application']))
                     $stmt->bind_param("sisssss", $ma_tuyen_dung, $stt_sv, $ho_ten, $email, $so_dien_thoai, $thu_gioi_thieu, $cv_path);
                     if ($stmt->execute()) {
                         $application_success = "Ứng tuyển thành công!";
-                        // header("Refresh: 2; url=../co_so_thuc_tap/ui_cv.php");
                     } else {
                         $application_error = "Có lỗi xảy ra khi gửi hồ sơ: " . $stmt->error;
                     }
                     $stmt->close();
-                } else {
-                    $application_error = "Lỗi khi tải lên CV! Kiểm tra quyền thư mục uploads/cv/.";
                 }
             }
             $stmt_sv->close();
@@ -138,7 +139,7 @@ $conn->close();
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="./chi_tiet.css">
-<style>
+    <style>
         .modal {
             display: none;
             position: fixed;
@@ -186,7 +187,7 @@ $conn->close();
         }
         .upload-section h2 .icon {
             background: #4CAF50;
-            color: white;
+            Wcolor: white;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -342,7 +343,7 @@ $conn->close();
         }
         .message.success { background: #e8f5e9; color: #2e7d32; }
         .message.error { background: #ffebee; color: #c62828; }
-</style>
+    </style>
 </head>
 <body>
     <div class="header">
@@ -356,28 +357,17 @@ $conn->close();
             </div>
         </div>
         <div class="nav">
-        <div class="account">
+            <div class="account">
                 <?php
-             if (session_status() == PHP_SESSION_NONE) {
-              session_start();
-              }
-
-              if (isset($_SESSION['name'])) {
- 
-              echo '<div class="dropdown">';
-              echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
-              echo '<div class="dropdown-content">';
-              echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>'; 
-              echo '</div>';
-              echo '</div>';
-            } else {
-    
-            //  echo '<a href="./formdangnhapky.php">Tài khoản</a>';
-           }
-
+                if (isset($_SESSION['name'])) {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
+                    echo '</div>';
+                    echo '</div>';
+                }
                 ?>
-          
-  
             </div>
             <a href="#">Việc làm</a>
             <a href="#">Hồ sơ & CV</a>
@@ -411,20 +401,15 @@ $conn->close();
                 </div>
                 <div class="section">
                     <h2>Chi tiết tin tuyển dụng</h2>
-                    <!-- <p><strong>Chuyên môn:</strong> Chăm sóc khách hàng</p> -->
                     <h3>Mô tả công việc:</h3>
                     <div><?php echo nl2br(htmlspecialchars($job['mo_ta'])); ?></div>
-                    <h3>Yêu cầu công việc:</h3>
-                    <div><?php echo nl2br(htmlspecialchars($job['yeu_cau'])); ?></div>
                     <p><strong>Địa điểm làm việc:</strong> <?php echo htmlspecialchars($job['dia_chi']); ?></p>
-                    <p><strong>Thời gian làm việc:</strong> <?php echo htmlspecialchars($job['thoi_gian_lam_viec'] ?? 'Không xác định'); ?></p>
                 </div>
             </div>
             <div class="chitietcv-right">
                 <div class="section">
                     <h2>Thông tin chung</h2>
-                    <p><strong>Cấp bậc:</strong> <?php echo htmlspecialchars($job['cap_bac'] ?? 'Nhân viên'); ?></p>
-                    <p><strong>Kinh nghiệm:</strong> Không yêu cầu kinh nghiệm</p>
+                    <h3>Trình độ:</h3><div><?php echo isset($job['trinh_do']) ? htmlspecialchars($job['trinh_do']) : 'Không xác định'; ?></div>
                     <p><strong>Số lượng tuyển:</strong> <?php echo htmlspecialchars($job['so_luong']); ?> người</p>
                     <p><strong>Hình thức làm việc:</strong> <?php echo htmlspecialchars($job['hinh_thuc']); ?></p>
                     <p><strong>Giới tính:</strong> <?php echo htmlspecialchars($job['gioi_tinh']); ?></p>
@@ -432,10 +417,10 @@ $conn->close();
                 <div class="section">
                     <h2>Thông tin công ty</h2>
                     <p><strong>Tên công ty:</strong> <?php echo htmlspecialchars($job['ten_cong_ty']); ?></p>
-                    <p><strong>Quy mô:</strong> <?php echo htmlspecialchars($job['quy_mo'] ?? 'Không xác định'); ?></p>
-                    <p><strong>Lĩnh vực:</strong> <?php echo htmlspecialchars($job['linh_vuc'] ?? 'Không xác định'); ?></p>
+                    <p><strong>Quy mô:</strong> <?php echo isset($job['quy_mo']) ? htmlspecialchars($job['quy_mo']) : 'Không xác định'; ?></p>
+                    <p><strong>Lĩnh vực:</strong> <?php echo isset($job['linh_vuc']) ? htmlspecialchars($job['linh_vuc']) : 'Không xác định'; ?></p>
                     <p><strong>Địa điểm:</strong> <?php echo htmlspecialchars($job['dia_chi_cty']); ?></p>
-                    <a href="#" class="button">Xem trang công ty</a>
+                    <a href="giaodien_thongtincty.php?stt_cty=<?php echo htmlspecialchars($job['stt_cty']); ?>" class="button">Xem trang công ty</a>
                 </div>
             </div>
         </div>
@@ -451,9 +436,9 @@ $conn->close();
                 </div>
 
                 <?php if (!empty($application_success)): ?>
-                    <div class="message success"><?php echo $application_success; ?></div>
+                    <div class="message success"><?php echo htmlspecialchars($application_success); ?></div>
                 <?php elseif (!empty($application_error)): ?>
-                    <div class="message error"><?php echo $application_error; ?></div>
+                    <div class="message error"><?php echo htmlspecialchars($application_error); ?></div>
                 <?php endif; ?>
 
                 <form method="POST" enctype="multipart/form-data">
@@ -559,7 +544,7 @@ $conn->close();
             <div class="footer-section">
                 <h4>Khám phá</h4>
                 <ul>
-                    <li><a href="#">Ứng dụng di động TopCV</a></li>
+                    <li><a href="#">Ứng dụng di động TopCV ■</a></li>
                     <li><a href="#">Tính lương Gross - Net</a></li>
                     <li><a href="#">Tính lãi suất kép</a></li>
                 </ul>

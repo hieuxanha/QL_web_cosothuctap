@@ -1,3 +1,11 @@
+<?php
+
+// Khởi tạo session nếu chưa có
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
   <head>
@@ -21,7 +29,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="ui_admin.css" />
-    <style></style>
+  <style>
+ 
+
+    </style>
   </head>
   <body>
     <div class="sidebar" id="sidebar">
@@ -67,10 +78,25 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <div class="profile">
-          <span>Nguyễn Thị My</span>
-          <img src="profile.jpg" alt="Ảnh đại diện" />
-        </div>
+        <div class="account">
+                <?php
+                if (isset($_SESSION['name']) && !empty($_SESSION['name'])) {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
+                    echo '</div>';
+                    echo '</div>';
+                } else {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, Khách</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/form_dn.php">Đăng nhập</a>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+                ?>
+            </div>
       </div>
 
       <div class="dashboard-content">

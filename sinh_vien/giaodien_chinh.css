@@ -471,7 +471,7 @@ body {
   display: flex;
   flex-wrap: wrap; /* Để hiển thị theo hàng */
   gap: 16px; /* Khoảng cách giữa các box */
-  justify-content: space-between;
+  /* justify-content: space-between; */
 }
 
 .job {

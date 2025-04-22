@@ -2,24 +2,46 @@
 session_start();
 require_once '../db.php';
 
-// Truy vấn dữ liệu từ các bảng sinh_vien, ung_tuyen, tuyen_dung và bao_cao_thuc_tap
-// Chỉ lấy các sinh viên có trạng thái 'Đồng ý'
+$per_page = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $per_page;
+
 $sinh_vien_list = [];
 $sql = "
-    SELECT sv.stt_sv, sv.ma_sinh_vien, sv.ho_ten, sv.email, sv.lop, sv.khoa, sv.so_dien_thoai,
-           ut.ma_tuyen_dung, ut.ngay_ung_tuyen, ut.trang_thai, ut.cv_path,
-           td.tieu_de,
-           bct.noi_dung, bct.file_path
+    SELECT 
+        sv.stt_sv, 
+        sv.ma_sinh_vien, 
+        sv.ho_ten, 
+        sv.email, 
+        sv.lop, 
+        sv.khoa, 
+        sv.so_dien_thoai, 
+        ut.ma_tuyen_dung, 
+        ut.ngay_ung_tuyen, 
+        ut.trang_thai, 
+        ut.cv_path,
+        td.tieu_de,
+        GROUP_CONCAT(bct.noi_dung SEPARATOR '|||') AS noi_dung_list,
+        GROUP_CONCAT(bct.file_path SEPARATOR '|||') AS file_path_list,
+        GROUP_CONCAT(bct.ngay_gui SEPARATOR '|||') AS ngay_gui_list
     FROM sinh_vien sv
     LEFT JOIN ung_tuyen ut ON sv.stt_sv = ut.stt_sv
     LEFT JOIN tuyen_dung td ON ut.ma_tuyen_dung = td.ma_tuyen_dung
     LEFT JOIN bao_cao_thuc_tap bct ON ut.id = bct.ma_dang_ky
     WHERE ut.id IS NOT NULL AND ut.trang_thai = 'Đồng ý'
+    GROUP BY sv.stt_sv, ut.ma_tuyen_dung
     ORDER BY ut.ngay_ung_tuyen DESC
+    LIMIT $per_page OFFSET $offset
 ";
 $result = $conn->query($sql);
+if ($result === false) {
+    die("Lỗi truy vấn: " . $conn->error);
+}
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
+        $row['noi_dung_list'] = !empty($row['noi_dung_list']) ? explode('|||', $row['noi_dung_list']) : [];
+        $row['file_path_list'] = !empty($row['file_path_list']) ? explode('|||', $row['file_path_list']) : [];
+        $row['ngay_gui_list'] = !empty($row['ngay_gui_list']) ? explode('|||', $row['ngay_gui_list']) : [];
         $sinh_vien_list[] = $row;
     }
 }
@@ -87,6 +109,7 @@ if ($result->num_rows > 0) {
             width: 100%;
             border-collapse: collapse;
             background-color: white;
+            table-layout: fixed;
         }
         .data-table th {
             background-color: #0078d4;
@@ -109,12 +132,26 @@ if ($result->num_rows > 0) {
         .center-text {
             text-align: center;
         }
-        .cv-link { color: #0078d4; text-decoration: none; cursor: pointer; }
-        .cv-link:hover { text-decoration: underline; }
-        .message.success { color: green; padding: 10px; margin: 10px 0; background: #e0ffe0; }
-        .message.error { color: red; padding: 10px; margin: 10px 0; background: #ffe0e0; }
-
-        /* CSS cho modal */
+        .cv-link {
+            color: #0078d4;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .cv-link:hover {
+            text-decoration: underline;
+        }
+        .message.success {
+            color: green;
+            padding: 10px;
+            margin: 10px 0;
+            background: #e0ffe0;
+        }
+        .message.error {
+            color: red;
+            padding: 10px;
+            margin: 10px 0;
+            background: #ffe0e0;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -136,7 +173,8 @@ if ($result->num_rows > 0) {
             height: 80vh;
             position: relative;
         }
-        .modal-content iframe {
+        .modal-content iframe,
+        .modal-content img {
             width: 100%;
             height: 90%;
             border: none;
@@ -155,6 +193,44 @@ if ($result->num_rows > 0) {
             color: black;
             text-decoration: none;
         }
+        .data-table td ul {
+            margin: 0;
+            padding-left: 20px;
+            list-style-type: disc;
+        }
+        .data-table td ul li {
+            margin-bottom: 5px;
+        }
+        .data-table td ul li small {
+            color: #555;
+            font-size: 0.9em;
+        }
+        .accordion-btn {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .accordion-content {
+            margin-top: 5px;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a {
+            margin: 0 5px;
+            padding: 5px 10px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .pagination a:hover {
+            background-color: #0078d4;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -166,13 +242,14 @@ if ($result->num_rows > 0) {
         <div class="menu">
             <hr />
             <ul>
-                <h2>Quản lý</h2>
+            <h2>Quản lý</h2>
                 <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_cstt.php">cstttt..</a></li>
                 <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_capnhat_cty.php">Đăng ký thông tin cty</a></li>
                 <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_capnhat_tt.php">Cập nhật thông tin tuyển dụng</a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_duyet_cv.php">- Xét duyệt hồ sơ ứng tuyển</a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="#">Theo dõi & đánh giá quá trình TT</a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="#">Xác nhận hoàn thành TT</a></li>
+                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_duyet_cv.php">Xét duyệt hồ sơ ứng tuyển</a></li>
+                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_quanly_baocao.php">Gửi báo cáo hàng tuần </a></li>
+                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_danh_gia_thuc_tap.php">Theo dõi & đánh giá quá trình TT</a></li>
+                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_xac_nhan_hoan_thanh.php">Xác nhận hoàn thành TT</a></li>
             </ul>
         </div>
     </div>
@@ -220,16 +297,16 @@ if ($result->num_rows > 0) {
                 <thead>
                     <tr>
                         <th style="width: 50px;">STT</th>
-                        <th style="width: 60px;">Sửa</th>
+                     
                         <th style="width: 150px;">Mã sinh viên</th>
                         <th style="width: 200px;">Họ tên</th>
                         <th style="width: 200px;">Email</th>
-                        <th style="width: 100px;">Lớp</th>
+                        <th style="width: 50px;">Lớp</th>
                         <th style="width: 100px;">Khoa</th>
                         <th style="width: 120px;">Số điện thoại</th>
                         <th style="width: 200px;">Tin tuyển dụng</th>
-                        <th style="width: 150px;">Nội dung</th>
-                        <th style="width: 150px;">File đính kèm</th>
+                        <th style="width: 250px;">Nội dung</th>
+                        <th style="width: 250px;">File đính kèm</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -240,10 +317,8 @@ if ($result->num_rows > 0) {
                     <?php else: ?>
                         <?php foreach ($sinh_vien_list as $index => $sv): ?>
                             <tr data-stt-sv="<?php echo htmlspecialchars($sv['stt_sv']); ?>" data-ma-tuyen-dung="<?php echo htmlspecialchars($sv['ma_tuyen_dung']); ?>">
-                                <td class="center-text"><?php echo $index + 1; ?></td>
-                                <td class="center-text">
-                                    <a href="edit_sv.php?stt_sv=<?php echo htmlspecialchars($sv['stt_sv']); ?>" class="action-icon">✏️</a>
-                                </td>
+                                <td class="center-text"><?php echo $index + 1 + $offset; ?></td>
+                              
                                 <td><?php echo htmlspecialchars($sv['ma_sinh_vien']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['ho_ten']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['email']); ?></td>
@@ -251,10 +326,38 @@ if ($result->num_rows > 0) {
                                 <td><?php echo htmlspecialchars($sv['khoa']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['so_dien_thoai']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['tieu_de']); ?></td>
-                                <td><?php echo htmlspecialchars($sv['noi_dung'] ?? 'Chưa gửi báo cáo'); ?></td>
                                 <td>
-                                    <?php if (!empty($sv['file_path'])): ?>
-                                        <span class="cv-link" onclick="showFile('<?php echo htmlspecialchars($sv['file_path']); ?>')">Xem</span>
+                                    <?php if (!empty($sv['noi_dung_list'])): ?>
+                                        <button class="accordion-btn" onclick="toggleAccordion(this)">Xem</button>
+                                        <div class="accordion-content" style="display: none;">
+                                            <ul>
+                                                <?php foreach ($sv['noi_dung_list'] as $key => $noi_dung): ?>
+                                                    <li>
+                                                        <?php echo htmlspecialchars($noi_dung); ?>
+                                                        <br>
+                                                        <small>(Gửi: <?php echo htmlspecialchars($sv['ngay_gui_list'][$key] ?? 'Không rõ'); ?>)</small>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    <?php else: ?>
+                                        Chưa gửi báo cáo
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (!empty($sv['file_path_list'])): ?>
+                                        <button class="accordion-btn" onclick="toggleAccordion(this)">Xem</button>
+                                        <div class="accordion-content" style="display: none;">
+                                            <ul>
+                                                <?php foreach ($sv['file_path_list'] as $key => $file_path): ?>
+                                                    <li>
+                                                        <span class="cv-link" onclick="showFile('<?php echo htmlspecialchars($file_path); ?>')">Xem file</span>
+                                                        <br>
+                                                        <small>(Gửi: <?php echo htmlspecialchars($sv['ngay_gui_list'][$key] ?? 'Không rõ'); ?>)</small>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
                                     <?php else: ?>
                                         Không có file
                                     <?php endif; ?>
@@ -264,10 +367,19 @@ if ($result->num_rows > 0) {
                     <?php endif; ?>
                 </tbody>
             </table>
+
+            <div class="pagination">
+                <?php
+                $total_records = $conn->query("SELECT COUNT(DISTINCT sv.stt_sv) AS total FROM sinh_vien sv JOIN ung_tuyen ut ON sv.stt_sv = ut.stt_sv WHERE ut.trang_thai = 'Đồng ý'")->fetch_assoc()['total'];
+                $total_pages = ceil($total_records / $per_page);
+                for ($i = 1; $i <= $total_pages; $i++):
+                ?>
+                    <a href="?page=<?php echo $i; ?>" <?php if ($i == $page) echo 'style="font-weight: bold;"'; ?>><?php echo $i; ?></a>
+                <?php endfor; ?>
+            </div>
         </div>
     </div>
 
-    <!-- Modal để hiển thị file -->
     <div id="fileModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeFile()">×</span>
@@ -283,17 +395,43 @@ if ($result->num_rows > 0) {
             content.classList.toggle("collapsed");
         }
 
+        function toggleAccordion(element) {
+            const content = element.nextElementSibling;
+            if (content.style.display === "none") {
+                content.style.display = "block";
+                element.textContent = "Ẩn";
+            } else {
+                content.style.display = "none";
+                element.textContent = "Xem";
+            }
+        }
+
         function showFile(filePath) {
             const modal = document.getElementById("fileModal");
             const fileFrame = document.getElementById("fileFrame");
-            fileFrame.src = filePath;
+            const extension = filePath.split('.').pop().toLowerCase();
+
+            if (['pdf'].includes(extension)) {
+                fileFrame.src = filePath;
+            } else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                fileFrame.src = '';
+                fileFrame.outerHTML = `<img src="${filePath}" style="width: 100%; height: 90%; object-fit: contain;" />`;
+            } else {
+                fileFrame.src = '';
+                fileFrame.outerHTML = `<a href="${filePath}" download>Tải xuống file</a>`;
+            }
+
             modal.style.display = "block";
         }
 
         function closeFile() {
             const modal = document.getElementById("fileModal");
-            const fileFrame = document.getElementById("fileFrame");
-            fileFrame.src = "";
+            const fileFrameContainer = document.querySelector('.modal-content');
+            
+            fileFrameContainer.innerHTML = `
+                <span class="close" onclick="closeFile()">×</span>
+                <iframe id="fileFrame" src=""></iframe>
+            `;
             modal.style.display = "none";
         }
     </script>

@@ -55,6 +55,159 @@
     .text-group h3 a:hover {
       text-decoration: none;
     }
+
+
+    /* Chat Box Styles */
+    .chat-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .chat-box {
+      width: 320px;
+      height: 400px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      display: none;
+    }
+
+    .chat-header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .chat-header button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background-color: #f5f5f5;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      max-width: 80%;
+      padding: 10px;
+      border-radius: 10px;
+      word-wrap: break-word;
+    }
+
+    .message.user {
+      background-color: #E3F2FD;
+      color: #333;
+      margin-left: auto;
+      border-bottom-right-radius: 2px;
+    }
+
+    .message.system {
+      background-color: #EEEEEE;
+      color: #333;
+      border-bottom-left-radius: 2px;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      background-color: #fff;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .chat-input button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .chat-input button:hover {
+      background-color: #3d8b40;
+    }
+
+    .chat-toggle {
+      width: 60px;
+      height: 60px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      font-size: 24px;
+      transition: transform 0.3s, background-color 0.3s;
+    }
+
+    .chat-toggle:hover {
+      background-color: #3d8b40;
+      transform: scale(1.05);
+    }
+
+    /* Add animation */
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.3);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+
+      70% {
+        transform: scale(0.9);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .chat-box.show {
+      display: flex;
+      animation: bounceIn 0.5s;
+    }
   </style>
 </head>
 
@@ -367,6 +520,28 @@
   </div>
 
 
+  <div class="chat-container">
+    <div class="chat-box" id="chatBox">
+      <div class="chat-header">
+        <h3>Chat Support</h3>
+        <button id="minimizeChat"><i class="fas fa-minus"></i></button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="message system">
+          <span>Welcome to our support chat! How can we help you today?</span>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button id="sendMessage"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+    <button class="chat-toggle" id="chatToggle">
+      <i class="fas fa-comments"></i>
+    </button>
+  </div>
+
+
 
 
   <!-- endend -->
@@ -527,8 +702,68 @@
 
       showPage(currentPage);
     });
+
+
+    //chat boxxx
   </script>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatToggle = document.getElementById('chatToggle');
+      const chatBox = document.getElementById('chatBox');
+      const minimizeChat = document.getElementById('minimizeChat');
+      const messageInput = document.getElementById('messageInput');
+      const sendMessage = document.getElementById('sendMessage');
+      const chatMessages = document.getElementById('chatMessages');
+
+      // Toggle chat box
+      chatToggle.addEventListener('click', function() {
+        chatBox.classList.toggle('show');
+      });
+
+      // Minimize chat box
+      minimizeChat.addEventListener('click', function() {
+        chatBox.classList.remove('show');
+      });
+
+      // Send message function
+      function sendUserMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+          // Add user message
+          const userMessageDiv = document.createElement('div');
+          userMessageDiv.className = 'message user';
+          userMessageDiv.innerHTML = `<span>${message}</span>`;
+          chatMessages.appendChild(userMessageDiv);
+
+          // Clear input
+          messageInput.value = '';
+
+          // Auto-scroll to bottom
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+
+          // Simulate response after a delay
+          setTimeout(function() {
+            const responseDiv = document.createElement('div');
+            responseDiv.className = 'message system';
+            responseDiv.innerHTML = `<span>Thanks for your message! Our team will get back to you soon.</span>`;
+            chatMessages.appendChild(responseDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }, 1000);
+        }
+      }
+
+      // Send message on button click
+      sendMessage.addEventListener('click', sendUserMessage);
+
+      // Send message on Enter key
+      messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          sendUserMessage();
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

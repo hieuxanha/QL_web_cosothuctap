@@ -5,6 +5,7 @@ require '../db.php';
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -50,11 +51,17 @@ require '../db.php';
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Cột bên trái: Form đăng ký -->
@@ -193,16 +200,16 @@ require '../db.php';
             let formData = new FormData(this); // Lấy dữ liệu form
 
             fetch('./logic_dang_ky.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json()) // Chuyển đổi JSON phản hồi từ PHP
-            .then(data => {
-                showModal(data.message); // Hiển thị thông báo bằng modal
-            })
-            .catch(error => {
-                showModal("Lỗi kết nối, vui lòng thử lại!");
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json()) // Chuyển đổi JSON phản hồi từ PHP
+                .then(data => {
+                    showModal(data.message); // Hiển thị thông báo bằng modal
+                })
+                .catch(error => {
+                    showModal("Lỗi kết nối, vui lòng thử lại!");
+                });
         });
 
         // Hàm toggleSelect để hiển thị/ẩn các trường theo loại người dùng
@@ -234,4 +241,5 @@ require '../db.php';
         }
     </script>
 </body>
+
 </html>
