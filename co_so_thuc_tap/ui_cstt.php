@@ -1,4 +1,3 @@
-
 <?php
 // Khởi tạo session nếu chưa có
 if (session_status() == PHP_SESSION_NONE) {
@@ -9,6 +8,7 @@ if (session_status() == PHP_SESSION_NONE) {
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -27,24 +27,28 @@ if (session_status() == PHP_SESSION_NONE) {
             position: relative;
             display: inline-block;
         }
+
         .account .user-name {
             cursor: pointer;
             font-weight: 500;
             color: #333;
         }
+
         .account .dropdown-content {
             display: none;
             position: absolute;
             right: 0;
             background: #fff;
             min-width: 120px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             border-radius: 4px;
             z-index: 1;
         }
+
         .account .dropdown:hover .dropdown-content {
             display: block;
         }
+
         .account .dropdown-content a {
             color: #333;
             padding: 10px;
@@ -52,11 +56,13 @@ if (session_status() == PHP_SESSION_NONE) {
             display: block;
             font-size: 14px;
         }
+
         .account .dropdown-content a:hover {
             background: #f4f4f4;
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar" id="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -66,14 +72,15 @@ if (session_status() == PHP_SESSION_NONE) {
         <div class="menu">
             <hr />
             <ul>
-            <h2>Quản lý</h2>
-                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_cstt.php">cstttt..</a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_capnhat_cty.php">Đăng ký thông tin cty</a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_capnhat_tt.php">Cập nhật thông tin tuyển dụng</a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_duyet_cv.php">Xét duyệt hồ sơ ứng tuyển</a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_quanly_baocao.php">Gửi báo cáo hàng tuần </a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_danh_gia_thuc_tap.php">Theo dõi & đánh giá quá trình TT</a></li>
-                <li><i class="fa-brands fa-windows"></i> <a href="../co_so_thuc_tap/ui_xac_nhan_hoan_thanh.php">Xác nhận hoàn thành TT</a></li>
+                <h3>Quản lý</h3>
+                <li><i class="fa-solid fa-building"></i> <a href="ui_cstt.php">Cơ sở thực tập</a></li>
+                <li><i class="fa-solid fa-briefcase"></i> <a href="ui_capnhat_cty.php">Đăng ký thông tin công ty</a></li>
+                <li><i class="fa-solid fa-bullhorn"></i> <a href="ui_capnhat_tt.php">Cập nhật thông tin tuyển dụng</a></li>
+                <li><i class="fa-solid fa-file-alt"></i> <a href="ui_duyet_cv.php">Xét duyệt hồ sơ ứng tuyển</a></li>
+                <li><i class="fa-solid fa-file-signature"></i> <a href="ui_quanly_baocao.php">Gửi báo cáo hàng tuần</a></li>
+                <li><i class="fa-solid fa-star"></i> <a href="ui_danh_gia_thuc_tap.php">Theo dõi & đánh giá thực tập</a></li>
+                <li><i class="fa-solid fa-list-check"></i> <a href="ui_quan_ly_danh_gia.php">Quản lý đánh giá thực tập</a></li>
+                <li><i class="fa-solid fa-check-circle"></i> <a href="ui_xac_nhan_hoan_thanh.php">Xác nhận hoàn thành thực tập</a></li>
             </ul>
         </div>
     </div>
@@ -165,10 +172,13 @@ if (session_status() == PHP_SESSION_NONE) {
             options: {
                 responsive: true,
                 scales: {
-                    y: { beginAtZero: true }
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
         });
     </script>
 </body>
+
 </html>

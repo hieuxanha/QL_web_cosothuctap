@@ -40,6 +40,7 @@ unset($_SESSION['form_data']); // Clear after use
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -53,12 +54,14 @@ unset($_SESSION['form_data']); // Clear after use
             position: relative;
             display: inline-block;
         }
+
         .user-name {
             cursor: pointer;
             padding: 8px;
             background-color: #f0f0f0;
             border-radius: 4px;
         }
+
         .dropdown-content {
             display: none;
             position: absolute;
@@ -71,21 +74,43 @@ unset($_SESSION['form_data']); // Clear after use
             border-radius: 15px;
             top: 20px;
         }
+
         .dropdown-content a {
             color: black;
             text-decoration: none;
             display: block;
             padding: 8px 12px;
         }
+
         .dropdown-content a:hover {
             background-color: #ddd;
         }
+
         .dropdown:hover .dropdown-content {
             display: block;
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+
+        .message.success {
+            background-color: #28a745;
+        }
+
+        .message.error {
+            background-color: #dc3545;
         }
     </style>
     <link rel="stylesheet" href="./ui_capnhat.css">
 </head>
+
 <body>
     <div class="sidebar" id="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -176,21 +201,21 @@ unset($_SESSION['form_data']); // Clear after use
                 <input type="text" name="dia_chi" maxlength="255" value="<?php echo isset($form_data['dia_chi']) ? htmlspecialchars($form_data['dia_chi']) : ''; ?>" required>
 
                 <label for="hinh_thuc">Hình thức làm việc:</label>
-                <select name="hinh_thuc" required>
-                    <option value="Full-time" <?php echo isset($form_data['hinh_thuc']) && $form_data['hinh_thuc'] == 'Full-time' ? 'selected' : ''; ?>>Full-time</option>
+                <select name="hinh_thuc" id="hinh_thuc" required>
+                    <option value="Full-time" <?php echo isset($form_data['hinh_thuc']) && $form_data['hinh_thuc'] == 'Full-time' ? 'selected' : 'selected'; ?>>Full-time</option>
                     <option value="Part-time" <?php echo isset($form_data['hinh_thuc']) && $form_data['hinh_thuc'] == 'Part-time' ? 'selected' : ''; ?>>Part-time</option>
                 </select>
 
                 <label for="gioi_tinh">Giới tính:</label>
                 <select name="gioi_tinh" required>
-                    <option value="Nam" <?php echo isset($form_data['gioi_tinh']) && $form_data['gioi_tinh'] == 'Nam' ? 'selected' : ''; ?>>Nam</option>
+                    <option value="Nam" <?php echo isset($form_data['gioi_tinh']) && $form_data['gioi_tinh'] == 'Nam' ? 'selected' : 'selected'; ?>>Nam</option>
                     <option value="Nữ" <?php echo isset($form_data['gioi_tinh']) && $form_data['gioi_tinh'] == 'Nữ' ? 'selected' : ''; ?>>Nữ</option>
                     <option value="Không giới hạn" <?php echo isset($form_data['gioi_tinh']) && $form_data['gioi_tinh'] == 'Không giới hạn' ? 'selected' : ''; ?>>Không giới hạn</option>
                 </select>
 
                 <label for="khoa">Khoa (tuỳ chọn):</label>
                 <select name="khoa">
-                    <option value="">Không chọn</option>
+                    <option value="" <?php echo !isset($form_data['khoa']) || empty($form_data['khoa']) ? 'selected' : ''; ?>>Không chọn</option>
                     <?php
                     foreach ($khoa_options as $value => $name) {
                         $selected = isset($form_data['khoa']) && $form_data['khoa'] == $value ? 'selected' : '';
@@ -204,7 +229,7 @@ unset($_SESSION['form_data']); // Clear after use
 
                 <label for="trinh_do">Trình độ:</label>
                 <select name="trinh_do" required>
-                    <option value="Không yêu cầu" <?php echo isset($form_data['trinh_do']) && $form_data['trinh_do'] == 'Không yêu cầu' ? 'selected' : ''; ?>>Không yêu cầu</option>
+                    <option value="Không yêu cầu" <?php echo !isset($form_data['trinh_do']) || $form_data['trinh_do'] == 'Không yêu cầu' ? 'selected' : ''; ?>>Không yêu cầu</option>
                     <option value="Trung cấp" <?php echo isset($form_data['trinh_do']) && $form_data['trinh_do'] == 'Trung cấp' ? 'selected' : ''; ?>>Trung cấp</option>
                     <option value="Cao đẳng" <?php echo isset($form_data['trinh_do']) && $form_data['trinh_do'] == 'Cao đẳng' ? 'selected' : ''; ?>>Cao đẳng</option>
                     <option value="Đại học" <?php echo isset($form_data['trinh_do']) && $form_data['trinh_do'] == 'Đại học' ? 'selected' : ''; ?>>Đại học</option>
@@ -234,7 +259,7 @@ unset($_SESSION['form_data']); // Clear after use
             content.classList.toggle("collapsed");
         }
 
-        // Client-side validation for date
+        // Client-side validation for form
         document.getElementById('formTuyenDung').addEventListener('submit', function(e) {
             const hanNop = new Date(document.querySelector('input[name="han_nop"]').value);
             const today = new Date();
@@ -242,10 +267,14 @@ unset($_SESSION['form_data']); // Clear after use
             if (hanNop < today) {
                 e.preventDefault();
                 alert('Hạn nộp phải từ hôm nay trở đi.');
+                return;
             }
+
+
         });
     </script>
 </body>
+
 </html>
 <?php
 if ($result) {

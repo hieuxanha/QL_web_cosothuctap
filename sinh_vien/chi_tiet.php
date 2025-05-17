@@ -131,6 +131,7 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -152,6 +153,7 @@ $conn->close();
             align-items: center;
             justify-content: center;
         }
+
         .modal-content {
             background: white;
             border-radius: 8px;
@@ -162,6 +164,7 @@ $conn->close();
             overflow-y: auto;
             position: relative;
         }
+
         .close-modal {
             position: absolute;
             top: 10px;
@@ -172,12 +175,17 @@ $conn->close();
             cursor: pointer;
             color: #888;
         }
-        .application-form { padding: 10px; }
+
+        .application-form {
+            padding: 10px;
+        }
+
         .header h1 {
             color: #4CAF50;
             font-size: 22px;
             margin-bottom: 15px;
         }
+
         .upload-section h2 {
             display: flex;
             align-items: center;
@@ -185,9 +193,10 @@ $conn->close();
             color: #333;
             margin-bottom: 10px;
         }
+
         .upload-section h2 .icon {
             background: #4CAF50;
-            Wcolor: white;
+            color: white;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -196,15 +205,18 @@ $conn->close();
             justify-content: center;
             margin-right: 10px;
         }
+
         .upload-container {
             border: 1px dashed #ccc;
             border-radius: 4px;
             padding: 15px;
         }
+
         .upload-option {
             display: flex;
             align-items: center;
         }
+
         .radio-circle {
             width: 20px;
             height: 20px;
@@ -213,6 +225,7 @@ $conn->close();
             margin-right: 15px;
             position: relative;
         }
+
         .radio-circle.selected:after {
             content: "";
             position: absolute;
@@ -223,6 +236,7 @@ $conn->close();
             background: #4CAF50;
             border-radius: 50%;
         }
+
         .upload-area {
             flex: 1;
             text-align: center;
@@ -230,36 +244,49 @@ $conn->close();
             background: #f9f9f9;
             border-radius: 4px;
         }
+
         .upload-icon {
             font-size: 30px;
             color: #888;
             margin-bottom: 5px;
         }
+
         .file-info {
             color: #888;
             font-size: 12px;
             margin-top: 5px;
         }
-        .info-section { margin-top: 20px; }
+
+        .info-section {
+            margin-top: 20px;
+        }
+
         .info-header {
             color: #4CAF50;
             font-size: 16px;
             margin-bottom: 10px;
         }
+
         .required-notice {
             color: #f44336;
             float: right;
             font-size: 12px;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             font-weight: bold;
             display: block;
             margin-bottom: 5px;
         }
-        .form-group label .required { color: #f44336; }
+
+        .form-group label .required {
+            color: #f44336;
+        }
+
         .form-control {
             width: 100%;
             padding: 10px;
@@ -267,27 +294,38 @@ $conn->close();
             border-radius: 4px;
             font-size: 14px;
         }
+
         .form-row {
             display: flex;
             gap: 41px;
         }
-        .form-row .form-group { flex: 1; }
-        .intro-section { margin-top: 20px; }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .intro-section {
+            margin-top: 20px;
+        }
+
         .intro-header {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
         }
+
         .intro-icon {
             color: #4CAF50;
             font-size: 24px;
             margin-right: 10px;
         }
+
         .intro-text {
             color: #666;
             font-size: 14px;
             margin-bottom: 10px;
         }
+
         .intro-textarea {
             width: 100%;
             min-height: 100px;
@@ -297,6 +335,7 @@ $conn->close();
             resize: vertical;
             font-size: 14px;
         }
+
         .warning-section {
             margin-top: 20px;
             background: #fff9f9;
@@ -304,6 +343,7 @@ $conn->close();
             padding: 10px;
             border-radius: 4px;
         }
+
         .warning-header {
             display: flex;
             align-items: center;
@@ -312,13 +352,22 @@ $conn->close();
             font-weight: bold;
             margin-bottom: 5px;
         }
-        .warning-icon { margin-right: 5px; }
-        .warning-link { color: #4CAF50; text-decoration: none; }
+
+        .warning-icon {
+            margin-right: 5px;
+        }
+
+        .warning-link {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
         .button-row {
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
         }
+
         .cancel-btn {
             padding: 10px 20px;
             border: 1px solid #ddd;
@@ -326,6 +375,7 @@ $conn->close();
             border-radius: 4px;
             cursor: pointer;
         }
+
         .submit-btn {
             padding: 10px 20px;
             background: #4CAF50;
@@ -336,15 +386,38 @@ $conn->close();
             flex-grow: 1;
             margin-left: 10px;
         }
+
         .message {
             padding: 10px;
             margin-bottom: 15px;
             border-radius: 4px;
         }
-        .message.success { background: #e8f5e9; color: #2e7d32; }
-        .message.error { background: #ffebee; color: #c62828; }
+
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .job-detail {
+            margin-bottom: 10px;
+        }
+
+        .job-detail p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .job-detail strong {
+            color: #4CAF50;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <div class="left-section">
@@ -409,7 +482,15 @@ $conn->close();
             <div class="chitietcv-right">
                 <div class="section">
                     <h2>Thông tin chung</h2>
-                    <h3>Trình độ:</h3><div><?php echo isset($job['trinh_do']) ? htmlspecialchars($job['trinh_do']) : 'Không xác định'; ?></div>
+                    <h3>Trình độ:</h3>
+                    <p>
+                        <strong>Trình độ yêu cầu:</strong>
+                        <?php
+                        $valid_trinh_do = ['Không yêu cầu', 'Trung cấp', 'Cao đẳng', 'Đại học', 'Thạc sĩ', 'Tiến sĩ'];
+                        $trinh_do_display = isset($job['trinh_do']) ? htmlspecialchars($job['trinh_do']) : 'Không xác định';
+                        echo in_array($trinh_do_display, $valid_trinh_do) ? $trinh_do_display : 'Không xác định';
+                        ?>
+                    </p>
                     <p><strong>Số lượng tuyển:</strong> <?php echo htmlspecialchars($job['so_luong']); ?> người</p>
                     <p><strong>Hình thức làm việc:</strong> <?php echo htmlspecialchars($job['hinh_thuc']); ?></p>
                     <p><strong>Giới tính:</strong> <?php echo htmlspecialchars($job['gioi_tinh']); ?></p>
@@ -564,9 +645,11 @@ $conn->close();
         function showApplicationModal() {
             document.getElementById('applicationModal').style.display = 'flex';
         }
+
         function closeApplicationModal() {
             document.getElementById('applicationModal').style.display = 'none';
         }
     </script>
 </body>
+
 </html>

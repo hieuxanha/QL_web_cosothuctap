@@ -59,6 +59,7 @@ $stmt_students->close();
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -74,6 +75,7 @@ $stmt_students->close();
             margin: 0 auto;
             padding: 20px 0;
         }
+
         .subnav {
             padding: 10px 8px;
             display: flex;
@@ -81,6 +83,7 @@ $stmt_students->close();
             background-color: white;
             border-bottom: 1px solid #ddd;
         }
+
         .subnav-title {
             display: flex;
             align-items: center;
@@ -88,11 +91,13 @@ $stmt_students->close();
             font-weight: bold;
             margin-right: 20px;
         }
+
         .subnav-title img {
             width: 24px;
             height: 24px;
             margin-right: 5px;
         }
+
         .youtube-icon {
             background-color: red;
             color: white;
@@ -101,10 +106,12 @@ $stmt_students->close();
             font-size: 12px;
             margin-left: 10px;
         }
+
         .button-group {
             margin-left: auto;
             display: flex;
         }
+
         .btn {
             background-color: #0078d4;
             color: white;
@@ -114,38 +121,46 @@ $stmt_students->close();
             margin-left: 5px;
             cursor: pointer;
         }
+
         .filter-section {
             padding: 15px 8px;
             background-color: white;
         }
+
         .filter-title {
             font-weight: bold;
             margin-bottom: 15px;
         }
+
         .filter-row {
             display: flex;
             margin-bottom: 10px;
         }
+
         .filter-item {
             display: flex;
             align-items: center;
             margin-right: 15px;
         }
+
         .filter-label {
             font-weight: bold;
             margin-right: 10px;
         }
+
         .filter-select {
             padding: 5px;
             border: 1px solid #ddd;
             border-radius: 4px;
             min-width: 150px;
         }
+
         .data-table {
             width: 100%;
             border-collapse: collapse;
             background-color: white;
         }
+
         .data-table th {
             background-color: #0078d4;
             color: white;
@@ -153,42 +168,51 @@ $stmt_students->close();
             padding: 10px;
             font-weight: normal;
         }
+
         .data-table td {
             padding: 8px 10px;
             border-bottom: 1px solid #ddd;
         }
+
         .data-table tr:hover {
             background-color: #f0f0f0;
         }
+
         .action-icon {
             margin: 0 5px;
             cursor: pointer;
         }
+
         .center-text {
             text-align: center;
         }
+
         .account .dropdown {
             position: relative;
             display: inline-block;
         }
+
         .account .user-name {
             cursor: pointer;
             font-weight: 500;
             color: #333;
         }
+
         .account .dropdown-content {
             display: none;
             position: absolute;
             right: 0;
             background: #fff;
             min-width: 120px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             border-radius: 4px;
             z-index: 1;
         }
+
         .account .dropdown:hover .dropdown-content {
             display: block;
         }
+
         .account .dropdown-content a {
             color: #333;
             padding: 10px;
@@ -196,11 +220,13 @@ $stmt_students->close();
             display: block;
             font-size: 14px;
         }
+
         .account .dropdown-content a:hover {
             background: #f4f4f4;
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar" id="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -210,13 +236,12 @@ $stmt_students->close();
         <div class="menu">
             <hr />
             <ul>
-                <h2>Quản lý</h2>
-                <li><i class="fa-brands fa-windows"></i><a href="./ui_giangvien.php">giangv vien</a></li>
-          
-                <li><i class="fa-brands fa-windows"></i><a href="./Danh sách sinh viên.php">Danh sách sinh viên</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Quản lý ds tts tại công ty</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Theo dõi và đánh giá qtrinh tt của tts</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Xác nhận ht thực tập cho tts</a></li>
+
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_giangvien.php">Trang chủ giảng viên</a></li>
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_danhsach_sinhvien.php">Danh sách sinh viên</a></li>
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_danhsach_thuctap.php">Danh Sách Sinh Viên Đang Thực Tập</a></li>
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_theo_doi_thuc_tap.php">Theo dõi và đánh giá qtrinh tt của tts</a></li>
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_completed_internships.php">Xác nhận hoàn thành thực tập</a></li>
             </ul>
         </div>
     </div>
@@ -234,8 +259,7 @@ $stmt_students->close();
                     stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    viewBox="0 0 24 24"
-                >
+                    viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
@@ -326,4 +350,5 @@ $stmt_students->close();
         }
     </script>
 </body>
+
 </html>

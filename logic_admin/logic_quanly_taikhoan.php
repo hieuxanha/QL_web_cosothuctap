@@ -1,121 +1,202 @@
 <?php
-session_start();
-require_once '../db.php'; // Kết nối CSDL
-
 header('Content-Type: application/json');
 
-// Hàm lấy danh sách tất cả tài khoản
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'get_users') {
-    $users = [];
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-    // Lấy danh sách sinh viên
-    $sql_sinh_vien = "SELECT stt_sv AS id, ho_ten, email, role FROM sinh_vien";
-    $result_sinh_vien = $conn->query($sql_sinh_vien);
-    while ($row = $result_sinh_vien->fetch_assoc()) {
-        $users[] = [
-            'id' => $row['id'],
-            'name' => $row['ho_ten'],
-            'email' => $row['email'],
-            'role' => $row['role'],
-            'table' => 'sinh_vien'
-        ];
-    }
+// Database configuration
+$servername = "localhost";
+$username = "root";
+$password = "";
+$database = "ql_cosothuctap"; // Adjust to your actual database name
 
-    // Lấy danh sách giảng viên
-    $sql_giang_vien = "SELECT stt_gv AS id, ho_ten, email, role FROM giang_vien";
-    $result_giang_vien = $conn->query($sql_giang_vien);
-    while ($row = $result_giang_vien->fetch_assoc()) {
-        $users[] = [
-            'id' => $row['id'],
-            'name' => $row['ho_ten'],
-            'email' => $row['email'],
-            'role' => $row['role'],
-            'table' => 'giang_vien'
-        ];
-    }
+// Create connection
+$conn = new mysqli($servername, $username, $password, $database);
 
-    // Lấy danh sách cơ sở thực tập
-    $sql_co_so = "SELECT stt_cstt AS id, ten_co_so AS ho_ten, email, role FROM co_so_thuc_tap";
-    $result_co_so = $conn->query($sql_co_so);
-    while ($row = $result_co_so->fetch_assoc()) {
-        $users[] = [
-            'id' => $row['id'],
-            'name' => $row['ho_ten'],
-            'email' => $row['email'],
-            'role' => $row['role'],
-            'table' => 'co_so_thuc_tap'
-        ];
-    }
-
-    echo json_encode(['success' => true, 'users' => $users]);
+// Check connection
+if ($conn->connect_error) {
+    error_log("Database connection failed: " . $conn->connect_error);
+    echo json_encode(['success' => false, 'error' => 'Database connection failed: ' . $conn->connect_error]);
     exit;
 }
 
-// Hàm cập nhật quyền
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_role') {
-    $id = $_POST['id'];
-    $new_role = $_POST['new_role'];
-    $table = $_POST['table'];
+// Get action from GET or POST
+$action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : '');
 
-    // Xác định bảng và cột ID tương ứng
-    $id_column = '';
-    if ($table === 'sinh_vien') {
-        $id_column = 'stt_sv';
-    } elseif ($table === 'giang_vien') {
-        $id_column = 'stt_gv';
-    } elseif ($table === 'co_so_thuc_tap') {
-        $id_column = 'stt_cstt';
-    }
+error_log("Action received: $action"); // Debug: Log the action
 
-    // Kiểm tra quyền hợp lệ
-    if (!in_array($new_role, ['sinh_vien', 'giang_vien', 'co_so_thuc_tap'])) {
-        echo json_encode(['success' => false, 'error' => 'Quyền không hợp lệ!']);
-        exit;
-    }
+switch ($action) {
+    case 'get_users':
+    case 'search_users':
+        $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+        $users = [];
 
-    // Cập nhật quyền trong CSDL
-    $sql = "UPDATE $table SET role = ? WHERE $id_column = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $new_role, $id);
+        // Query admin (use email as name)
+        $query = "SELECT id, email AS name, email, role, 'admin' AS `table` FROM admin";
+        if ($action === 'search_users' && $keyword) {
+            $query .= " WHERE email LIKE ?";
+        }
+        $stmt = $conn->prepare($query);
+        if ($action === 'search_users' && $keyword) {
+            $searchTerm = "%$keyword%";
+            $stmt->bind_param("s", $searchTerm);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+        $stmt->close();
 
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Cập nhật quyền thành công!']);
-    } else {
-        echo json_encode(['success' => false, 'error' => 'Lỗi khi cập nhật quyền: ' . $stmt->error]);
-    }
-    $stmt->close();
-    exit;
+        // Query giang_vien
+        $query = "SELECT stt_gv AS id, ho_ten AS name, email, role, 'giang_vien' AS `table` FROM giang_vien";
+        if ($action === 'search_users' && $keyword) {
+            $query .= " WHERE ho_ten LIKE ?";
+        }
+        $stmt = $conn->prepare($query);
+        if ($action === 'search_users' && $keyword) {
+            $stmt->bind_param("s", $searchTerm);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+        $stmt->close();
+
+        // Query sinh_vien
+        $query = "SELECT stt_sv AS id, ho_ten AS name, email, role, 'sinh_vien' AS `table` FROM sinh_vien";
+        if ($action === 'search_users' && $keyword) {
+            $query .= " WHERE ho_ten LIKE ?";
+        }
+        $stmt = $conn->prepare($query);
+        if ($action === 'search_users' && $keyword) {
+            $stmt->bind_param("s", $searchTerm);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+        $stmt->close();
+
+        // Query co_so_thuc_tap
+        $query = "SELECT stt_cstt AS id, ten_co_so AS name, email, role, 'co_so_thuc_tap' AS `table` FROM co_so_thuc_tap";
+        if ($action === 'search_users' && $keyword) {
+            $query .= " WHERE ten_co_so LIKE ?";
+        }
+        $stmt = $conn->prepare($query);
+        if ($action === 'search_users' && $keyword) {
+            $stmt->bind_param("s", $searchTerm);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+        $stmt->close();
+
+        error_log("Users fetched: " . json_encode($users)); // Debug: Log the users
+        echo json_encode(['success' => true, 'users' => $users]);
+        break;
+
+    case 'update_role':
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $new_role = isset($_POST['new_role']) ? trim($_POST['new_role']) : '';
+        $current_table = isset($_POST['table']) ? trim($_POST['table']) : '';
+
+        $valid_tables = ['admin', 'sinh_vien', 'giang_vien', 'co_so_thuc_tap'];
+        if (!$id || !in_array($new_role, $valid_tables) || !in_array($current_table, $valid_tables)) {
+            echo json_encode(['success' => false, 'error' => 'Invalid parameters']);
+            exit;
+        }
+
+        if ($current_table === $new_role) {
+            echo json_encode(['success' => true, 'message' => 'No change in role']);
+            exit;
+        }
+
+        // Map table to ID and name fields
+        $table_config = [
+            'admin' => ['id_field' => 'id', 'name_field' => 'email'],
+            'giang_vien' => ['id_field' => 'stt_gv', 'name_field' => 'ho_ten'],
+            'sinh_vien' => ['id_field' => 'stt_sv', 'name_field' => 'ho_ten'],
+            'co_so_thuc_tap' => ['id_field' => 'stt_cstt', 'name_field' => 'ten_co_so']
+        ];
+
+        // Fetch user data
+        $id_field = $table_config[$current_table]['id_field'];
+        $name_field = $table_config[$current_table]['name_field'];
+        $query = "SELECT $name_field AS name, email, password FROM $current_table WHERE $id_field = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($user = $result->fetch_assoc()) {
+            // Insert into new table
+            $new_id_field = $table_config[$new_role]['id_field'];
+            $new_name_field = $table_config[$new_role]['name_field'];
+            if ($new_role === 'admin') {
+                $query = "INSERT INTO $new_role (email, password, role) VALUES (?, ?, 'admin')";
+                $stmt = $conn->prepare($query);
+                $stmt->bind_param("ss", $user['email'], $user['password']);
+            } else {
+                $query = "INSERT INTO $new_role ($new_name_field, email, password, role) VALUES (?, ?, ?, ?)";
+                $stmt = $conn->prepare($query);
+                $role_value = $new_role;
+                $stmt->bind_param("ssss", $user['name'], $user['email'], $user['password'], $role_value);
+            }
+            if ($stmt->execute()) {
+                // Delete from old table
+                $stmt = $conn->prepare("DELETE FROM $current_table WHERE $id_field = ?");
+                $stmt->bind_param("i", $id);
+                $stmt->execute();
+                echo json_encode(['success' => true, 'message' => 'Role updated successfully']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Failed to update role']);
+            }
+            $stmt->close();
+        } else {
+            echo json_encode(['success' => false, 'error' => 'User not found']);
+        }
+        break;
+
+    case 'delete_user':
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $table = isset($_POST['table']) ? trim($_POST['table']) : '';
+
+        $valid_tables = ['admin', 'sinh_vien', 'giang_vien', 'co_so_thuc_tap'];
+        if (!$id || !in_array($table, $valid_tables)) {
+            echo json_encode(['success' => false, 'error' => 'Invalid parameters']);
+            exit;
+        }
+
+        $table_config = [
+            'admin' => 'id',
+            'giang_vien' => 'stt_gv',
+            'sinh_vien' => 'stt_sv',
+            'co_so_thuc_tap' => 'stt_cstt'
+        ];
+        $id_field = $table_config[$table];
+        $stmt = $conn->prepare("DELETE FROM $table WHERE $id_field = ?");
+        $stmt->bind_param("i", $id);
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                echo json_encode(['success' => true, 'message' => 'User deleted successfully']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'User not found']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to delete user']);
+        }
+        $stmt->close();
+        break;
+
+    default:
+        echo json_encode(['success' => false, 'error' => 'Invalid action']);
+        break;
 }
 
-// Hàm xóa tài khoản
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_user') {
-    $id = $_POST['id'];
-    $table = $_POST['table'];
-
-    // Xác định bảng và cột ID tương ứng
-    $id_column = '';
-    if ($table === 'sinh_vien') {
-        $id_column = 'stt_sv';
-    } elseif ($table === 'giang_vien') {
-        $id_column = 'stt_gv';
-    } elseif ($table === 'co_so_thuc_tap') {
-        $id_column = 'stt_cstt';
-    }
-
-    // Xóa tài khoản từ CSDL
-    $sql = "DELETE FROM $table WHERE $id_column = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Xóa tài khoản thành công!']);
-    } else {
-        echo json_encode(['success' => false, 'error' => 'Lỗi khi xóa tài khoản: ' . $stmt->error]);
-    }
-    $stmt->close();
-    exit;
-}
-
-echo json_encode(['success' => false, 'error' => 'Yêu cầu không hợp lệ!']);
 $conn->close();
-?>

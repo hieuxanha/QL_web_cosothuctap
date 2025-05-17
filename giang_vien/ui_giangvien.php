@@ -63,6 +63,7 @@ if ($result_departments && $result_departments->num_rows > 0) {
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -77,24 +78,28 @@ if ($result_departments && $result_departments->num_rows > 0) {
             position: relative;
             display: inline-block;
         }
+
         .account .user-name {
             cursor: pointer;
             font-weight: 500;
             color: #333;
         }
+
         .account .dropdown-content {
             display: none;
             position: absolute;
             right: 0;
             background: #fff;
             min-width: 120px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             border-radius: 4px;
             z-index: 1;
         }
+
         .account .dropdown:hover .dropdown-content {
             display: block;
         }
+
         .account .dropdown-content a {
             color: #333;
             padding: 10px;
@@ -102,15 +107,18 @@ if ($result_departments && $result_departments->num_rows > 0) {
             display: block;
             font-size: 14px;
         }
+
         .account .dropdown-content a:hover {
             background: #f4f4f4;
         }
+
         .dashboard-content .card p {
             margin: 10px 0;
             font-size: 14px;
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar" id="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -120,14 +128,11 @@ if ($result_departments && $result_departments->num_rows > 0) {
         <div class="menu">
             <hr />
             <ul>
-                <h2>Quản lý</h2>
-                <li><i class="fa-brands fa-windows"></i><a href="./ui_giangvien.php">giangv vien</a></li>
-        
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_giangvien.php">Trang chủ giảng viên</a></li>
                 <li><i class="fa-brands fa-windows"></i><a href="./ui_danhsach_sinhvien.php">Danh sách sinh viên</a></li>
-
-                <li><i class="fa-brands fa-windows"></i><a href="">Quản lý ds tts tại công ty</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Theo dõi và đánh giá qtrinh tt của tts</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="">Xác nhận ht thực tập cho tts</a></li>
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_danhsach_thuctap.php">Danh Sách Sinh Viên Đang Thực Tập</a></li>
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_theo_doi_thuc_tap.php">Theo dõi và đánh giá qtrinh tt của tts</a></li>
+                <li><i class="fa-brands fa-windows"></i><a href="./ui_completed_internships.php">Xác nhận hoàn thành thực tập</a></li>
             </ul>
         </div>
     </div>
@@ -145,8 +150,7 @@ if ($result_departments && $result_departments->num_rows > 0) {
                     stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    viewBox="0 0 24 24"
-                >
+                    viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
@@ -161,7 +165,6 @@ if ($result_departments && $result_departments->num_rows > 0) {
                     echo '</div>';
                     echo '</div>';
                 } else {
-                   
                 }
                 ?>
             </div>
@@ -182,6 +185,13 @@ if ($result_departments && $result_departments->num_rows > 0) {
                 <canvas id="lecturersChart"></canvas>
             </div>
 
+
+            <div class="card">
+                <h3>Khoa: <?php echo $department_count; ?></h3>
+                <p>Có <?php echo $department_count; ?> khoa và bộ môn trực thuộc</p>
+                <canvas id="departmentsChart"></canvas>
+            </div>
+
             <div class="card">
                 <h3>Sinh viên: <?php echo $total_students; ?></h3>
                 <p>
@@ -194,12 +204,6 @@ if ($result_departments && $result_departments->num_rows > 0) {
                     ?>
                 </p>
                 <canvas id="studentsChart"></canvas>
-            </div>
-
-            <div class="card">
-                <h3>Khoa: <?php echo $department_count; ?></h3>
-                <p>Có <?php echo $department_count; ?> khoa và bộ môn trực thuộc</p>
-                <canvas id="departmentsChart"></canvas>
             </div>
 
             <div class="card" style="grid-column: span 2">
@@ -246,7 +250,9 @@ if ($result_departments && $result_departments->num_rows > 0) {
             options: {
                 responsive: true,
                 scales: {
-                    y: { beginAtZero: true },
+                    y: {
+                        beginAtZero: true
+                    },
                 },
             },
         });
@@ -258,10 +264,15 @@ if ($result_departments && $result_departments->num_rows > 0) {
                 labels: <?php echo json_encode($department_labels); ?>,
                 datasets: [{
                     data: <?php echo json_encode($department_data); ?>,
-                    backgroundColor: ["#1abc9c", "#9b59b6", "#e67e22", "#34495e", "#3498db", "#e74c3c"],
+                    backgroundColor: [
+                        "#FF6F61", "#6B7280", "#4A90E2", "#50C878", "#F7B32B",
+                        "#A3BFFA", "#FF9999", "#2E8B57", "#D4A017", "#4682B4",
+                        "#FF7F50", "#9ACD32", "#CD5C5C", "#87CEEB", "#FFA07A"
+                    ],
                 }],
             },
         });
     </script>
 </body>
+
 </html>

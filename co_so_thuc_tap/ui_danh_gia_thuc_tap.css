@@ -36,7 +36,7 @@ body {
 
 .sidebar .icons .fa-solid {
     margin: 20px;
-    font-size: 24px;
+
 }
 
 .sidebar .menu h2 {
@@ -127,9 +127,9 @@ body {
     padding: 5px 10px;
     width: 350px;
     /* Hoặc điều chỉnh theo ý muốn */
-  }
-  
-  .search-bar input {
+}
+
+.search-bar input {
     flex: 1;
     /* Giúp input chiếm phần lớn diện tích */
     border: none;
@@ -137,14 +137,14 @@ body {
     padding: 5px;
     font-size: 16px;
     width: 50%;
-  }
-  
-  .search-bar svg {
+}
+
+.search-bar svg {
     margin-left: 8px;
     cursor: pointer;
     color: #888;
-  }
-  
+}
+
 
 .search-bar svg {
     margin-left: 8px;
@@ -334,12 +334,15 @@ label {
     .sidebar {
         width: 80px;
     }
+
     .content {
         margin-left: 100px;
     }
+
     .search-bar {
         width: 100%;
     }
+
     .container {
         padding: 10px;
     }
