@@ -53,6 +53,22 @@ if (isset($_SESSION['name'])) {
     $stmt->close();
 }
 
+// Truy vấn 3 tin tuyển dụng ngẫu nhiên (không bao gồm tin hiện tại)
+$sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.dia_chi, ct.ten_cong_ty, ct.logo
+        FROM tuyen_dung td
+        JOIN cong_ty ct ON td.stt_cty = ct.stt_cty
+        WHERE td.trang_thai = 'Đã duyệt' AND td.ma_tuyen_dung != ?
+        ORDER BY RAND() LIMIT 3";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $ma_tuyen_dung);
+$stmt->execute();
+$result = $stmt->get_result();
+$random_jobs = [];
+while ($row = $result->fetch_assoc()) {
+    $random_jobs[] = $row;
+}
+$stmt->close();
+
 // Xử lý ứng tuyển
 $application_error = $application_success = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_application'])) {
@@ -67,13 +83,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_application']))
         $thu_gioi_thieu = trim($_POST['thu_gioi_thieu'] ?? '');
         $cv_file = $_FILES['cv_file'] ?? null;
 
-        // Kiểm tra thông tin bắt buộc
         if (empty($ho_ten) || empty($email) || empty($so_dien_thoai)) {
             $application_error = "Vui lòng nhập đầy đủ thông tin bắt buộc!";
         } elseif (!$cv_file || $cv_file['size'] == 0) {
             $application_error = "Vui lòng tải lên CV!";
         } else {
-            // Lấy stt_sv từ ma_sinh_vien
             $ma_sinh_vien = $_SESSION['ma_sinh_vien'];
             $sql_sv = "SELECT stt_sv FROM sinh_vien WHERE ma_sinh_vien = ?";
             $stmt_sv = $conn->prepare($sql_sv);
@@ -87,17 +101,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_application']))
                 $sinh_vien_data = $result_sv->fetch_assoc();
                 $stt_sv = $sinh_vien_data['stt_sv'];
 
-                // Xử lý upload file CV
                 $allowed_types = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
                 $max_size = 5 * 1024 * 1024; // 5MB
                 $upload_dir = '../Uploads/cv/';
 
-                // Tạo thư mục nếu chưa tồn tại
                 if (!file_exists($upload_dir)) {
                     mkdir($upload_dir, 0777, true);
                 }
 
-                // Chuẩn hóa tên file
                 $cv_name = time() . '_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $cv_file['name']);
                 $cv_path = $upload_dir . $cv_name;
 
@@ -108,7 +119,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_application']))
                 } elseif (!move_uploaded_file($cv_file['tmp_name'], $cv_path)) {
                     $application_error = "Lỗi khi tải lên CV! Kiểm tra quyền thư mục uploads/cv/.";
                 } else {
-                    // Lưu thông tin ứng tuyển vào database
                     $sql = "INSERT INTO ung_tuyen (ma_tuyen_dung, stt_sv, ho_ten, email, so_dien_thoai, thu_gioi_thieu, cv_path, ngay_ung_tuyen) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
                     $stmt = $conn->prepare($sql);
@@ -140,283 +150,11 @@ $conn->close();
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="./chi_tiet.css">
-    <style>
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 800px;
-            padding: 20px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 24px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #888;
-        }
-
-        .application-form {
-            padding: 10px;
-        }
-
-        .header h1 {
-            color: #4CAF50;
-            font-size: 22px;
-            margin-bottom: 15px;
-        }
-
-        .upload-section h2 {
-            display: flex;
-            align-items: center;
-            font-size: 18px;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .upload-section h2 .icon {
-            background: #4CAF50;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-        }
-
-        .upload-container {
-            border: 1px dashed #ccc;
-            border-radius: 4px;
-            padding: 15px;
-        }
-
-        .upload-option {
-            display: flex;
-            align-items: center;
-        }
-
-        .radio-circle {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #4CAF50;
-            border-radius: 50%;
-            margin-right: 15px;
-            position: relative;
-        }
-
-        .radio-circle.selected:after {
-            content: "";
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 10px;
-            height: 10px;
-            background: #4CAF50;
-            border-radius: 50%;
-        }
-
-        .upload-area {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 4px;
-        }
-
-        .upload-icon {
-            font-size: 30px;
-            color: #888;
-            margin-bottom: 5px;
-        }
-
-        .file-info {
-            color: #888;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .info-section {
-            margin-top: 20px;
-        }
-
-        .info-header {
-            color: #4CAF50;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .required-notice {
-            color: #f44336;
-            float: right;
-            font-size: 12px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .form-group label .required {
-            color: #f44336;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 41px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        .intro-section {
-            margin-top: 20px;
-        }
-
-        .intro-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .intro-icon {
-            color: #4CAF50;
-            font-size: 24px;
-            margin-right: 10px;
-        }
-
-        .intro-text {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .intro-textarea {
-            width: 100%;
-            min-height: 100px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
-            font-size: 14px;
-        }
-
-        .warning-section {
-            margin-top: 20px;
-            background: #fff9f9;
-            border: 1px solid #ffebee;
-            padding: 10px;
-            border-radius: 4px;
-        }
-
-        .warning-header {
-            display: flex;
-            align-items: center;
-            color: #f44336;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .warning-icon {
-            margin-right: 5px;
-        }
-
-        .warning-link {
-            color: #4CAF50;
-            text-decoration: none;
-        }
-
-        .button-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        .cancel-btn {
-            padding: 10px 20px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .submit-btn {
-            padding: 10px 20px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            flex-grow: 1;
-            margin-left: 10px;
-        }
-
-        .message {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
-
-        .message.success {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .message.error {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .job-detail {
-            margin-bottom: 10px;
-        }
-
-        .job-detail p {
-            margin: 5px 0;
-            color: #333;
-        }
-
-        .job-detail strong {
-            color: #4CAF50;
-        }
-    </style>
+    <link rel="stylesheet" href="../sinh_vien/footer.css">
 </head>
+<style>
+
+</style>
 
 <body>
     <div class="header">
@@ -425,7 +163,7 @@ $conn->close();
                 <img alt="TopCV Logo" height="40" src="../img/logo.png" width="100%" />
             </div>
             <div class="ten_trg">
-                <h3>ĐẠI HỌC TRƯỜNG NGUYÊN MÔI TRƯỜNG HÀ NỘI</h3>
+                <h3>ĐẠI HỌC TÀI NGUYÊN & MÔI TRƯỜNG HÀ NỘI</h3>
                 <p>Hanoi University of Natural Resources and Environment</p>
             </div>
         </div>
@@ -442,8 +180,7 @@ $conn->close();
                 }
                 ?>
             </div>
-            <a href="#">Việc làm</a>
-            <a href="#">Hồ sơ & CV</a>
+            <a href="./giaodien_sinhvien.php">Trang chủ</a>
             <?php
             if (isset($_SESSION['name'])) {
                 echo '<a href="./profile.php"><i class="fa-solid fa-user"></i></a>';
@@ -456,8 +193,40 @@ $conn->close();
 
     <div class="timkiem-job">
         <div class="search-bar">
-            <input placeholder="Khoa ..." type="text" />
-            <button>Tìm kiếm</button>
+            <input id="searchInput" placeholder="Tìm theo tiêu đề, công ty..." type="text" />
+            <select id="locationFilter">
+                <option value="">Địa điểm</option>
+                <option value="Ba Đình">Ba Đình</option>
+                <option value="Hoàn Kiếm">Hoàn Kiếm</option>
+                <option value="Tây Hồ">Tây Hồ</option>
+                <option value="Cầu Giấy">Cầu Giấy</option>
+                <option value="Đống Đa">Đống Đa</option>
+                <option value="Hai Bà Trưng">Hai Bà Trưng</option>
+                <option value="Hoàng Mai">Hoàng Mai</option>
+                <option value="Long Biên">Long Biên</option>
+                <option value="Nam Từ Liêm">Nam Từ Liêm</option>
+                <option value="Bắc Từ Liêm">Bắc Từ Liêm</option>
+                <option value="Thanh Xuân">Thanh Xuân</option>
+                <option value="Sơn Tây">Sơn Tây</option>
+                <option value="Ba Vì">Ba Vì</option>
+                <option value="Chương Mỹ">Chương Mỹ</option>
+                <option value="Đan Phượng">Đan Phượng</option>
+                <option value="Đông Anh">Đông Anh</option>
+                <option value="Gia Lâm">Gia Lâm</option>
+                <option value="Hoài Đức">Hoài Đức</option>
+                <option value="Mỹ Đức">Mỹ Đức</option>
+                <option value="Phú Xuyên">Phú Xuyên</option>
+                <option value="Quốc Oai">Quốc Oai</option>
+                <option value="Thạch Thất">Thạch Thất</option>
+                <option value="Thái Nguyên">Thái Nguyên</option>
+                <option value="Thường Tín">Thường Tín</option>
+                <option value="Ứng Hòa">Ứng Hòa</option>
+                <option value="Phúc Thọ">Phúc Thọ</option>
+                <option value="Hà Nội (ngoại thành)">Hà Nội (ngoại thành)</option>
+            </select>
+            <button onclick="searchJobs()">Tìm kiếm</button>
+            <span id="searchLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
+            <div id="searchResults"></div>
         </div>
     </div>
 
@@ -507,7 +276,6 @@ $conn->close();
         </div>
     </div>
 
-    <!-- Modal ứng tuyển -->
     <div id="applicationModal" class="modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeApplicationModal()">×</button>
@@ -558,20 +326,20 @@ $conn->close();
                         </div>
                     </div>
 
-                    <div class="intro-section">
+                    <!-- <div class="intro-section">
                         <div class="intro-header">
                             <span class="intro-icon">🍃</span>
                             <h2>Thư giới thiệu</h2>
                         </div>
                         <div class="intro-text">Giới thiệu ngắn gọn để gây ấn tượng với nhà tuyển dụng.</div>
                         <textarea name="thu_gioi_thieu" class="intro-textarea" placeholder="Viết giới thiệu ngắn gọn về bản thân (điểm mạnh, kinh nghiệm) và lý do ứng tuyển."></textarea>
-                    </div>
+                    </div> -->
 
                     <div class="warning-section">
                         <div class="warning-header">
                             <span class="warning-icon">⚠️</span> Lưu ý
                         </div>
-                        <p>Nghiên cứu kỹ thông tin công ty trước khi ứng tuyển. Báo cáo vấn đề qua <a href="mailto:hotro@topcv.vn" class="warning-link">hotro@topcv.vn</a>.</p>
+                        <p>Nghiên cứu kỹ thông tin công ty trước khi ứng tuyển. </p>
                     </div>
 
                     <div class="button-row">
@@ -583,6 +351,25 @@ $conn->close();
         </div>
     </div>
 
+    <section class="random-jobs-section">
+        <h2>Việc làm nổi bật</h2>
+        <div class="random-jobs-container">
+            <?php if (empty($random_jobs)): ?>
+                <p>Không có tin tuyển dụng nào khác để hiển thị.</p>
+            <?php else: ?>
+                <?php foreach ($random_jobs as $random_job): ?>
+                    <div class="job-card">
+                        <img src="<?php echo !empty($random_job['logo']) ? '../sinh_vien/uploads/' . htmlspecialchars($random_job['logo']) : '../sinh_vien/uploads/logo.png'; ?>" alt="Company Logo" />
+                        <h3><?php echo htmlspecialchars($random_job['tieu_de']); ?></h3>
+                        <p><strong>Công ty:</strong> <?php echo htmlspecialchars($random_job['ten_cong_ty']); ?></p>
+                        <p><strong>Địa điểm:</strong> <?php echo htmlspecialchars($random_job['dia_chi']); ?></p>
+                        <a href="chi_tiet.php?ma_tuyen_dung=<?php echo htmlspecialchars($random_job['ma_tuyen_dung']); ?>">Xem chi tiết</a>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </section>
+
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-section">
@@ -590,8 +377,8 @@ $conn->close();
                 <p>Tiếp lợi thế - Nối thành công</p>
                 <img src="../img/google_for_startup.webp" alt="Google for Startups" />
                 <p>Liên hệ</p>
-                <p>Hotline: <a href="tel:02466805958">(024) 6680 5958</a> (Giờ hành chính)</p>
-                <p>Email: <a href="mailto:hotro@topcv.vn">hotro@topcv.vn</a></p>
+                <p>Hotline: <a href="tel:02466805958"> 0902.130.130</a> (Giờ hành chính)</p>
+                <p>Email: <a href="mailto:hotro@topcv.vn">DHTNMT@hunre.edu.vn</a></p>
                 <p>Ứng dụng tải xuống</p>
                 <div class="app-links">
                     <img src="../img/app_store.webp" alt="App Store" />
@@ -625,7 +412,7 @@ $conn->close();
             <div class="footer-section">
                 <h4>Khám phá</h4>
                 <ul>
-                    <li><a href="#">Ứng dụng di động TopCV ■</a></li>
+                    <li><a href="#">Ứng dụng di động TopCV</a></li>
                     <li><a href="#">Tính lương Gross - Net</a></li>
                     <li><a href="#">Tính lãi suất kép</a></li>
                 </ul>
@@ -649,6 +436,53 @@ $conn->close();
         function closeApplicationModal() {
             document.getElementById('applicationModal').style.display = 'none';
         }
+
+        function searchJobs() {
+            const keyword = document.getElementById('searchInput').value;
+            const location = document.getElementById('locationFilter').value;
+            const khoa = document.getElementById('searchInput').value; // Use same input for khoa
+            const resultsDiv = document.getElementById('searchResults');
+            const loadingSpan = document.getElementById('searchLoading');
+
+            resultsDiv.innerHTML = '';
+            resultsDiv.style.display = 'none';
+            loadingSpan.style.display = 'inline-block';
+
+            fetch(`../logic_sinhvien/logic_search_jobs.php?action=search&khoa=${encodeURIComponent(khoa)}&keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingSpan.style.display = 'none';
+                    if (data.success && data.data.length > 0) {
+                        resultsDiv.style.display = 'block';
+                        data.data.forEach(job => {
+                            const jobDiv = document.createElement('div');
+                            jobDiv.className = 'search-result-item';
+                            jobDiv.innerHTML = `
+                            <img src="${job.logo}" alt="Company Logo" />
+                            <div>
+                                <h4><a href="chi_tiet.php?ma_tuyen_dung=${job.ma_tuyen_dung}">${job.tieu_de}</a></h4>
+                                <p>${job.ten_cong_ty} - ${job.dia_chi}</p>
+                            </div>
+                        `;
+                            resultsDiv.appendChild(jobDiv);
+                        });
+                    } else {
+                        resultsDiv.style.display = 'block';
+                        resultsDiv.innerHTML = '<p>Không tìm thấy công việc phù hợp.</p>';
+                    }
+                })
+                .catch(error => {
+                    loadingSpan.style.display = 'none';
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.innerHTML = '<p>Lỗi khi tìm kiếm: ' + error.message + '</p>';
+                });
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchJobs();
+            }
+        });
     </script>
 </body>
 

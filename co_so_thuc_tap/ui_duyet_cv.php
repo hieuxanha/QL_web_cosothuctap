@@ -2,6 +2,25 @@
 session_start();
 require_once '../db.php';
 
+// Mapping array for khoa
+$khoa_display_names = [
+    'kinh_te' => 'Kinh tế',
+    'moi_truong' => 'Môi trường',
+    'quan_ly_dat_dai' => 'Quản lý đất đai',
+    'khi_tuong_thuy_van' => 'Khí tượng thủy văn',
+    'trac_dia_ban_do' => 'Trắc địa bản đồ',
+    'dia_chat' => 'Địa chất',
+    'tai_nguyen_nuoc' => 'Tài nguyên nước',
+    'cntt' => 'Công nghệ thông tin',
+    'ly_luan_chinh_tri' => 'Lý luận chính trị',
+    'bien_hai_dao' => 'Biển - Hải đảo',
+    'khoa_hoc_dai_cuong' => 'Khoa học đại cương',
+    'the_chat_quoc_phong' => 'Thể chất quốc phòng',
+    'bo_mon_luat' => 'Bộ môn Luật',
+    'bien_doi_khi_hau' => 'Biến đổi khí hậu',
+    'ngoai_ngu' => 'Ngoại ngữ'
+];
+
 // Lấy bộ lọc và từ khóa tìm kiếm từ GET
 $khoa_filter = isset($_GET['khoa']) ? $_GET['khoa'] : 'Tất cả';
 $lop_filter = isset($_GET['lop']) ? $_GET['lop'] : 'Tất cả';
@@ -48,8 +67,8 @@ $sinh_vien_list = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 // Lấy danh sách khoa và lớp để điền vào bộ lọc
-$khoa_list = $conn->query("SELECT DISTINCT khoa FROM sinh_vien WHERE khoa IS NOT NULL")->fetch_all(MYSQLI_ASSOC);
-$lop_list = $conn->query("SELECT DISTINCT lop FROM sinh_vien WHERE lop IS NOT NULL")->fetch_all(MYSQLI_ASSOC);
+$khoa_list = $conn->query("SELECT DISTINCT khoa FROM sinh_vien WHERE khoa IS NOT NULL ORDER BY khoa")->fetch_all(MYSQLI_ASSOC);
+$lop_list = $conn->query("SELECT DISTINCT lop FROM sinh_vien WHERE lop IS NOT NULL ORDER BY lop")->fetch_all(MYSQLI_ASSOC);
 
 $conn->close();
 ?>
@@ -392,9 +411,17 @@ $conn->close();
                 </svg>
                 <div id="searchResults"></div>
             </div>
-            <div class="profile">
-                <span><?php echo htmlspecialchars($_SESSION['name'] ?? 'Tên người dùng'); ?></span>
-                <img src="profile.jpg" alt="Ảnh đại diện" />
+            <div class="account">
+                <?php
+                if (isset($_SESSION['name'])) {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+                ?>
             </div>
         </div>
 
@@ -416,10 +443,7 @@ $conn->close();
                     Danh sách tất cả ứng tuyển
                     <span class="youtube-icon">▶</span>
                 </div>
-                <div class="button-group">
-                    <button class="btn">Xuất Excel</button>
-                    <button class="btn">Cấu hình cột hiển thị</button>
-                </div>
+
             </div>
 
             <div class="filter-section">
@@ -431,7 +455,7 @@ $conn->close();
                             <option value="Tất cả" <?php echo $khoa_filter === 'Tất cả' ? 'selected' : ''; ?>>Tất cả</option>
                             <?php foreach ($khoa_list as $khoa): ?>
                                 <option value="<?php echo htmlspecialchars($khoa['khoa']); ?>" <?php echo $khoa_filter === $khoa['khoa'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($khoa['khoa']); ?>
+                                    <?php echo htmlspecialchars($khoa_display_names[$khoa['khoa']] ?? $khoa['khoa']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -455,7 +479,7 @@ $conn->close();
                 <thead>
                     <tr>
                         <th style="width: 50px;">STT</th>
-                        <th style="width: 60px;">Sửa</th>
+
                         <th style="width: 150px;">Mã sinh viên</th>
                         <th style="width: 200px;">Họ tên</th>
                         <th style="width: 200px;">Email</th>
@@ -479,14 +503,12 @@ $conn->close();
                             <?php $trang_thai = trim($sv['trang_thai']) ?: 'Chờ duyệt'; ?>
                             <tr data-stt-sv="<?php echo htmlspecialchars($sv['stt_sv']); ?>" data-ma-tuyen-dung="<?php echo htmlspecialchars($sv['ma_tuyen_dung']); ?>">
                                 <td class="center-text"><?php echo $index + 1; ?></td>
-                                <td class="center-text">
-                                    <a href="edit_sv.php?stt_sv=<?php echo htmlspecialchars($sv['stt_sv']); ?>" class="action-icon">✏️</a>
-                                </td>
+
                                 <td><?php echo htmlspecialchars($sv['ma_sinh_vien']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['ho_ten']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['email']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['lop']); ?></td>
-                                <td><?php echo htmlspecialchars($sv['khoa']); ?></td>
+                                <td><?php echo htmlspecialchars($khoa_display_names[$sv['khoa']] ?? $sv['khoa'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($sv['so_dien_thoai']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['ngay_ung_tuyen']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['tieu_de']); ?></td>
@@ -657,13 +679,14 @@ $conn->close();
                     .then(data => {
                         resultsContainer.innerHTML = "";
                         if (data.success && data.data.applications.length > 0) {
+                            const khoaDisplayNames = <?php echo json_encode($khoa_display_names); ?>;
                             const resultList = document.createElement("ul");
                             data.data.applications.slice(0, 10).forEach(app => {
                                 const listItem = document.createElement("li");
                                 listItem.innerHTML = `
                                     <div>
                                         <strong>${escapeHTML(app.ho_ten)}</strong> (${app.ma_sinh_vien})
-                                        <p style="margin: 0; font-size: 12px;">${escapeHTML(app.tieu_de)}</p>
+                                        <p style="margin: 0; font-size: 12px;">${escapeHTML(khoaDisplayNames[app.khoa] || app.khoa || 'N/A')} - ${escapeHTML(app.tieu_de)}</p>
                                     </div>
                                 `;
                                 listItem.addEventListener("click", () => {
@@ -697,11 +720,11 @@ $conn->close();
 
         function escapeHTML(str) {
             return str.replace(/[&<>"']/g, match => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
+                '&': '&',
+                '<': '<',
+                '>': '>',
+                '"': '"',
+                "'": "'"
             })[match]);
         }
 

@@ -207,6 +207,7 @@ body {
 .icons .fa-solid {
   margin: 20px;
 }
+
 .pending-list {
   width: 95%;
   margin: 20px auto;
@@ -227,7 +228,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #ddd;
@@ -266,7 +268,8 @@ button:hover {
 }
 
 
-.approve, .reject {
+.approve,
+.reject {
   padding: 5px 10px;
   margin-right: 5px;
   border: none;
@@ -279,11 +282,11 @@ button:hover {
   color: white;
 }
 
-    
+
 .dropdown {
   position: relative;
   display: inline-block;
-  
+
 }
 
 .user-name {
@@ -294,7 +297,8 @@ button:hover {
 }
 
 .dropdown-content {
-  display: none; /* Ẩn menu thả xuống mặc định */
+  display: none;
+  /* Ẩn menu thả xuống mặc định */
   position: absolute;
   background-color: #ffffff;
   min-width: 150px;
@@ -304,7 +308,7 @@ button:hover {
   padding: 8px;
   border-radius: 15px;
   top: 20px;
-  
+
 }
 
 .dropdown-content a {

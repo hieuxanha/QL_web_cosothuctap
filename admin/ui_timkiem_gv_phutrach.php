@@ -6,6 +6,25 @@ require '../db.php'; // Database connection
 $success_message = "";
 $error_message = "";
 
+// Define khoa_options array for full department names
+$khoa_options = [
+    'kinh_te' => 'Kinh tế',
+    'moi_truong' => 'Môi trường',
+    'quan_ly_dat_dai' => 'Quản lý đất đai',
+    'khi_tuong_thuy_van' => 'Khí tượng thủy văn',
+    'trac_dia_ban_do' => 'Trắc địa bản đồ',
+    'dia_chat' => 'Địa chất',
+    'tai_nguyen_nuoc' => 'Tài nguyên nước',
+    'cntt' => 'Công nghệ thông tin',
+    'ly_luan_chinh_tri' => 'Lý luận chính trị',
+    'bien_hai_dao' => 'Biển - Hải đảo',
+    'khoa_hoc_dai_cuong' => 'Khoa học đại cương',
+    'the_chat_quoc_phong' => 'Thể chất quốc phòng',
+    'bo_mon_luat' => 'Bộ môn Luật',
+    'bien_doi_khi_hau' => 'Biến đổi khí hậu',
+    'ngoai_ngu' => 'Ngoại ngữ'
+];
+
 // Fetch all departments (khoa)
 $departments = [];
 $sql_departments = "SELECT DISTINCT khoa FROM sinh_vien WHERE khoa IS NOT NULL ORDER BY khoa";
@@ -43,6 +62,7 @@ $sql_lecturers = "SELECT so_hieu_giang_vien, ho_ten, khoa FROM giang_vien ORDER 
 $result_lecturers = $conn->query($sql_lecturers);
 if ($result_lecturers && $result_lecturers->num_rows > 0) {
     while ($row = $result_lecturers->fetch_assoc()) {
+        $row['khoa'] = isset($khoa_options[$row['khoa']]) ? $khoa_options[$row['khoa']] : ($row['khoa'] ?? 'N/A');
         $lecturers[] = $row;
     }
 }
@@ -51,7 +71,7 @@ if ($result_lecturers && $result_lecturers->num_rows > 0) {
 $selected_lop = isset($_POST['lop']) ? trim($_POST['lop']) : '';
 $students = [];
 if (!empty($selected_khoa)) {
-    $sql_students = "SELECT ma_sinh_vien, ho_ten, email, so_dien_thoai, khoa, so_hieu FROM sinh_vien WHERE khoa = ?";
+    $sql_students = "SELECT ma_sinh_vien, ho_ten, email, so_dien_thoai, khoa, lop, so_hieu FROM sinh_vien WHERE khoa = ?";
     $params = [$selected_khoa];
     $types = "s";
     if (!empty($selected_lop)) {
@@ -65,6 +85,7 @@ if (!empty($selected_khoa)) {
     $result_students = $stmt->get_result();
     if ($result_students && $result_students->num_rows > 0) {
         while ($row = $result_students->fetch_assoc()) {
+            $row['khoa'] = isset($khoa_options[$row['khoa']]) ? $khoa_options[$row['khoa']] : ($row['khoa'] ?? 'N/A');
             $students[] = $row;
         }
     }
@@ -152,6 +173,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
+            margin-right: 10px;
         }
 
         .form-group button:hover {
@@ -289,14 +311,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
             <hr />
             <ul>
                 <h2>Quản lý</h2>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_admin.php">admin..</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanly_cty.php">Phê duyệt công ty</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Thông báo</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Bảo trì hệ thống</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Cơ sở</a></li>
+                <li><i class="fa-solid fa-chart-line"></i> <a href="ui_admin.php">Tổng quan</a></li>
+                <li><i class="fa-solid fa-users"></i> <a href="ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
+                <li><i class="fa-solid fa-building-circle-check"></i> <a href="ui_quanly_cty.php">Phê duyệt công ty</a></li>
+                <li><i class="fa-solid fa-file-circle-check"></i> <a href="ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
+                <li><i class="fa-solid fa-chalkboard-user"></i> <a href="ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
             </ul>
         </div>
     </div>
@@ -349,10 +368,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
                     <div class="form-group">
                         <label for="khoa">Chọn khoa</label>
                         <select name="khoa" id="khoa" required onchange="this.form.submit()">
-                            <option value="">-- Chọn khoa --</option>
-                            <?php foreach ($departments as $department): ?>
-                                <option value="<?php echo htmlspecialchars($department); ?>" <?php echo $selected_khoa === $department ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($department); ?>
+                            <option value="" disabled selected>Chọn danh mục</option>
+                            <option value="">...</option>
+                            <?php foreach ($khoa_options as $key => $value): ?>
+                                <option value="<?php echo htmlspecialchars($key); ?>" <?php echo $selected_khoa === $key ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($value); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -381,6 +401,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
                     </div>
                     <div class="form-group">
                         <button type="submit" name="assign_lecturer">Phân công</button>
+                        <button type="button" id="loadAssignmentBtn" onclick="location.reload()">Tải lại</button>
                     </div>
                 </form>
             </div>
@@ -390,7 +411,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
                 <div class="table-container">
                     <h3>
                         Danh sách sinh viên
-                        <?php echo !empty($selected_lop) ? 'lớp ' . htmlspecialchars($selected_lop) : 'khoa ' . htmlspecialchars($selected_khoa); ?>
+                        <?php echo !empty($selected_lop) ? 'lớp ' . htmlspecialchars($selected_lop) : 'khoa ' . htmlspecialchars($khoa_options[$selected_khoa] ?? $selected_khoa); ?>
                     </h3>
                     <table>
                         <thead>
@@ -400,6 +421,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
                                 <th>Email</th>
                                 <th>Số điện thoại</th>
                                 <th>Khoa</th>
+                                <th>Lớp</th>
                                 <th>Giảng viên hiện tại</th>
                             </tr>
                         </thead>
@@ -410,7 +432,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
                                     <td><?php echo htmlspecialchars($student['ho_ten']); ?></td>
                                     <td><?php echo htmlspecialchars($student['email']); ?></td>
                                     <td><?php echo htmlspecialchars($student['so_dien_thoai'] ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($student['khoa'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($student['khoa']); ?></td>
+                                    <td><?php echo htmlspecialchars($student['lop'] ?? 'N/A'); ?></td>
                                     <td>
                                         <?php
                                         if (!empty($student['so_hieu'])) {
@@ -495,16 +518,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
 
         function escapeHTML(str) {
             return str.replace(/[&<>"']/g, match => ({
-                '&': '&',
-                '<': '<',
-                '>': '>',
-                '"': '"',
-                "'": "'"
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
             })[match]);
-        }
-
-        function loadStudents() {
-            document.getElementById('assignForm').submit();
         }
 
         function loadLecturers(searchTerm = '') {
@@ -517,22 +536,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
 
             fetch(url)
                 .then(response => {
-                    console.log('Fetch Response:', response);
                     if (!response.ok) {
                         throw new Error(`HTTP status ${response.status}: ${response.statusText}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Fetch Data:', data);
                     tableBody.innerHTML = '';
                     if (data.success && data.data.lecturers.length > 0) {
                         data.data.lecturers.forEach(lecturer => {
+                            const khoaName = <?php echo json_encode($khoa_options); ?>[lecturer.khoa] || lecturer.khoa || 'N/A';
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${escapeHTML(lecturer.so_hieu_giang_vien)}</td>
                                 <td>${escapeHTML(lecturer.ho_ten)}</td>
-                                <td>${escapeHTML(lecturer.khoa || 'N/A')}</td>
+                                <td>${escapeHTML(khoaName)}</td>
                                 <td>${escapeHTML(lecturer.email)}</td>
                                 <td>${escapeHTML(lecturer.so_dien_thoai || 'N/A')}</td>
                             `;
@@ -564,22 +582,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['assign_lecturer'])) {
             debounceTimer = setTimeout(() => {
                 fetch(`../logic_giangvien/logic_timkiem_gv.php?action=search_lecturers&keyword=${encodeURIComponent(keyword)}`)
                     .then(response => {
-                        console.log('Search Response:', response);
                         if (!response.ok) throw new Error("HTTP status " + response.status);
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Search Data:', data);
                         resultsContainer.innerHTML = "";
                         if (data.success && data.data.lecturers.length > 0) {
                             const resultList = document.createElement("ul");
                             data.data.lecturers.forEach(lecturer => {
+                                const khoaName = <?php echo json_encode($khoa_options); ?>[lecturer.khoa] || lecturer.khoa || 'N/A';
                                 const listItem = document.createElement("li");
                                 listItem.innerHTML = `
                                     <div style="display: flex; align-items: center;">
                                         <div>
                                             <strong>${escapeHTML(lecturer.ho_ten)}</strong>
-                                            <p style="margin: 0; font-size: 12px;">${escapeHTML(lecturer.khoa || 'N/A')}</p>
+                                            <p style="margin: 0; font-size: 12px;">${escapeHTML(khoaName)}</p>
                                         </div>
                                     </div>
                                 `;

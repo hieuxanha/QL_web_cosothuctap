@@ -2,6 +2,25 @@
 session_start();
 require_once '../db.php';
 
+// Mapping array for khoa
+$khoa_display_names = [
+    'kinh_te' => 'Kinh tế',
+    'moi_truong' => 'Môi trường',
+    'quan_ly_dat_dai' => 'Quản lý đất đai',
+    'khi_tuong_thuy_van' => 'Khí tượng thủy văn',
+    'trac_dia_ban_do' => 'Trắc địa bản đồ',
+    'dia_chat' => 'Địa chất',
+    'tai_nguyen_nuoc' => 'Tài nguyên nước',
+    'cntt' => 'Công nghệ thông tin',
+    'ly_luan_chinh_tri' => 'Lý luận chính trị',
+    'bien_hai_dao' => 'Biển - Hải đảo',
+    'khoa_hoc_dai_cuong' => 'Khoa học đại cương',
+    'the_chat_quoc_phong' => 'Thể chất quốc phòng',
+    'bo_mon_luat' => 'Bộ môn Luật',
+    'bien_doi_khi_hau' => 'Biến đổi khí hậu',
+    'ngoai_ngu' => 'Ngoại ngữ'
+];
+
 // Lấy tham số phân trang và từ khóa tìm kiếm
 $per_page = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -295,24 +314,6 @@ $conn->close();
             margin-top: 5px;
         }
 
-        .pagination {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .pagination a {
-            margin: 0 5px;
-            padding: 5px 10px;
-            text-decoration: none;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .pagination a:hover {
-            background-color: #0078d4;
-            color: white;
-        }
-
         /* CSS cho tìm kiếm */
         .search-bar {
             position: relative;
@@ -323,7 +324,6 @@ $conn->close();
         #searchInput {
             padding: 8px;
             width: 300px;
-            /* border: 1px solid #ddd; */
             border-radius: 4px;
         }
 
@@ -368,6 +368,42 @@ $conn->close();
         #searchResults li:last-child {
             border-bottom: none;
         }
+
+        /* Pagination styles */
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #0078d4;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            color: #888;
+        }
+
+        .pagination span {
+            padding: 8px 12px;
+            background-color: #0078d4;
+            color: white;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
@@ -404,9 +440,17 @@ $conn->close();
                 </svg>
                 <div id="searchResults"></div>
             </div>
-            <div class="profile">
-                <span><?php echo htmlspecialchars($_SESSION['name'] ?? 'Tên người dùng'); ?></span>
-                <img src="profile.jpg" alt="Ảnh đại diện" />
+            <div class="account">
+                <?php
+                if (isset($_SESSION['name'])) {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+                ?>
             </div>
         </div>
 
@@ -428,10 +472,6 @@ $conn->close();
                     Danh sách tất cả ứng tuyển
                     <span class="youtube-icon">▶</span>
                 </div>
-                <div class="button-group">
-                    <button class="btn">Xuất Excel</button>
-                    <button class="btn">Cấu hình cột hiển thị</button>
-                </div>
             </div>
 
             <table class="data-table">
@@ -441,9 +481,9 @@ $conn->close();
                         <th style="width: 150px;">Mã sinh viên</th>
                         <th style="width: 200px;">Họ tên</th>
                         <th style="width: 200px;">Email</th>
-                        <th style="width: 50px;">Lớp</th>
-                        <th style="width: 100px;">Khoa</th>
-                        <th style="width: 120px;">Số điện thoại</th>
+                        <th style="width: 120px;">Lớp</th>
+                        <th style="width: 150px;">Khoa</th>
+                        <!-- <th style="width: 120px;">Số điện thoại</th> -->
                         <th style="width: 200px;">Tin tuyển dụng</th>
                         <th style="width: 250px;">Nội dung</th>
                         <th style="width: 250px;">File đính kèm</th>
@@ -462,8 +502,8 @@ $conn->close();
                                 <td><?php echo htmlspecialchars($sv['ho_ten']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['email']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['lop']); ?></td>
-                                <td><?php echo htmlspecialchars($sv['khoa']); ?></td>
-                                <td><?php echo htmlspecialchars($sv['so_dien_thoai']); ?></td>
+                                <td><?php echo htmlspecialchars($khoa_display_names[$sv['khoa']] ?? $sv['khoa'] ?? 'N/A'); ?></td>
+                                <!-- <td><?php echo htmlspecialchars($sv['so_dien_thoai']); ?></td> -->
                                 <td><?php echo htmlspecialchars($sv['tieu_de']); ?></td>
                                 <td>
                                     <?php if (!empty($sv['noi_dung_list'])): ?>
@@ -507,10 +547,26 @@ $conn->close();
                 </tbody>
             </table>
 
+            <!-- Pagination controls -->
             <div class="pagination">
-                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?page=<?php echo $i; ?>&keyword=<?php echo urlencode($keyword); ?>" <?php if ($i == $page) echo 'style="font-weight: bold;"'; ?>><?php echo $i; ?></a>
+                <button onclick="changePage(<?php echo $page - 1; ?>)" <?php echo $page <= 1 ? 'disabled' : ''; ?>>Trước</button>
+                <?php
+                $max_pages_to_show = 5;
+                $start_page = max(1, $page - floor($max_pages_to_show / 2));
+                $end_page = min($total_pages, $start_page + $max_pages_to_show - 1);
+
+                if ($end_page - $start_page + 1 < $max_pages_to_show) {
+                    $start_page = max(1, $end_page - $max_pages_to_show + 1);
+                }
+
+                for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <?php if ($i == $page): ?>
+                        <span><?php echo $i; ?></span>
+                    <?php else: ?>
+                        <button onclick="changePage(<?php echo $i; ?>)"><?php echo $i; ?></button>
+                    <?php endif; ?>
                 <?php endfor; ?>
+                <button onclick="changePage(<?php echo $page + 1; ?>)" <?php echo $page >= $total_pages ? 'disabled' : ''; ?>>Sau</button>
             </div>
         </div>
     </div>
@@ -597,13 +653,14 @@ $conn->close();
                     .then(data => {
                         resultsContainer.innerHTML = "";
                         if (data.success && data.data.applications.length > 0) {
+                            const khoaDisplayNames = <?php echo json_encode($khoa_display_names); ?>;
                             const resultList = document.createElement("ul");
                             data.data.applications.slice(0, 10).forEach(app => {
                                 const listItem = document.createElement("li");
                                 listItem.innerHTML = `
                                     <div>
                                         <strong>${escapeHTML(app.ho_ten)}</strong> (${app.ma_sinh_vien})
-                                        <p style="margin: 0; font-size: 12px;">${escapeHTML(app.tieu_de)}</p>
+                                        <p style="margin: 0; font-size: 12px;">${escapeHTML(khoaDisplayNames[app.khoa] || app.khoa || 'N/A')} - ${escapeHTML(app.tieu_de)}</p>
                                     </div>
                                 `;
                                 listItem.addEventListener("click", () => {
@@ -637,16 +694,21 @@ $conn->close();
 
         function escapeHTML(str) {
             return str.replace(/[&<>"']/g, match => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
+                '&': '&',
+                '<': '<',
+                '>': '>',
+                '"': '"',
+                "'": "'"
             })[match]);
         }
 
         function updateSearch(keyword) {
             window.location.href = `?page=1&keyword=${encodeURIComponent(keyword)}`;
+        }
+
+        function changePage(page) {
+            const keyword = '<?php echo htmlspecialchars($keyword); ?>';
+            window.location.href = `?page=${page}&keyword=${encodeURIComponent(keyword)}`;
         }
 
         function showMessage(type, message) {

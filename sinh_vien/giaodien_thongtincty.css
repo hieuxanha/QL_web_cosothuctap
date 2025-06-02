@@ -67,38 +67,125 @@ body {
 
 /* Thanh tìm kiếm */
 .timkiem-job {
-  background-color: #19734e;
+  background: #19734e;
   padding: 20px;
   text-align: center;
 }
 
 .search-bar {
-  background-color: #fff;
-  padding: 12px;
   display: inline-flex;
   gap: 10px;
+  background: #fff;
+  padding: 12px;
   border-radius: 5px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.search-bar input,
+.search-bar select,
+.search-bar button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
 }
 
 .search-bar input {
-  padding: 10px;
   width: 800px;
-  border: none;
-  border-radius: 5px;
+}
+
+.search-bar select {
+  width: 200px;
+  background: #f8f9fa;
 }
 
 .search-bar button {
-  padding: 10px 20px;
-  background-color: #28a745;
+  background: #28a745;
   color: #fff;
-  border: none;
-  border-radius: 5px;
   cursor: pointer;
 }
 
 .search-bar button:hover {
-  background-color: #218838;
+  background: #218838;
+}
+
+#searchLoading {
+  margin-left: 10px;
+  color: #28a745;
+  font-size: 16px;
+  align-self: center;
+}
+
+#searchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 5px;
+  display: none;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  margin-right: 10px;
+}
+
+.search-result-item h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.search-result-item h4 a {
+  color: #0078d4;
+  text-decoration: none;
+}
+
+.search-result-item h4 a:hover {
+  text-decoration: underline;
+}
+
+.search-result-item p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  color: #555;
+}
+
+@media (max-width: 900px) {
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-bar input,
+  .search-bar select {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 10px;
+  }
+
+  #searchResults {
+    position: static;
+    max-height: 200px;
+  }
 }
 
 /* Danh sách công ty */
@@ -197,6 +284,7 @@ body {
 
 /* Nội dung chi tiết */
 .company-content {
+
   display: flex;
   gap: 20px;
   padding: 20px;
@@ -227,6 +315,7 @@ body {
 .company-right p {
   font-size: 14px;
   color: #333;
+  text-decoration: none;
 }
 
 .map {
@@ -260,30 +349,34 @@ body {
 /* Responsive */
 @media (max-width: 1200px) {
   .company-logo {
-      position: relative;
-      top: -83px;
-      left: auto;
-      transform: none;
-      margin: 10px auto;
+    position: relative;
+    top: -83px;
+    left: auto;
+    transform: none;
+    margin: 10px auto;
   }
+
   .company-header {
-      padding-bottom: 50px;
+    padding-bottom: 50px;
   }
 }
 
 @media (max-width: 768px) {
   .header .left-section {
-      flex-direction: column;
-      text-align: center;
+    flex-direction: column;
+    text-align: center;
   }
+
   .header .nav {
-      flex-direction: column;
-      gap: 10px;
+    flex-direction: column;
+    gap: 10px;
   }
+
   .search-bar input {
-      width: 100%;
+    width: 100%;
   }
+
   .company-content {
-      flex-direction: column;
+    flex-direction: column;
   }
 }

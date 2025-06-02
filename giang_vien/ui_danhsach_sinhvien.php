@@ -4,6 +4,25 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 require '../db.php'; // Kết nối cơ sở dữ liệu
 
+// Mapping array for khoa
+$khoa_display_names = [
+    'kinh_te' => 'Kinh tế',
+    'moi_truong' => 'Môi trường',
+    'quan_ly_dat_dai' => 'Quản lý đất đai',
+    'khi_tuong_thuy_van' => 'Khí tượng thủy văn',
+    'trac_dia_ban_do' => 'Trắc địa bản đồ',
+    'dia_chat' => 'Địa chất',
+    'tai_nguyen_nuoc' => 'Tài nguyên nước',
+    'cntt' => 'Công nghệ thông tin',
+    'ly_luan_chinh_tri' => 'Lý luận chính trị',
+    'bien_hai_dao' => 'Biển - Hải đảo',
+    'khoa_hoc_dai_cuong' => 'Khoa học đại cương',
+    'the_chat_quoc_phong' => 'Thể chất quốc phòng',
+    'bo_mon_luat' => 'Bộ môn Luật',
+    'bien_doi_khi_hau' => 'Biến đổi khí hậu',
+    'ngoai_ngu' => 'Ngoại ngữ'
+];
+
 // Khởi tạo biến
 $selected_lop = isset($_POST['lop']) ? $_POST['lop'] : '';
 $students = [];
@@ -13,7 +32,51 @@ $classes = [];
 $so_hieu_giang_vien = isset($_SESSION['so_hieu_giang_vien']) ? $_SESSION['so_hieu_giang_vien'] : null;
 
 if (!$so_hieu_giang_vien) {
-    die("Không tìm thấy thông tin số hiệu của giảng viên. Vui lòng đăng nhập lại.");
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'Không tìm thấy thông tin số hiệu của giảng viên. Vui lòng đăng nhập lại.']);
+    exit;
+}
+
+// Xử lý yêu cầu tìm kiếm qua AJAX
+if (isset($_GET['action']) && $_GET['action'] === 'search') {
+    header('Content-Type: application/json');
+    $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+    $lop = isset($_GET['lop']) ? $_GET['lop'] : '';
+
+    $sql = "SELECT ma_sinh_vien, ho_ten, email, lop, khoa, so_dien_thoai 
+            FROM sinh_vien 
+            WHERE so_hieu = ?";
+    $params = [$so_hieu_giang_vien];
+
+    if ($lop) {
+        $sql .= " AND lop = ?";
+        $params[] = $lop;
+    }
+    if ($keyword) {
+        $sql .= " AND (ma_sinh_vien LIKE ? OR ho_ten LIKE ? OR email LIKE ?)";
+        $likeKeyword = "%$keyword%";
+        $params[] = $likeKeyword;
+        $params[] = $likeKeyword;
+        $params[] = $likeKeyword;
+    }
+    $sql .= " ORDER BY ho_ten LIMIT 10";
+
+    $stmt = $conn->prepare($sql);
+    if ($stmt === false) {
+        echo json_encode(['success' => false, 'error' => 'Lỗi prepare: ' . $conn->error]);
+        exit;
+    }
+    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $students = [];
+    while ($row = $result->fetch_assoc()) {
+        $row['khoa_display'] = $khoa_display_names[$row['khoa']] ?? $row['khoa'] ?? 'N/A'; // Thêm tên hiển thị
+        $students[] = $row;
+    }
+    $stmt->close();
+    echo json_encode(['success' => true, 'data' => ['students' => $students]]);
+    exit;
 }
 
 // Lấy danh sách lớp của sinh viên thuộc giảng viên (dựa trên so_hieu)
@@ -55,6 +118,7 @@ while ($row = $result_students->fetch_assoc()) {
     $students[] = $row;
 }
 $stmt_students->close();
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -224,6 +288,78 @@ $stmt_students->close();
         .account .dropdown-content a:hover {
             background: #f4f4f4;
         }
+
+        /* CSS cho tìm kiếm */
+        .search-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #searchInput {
+            padding: 8px;
+            width: 300px;
+            /* border: 1px solid #ddd; */
+            border-radius: 4px;
+        }
+
+        #searchLoading {
+            margin-left: 10px;
+            display: none;
+        }
+
+        #searchResults {
+            position: absolute;
+            top: 40px;
+            width: 300px;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            z-index: 1000;
+            display: none;
+        }
+
+        #searchResults.active {
+            display: block;
+        }
+
+        #searchResults ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #searchResults li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        #searchResults li:hover {
+            background-color: #f5f5f5;
+        }
+
+        #searchResults li:last-child {
+            border-bottom: none;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .message.success {
+            color: green;
+            background: #e0ffe0;
+        }
+
+        .message.error {
+            color: red;
+            background: #ffe0e0;
+        }
     </style>
 </head>
 
@@ -236,12 +372,12 @@ $stmt_students->close();
         <div class="menu">
             <hr />
             <ul>
-
-                <li><i class="fa-brands fa-windows"></i><a href="./ui_giangvien.php">Trang chủ giảng viên</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="./ui_danhsach_sinhvien.php">Danh sách sinh viên</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="./ui_danhsach_thuctap.php">Danh Sách Sinh Viên Đang Thực Tập</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="./ui_theo_doi_thuc_tap.php">Theo dõi và đánh giá qtrinh tt của tts</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="./ui_completed_internships.php">Xác nhận hoàn thành thực tập</a></li>
+                <li><i class="fa-solid fa-house"></i><a href="./ui_giangvien.php">Trang chủ giảng viên</a></li>
+                <li><i class="fa-solid fa-users"></i><a href="./ui_danhsach_sinhvien.php">Danh sách sinh viên</a></li>
+                <li><i class="fa-solid fa-user-graduate"></i><a href="./ui_danhsach_thuctap.php">Danh Sách Sinh Viên Đang Thực Tập</a></li>
+                <li><i class="fa-solid fa-chart-line"></i><a href="./ui_theo_doi_thuc_tap.php">Theo dõi và đánh giá qtrinh tt của tts</a></li>
+                <li><i class="fa-solid fa-file-pdf"></i><a href="./ui_nhan_pdf.php">Chấm Điểm</a></li>
+                <li><i class="fa-solid fa-check-circle"></i><a href="./ui_completed_internships.php">Xác nhận hoàn thành thực tập</a></li>
             </ul>
         </div>
     </div>
@@ -249,7 +385,8 @@ $stmt_students->close();
     <div class="content" id="content">
         <div class="header">
             <div class="search-bar">
-                <input type="text" placeholder="Tìm kiếm..." />
+                <input type="text" id="searchInput" placeholder="Tìm theo mã SV, họ tên, email..." />
+                <span id="searchLoading"><i class="fas fa-spinner fa-spin"></i></span>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -263,6 +400,7 @@ $stmt_students->close();
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
+                <div id="searchResults"></div>
             </div>
             <div class="account">
                 <?php
@@ -286,8 +424,19 @@ $stmt_students->close();
         </div>
 
         <div class="container">
+            <div class="subnav">
+                <div class="subnav-title">
+                    <img src="/api/placeholder/24/24" alt="Icon" />
+                    Danh sách sinh viên
+                    <span class="youtube-icon">▶</span>
+                </div>
+                <!-- <div class="button-group">
+                    <button class="btn">Xuất Excel</button>
+                </div> -->
+            </div>
+
             <div class="filter-section">
-                <div class="filter-title">Hướng dẫn/ Ghi chú:</div>
+                <div class="filter-title">Hướng dẫn/ Ghi chú: Xem danh sách sinh viên thuộc quyền quản lý.</div>
                 <div class="filter-row">
                     <div class="filter-item">
                         <div class="filter-label">Lớp:</div>
@@ -300,6 +449,7 @@ $stmt_students->close();
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                            <input type="hidden" name="keyword" id="keywordInput" value="">
                         </form>
                     </div>
                 </div>
@@ -309,8 +459,7 @@ $stmt_students->close();
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">STT</th>
-                            <th style="width: 60px;">Sửa</th>
+                            <th style="width: 20px;">STT</th>
                             <th style="width: 150px;">Mã sinh viên</th>
                             <th style="width: 200px;">Họ tên</th>
                             <th style="width: 200px;">Email</th>
@@ -319,17 +468,16 @@ $stmt_students->close();
                             <th style="width: 120px;">Số điện thoại</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="studentList">
                         <?php $stt = 1; ?>
                         <?php foreach ($students as $student): ?>
                             <tr>
                                 <td class="center-text"><?php echo $stt++; ?></td>
-                                <td class="center-text"><a href="edit_student.php?id=<?php echo htmlspecialchars($student['ma_sinh_vien']); ?>">✏️</a></td>
                                 <td><?php echo htmlspecialchars($student['ma_sinh_vien']); ?></td>
                                 <td><?php echo htmlspecialchars($student['ho_ten']); ?></td>
                                 <td><?php echo htmlspecialchars($student['email']); ?></td>
                                 <td><?php echo htmlspecialchars($student['lop']); ?></td>
-                                <td><?php echo htmlspecialchars($student['khoa'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($khoa_display_names[$student['khoa']] ?? $student['khoa'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['so_dien_thoai'] ?? 'N/A'); ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -347,6 +495,98 @@ $stmt_students->close();
             const content = document.getElementById("content");
             sidebar.classList.toggle("collapsed");
             content.classList.toggle("collapsed");
+        }
+
+        // Chức năng tìm kiếm
+        let debounceTimer;
+        document.getElementById("searchInput").addEventListener("keyup", function() {
+            clearTimeout(debounceTimer);
+            const keyword = this.value.trim();
+            const resultsContainer = document.getElementById("searchResults");
+            const loadingSpinner = document.getElementById("searchLoading");
+            const lop = document.querySelector('select[name="lop"]').value;
+
+            if (keyword === "") {
+                resultsContainer.classList.remove("active");
+                updateFilterForm("");
+                return;
+            }
+
+            loadingSpinner.style.display = 'inline-block';
+            debounceTimer = setTimeout(() => {
+                const url = `?action=search&lop=${encodeURIComponent(lop)}&keyword=${encodeURIComponent(keyword)}`;
+
+                fetch(url)
+                    .then(response => {
+                        loadingSpinner.style.display = 'none';
+                        if (!response.ok) throw new Error("HTTP status " + response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        resultsContainer.innerHTML = "";
+                        if (data.success && data.data.students.length > 0) {
+                            const khoaDisplayNames = <?php echo json_encode($khoa_display_names); ?>;
+                            const resultList = document.createElement("ul");
+                            data.data.students.slice(0, 10).forEach(student => {
+                                const listItem = document.createElement("li");
+                                listItem.innerHTML = `
+                                    <div>
+                                        <strong>${escapeHTML(student.ho_ten)}</strong> (${student.ma_sinh_vien})
+                                        <p style="margin: 0; font-size: 12px;">${escapeHTML(student.khoa_display)} - ${escapeHTML(student.email)}</p>
+                                    </div>
+                                `;
+                                listItem.addEventListener("click", () => {
+                                    updateFilterForm(student.ho_ten);
+                                    resultsContainer.classList.remove("active");
+                                });
+                                resultList.appendChild(listItem);
+                            });
+                            resultsContainer.appendChild(resultList);
+                            resultsContainer.classList.add("active");
+                        } else {
+                            resultsContainer.innerHTML = "<p>Không tìm thấy sinh viên phù hợp.</p>";
+                            resultsContainer.classList.add("active");
+                        }
+                    })
+                    .catch(error => {
+                        loadingSpinner.style.display = 'none';
+                        showMessage('error', 'Có lỗi xảy ra khi tìm kiếm.');
+                        console.error("Lỗi tìm kiếm:", error);
+                    });
+            }, 300);
+        });
+
+        document.addEventListener("click", function(event) {
+            const resultsContainer = document.getElementById("searchResults");
+            const searchInput = document.getElementById("searchInput");
+            if (!resultsContainer.contains(event.target) && !searchInput.contains(event.target)) {
+                resultsContainer.classList.remove("active");
+            }
+        });
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, match => ({
+                '&': '&',
+                '<': '<',
+                '>': '>',
+                '"': '"',
+                "'": "'"
+
+            })[match]);
+        }
+
+        function updateFilterForm(keyword) {
+            const form = document.getElementById("filterForm");
+            document.getElementById("keywordInput").value = keyword;
+            form.submit();
+        }
+
+        function showMessage(type, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            document.getElementById('content').insertBefore(messageDiv, content.children[1]);
+            setTimeout(() => messageDiv.remove(), 3000);
         }
     </script>
 </body>

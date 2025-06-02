@@ -130,7 +130,7 @@ body {
 
 
  */
-
+/* 
 .search-bar {
   display: flex;
   justify-content: space-between;
@@ -168,8 +168,77 @@ body {
 
 .search-bar button:hover {
   background-color: #28a745;
+} */
+/* Cập nhật .search-bar để điều chỉnh bố cục */
+.search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 20px;
+  margin: 25px auto 25px;
+  padding: 15px 20px;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  gap: 10px;
+  position: relative;
 }
 
+/* Tăng độ rộng của input */
+.search-bar input {
+  width: 70%;
+  /* Tăng từ 60% lên 70% */
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* Làm nhỏ nút button */
+.search-bar button {
+  width: 70px;
+  /* Giảm từ 90px xuống 70px */
+  padding: 8px;
+  /* Giảm padding để nút nhỏ hơn */
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  /* Giảm kích thước chữ */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Kiểu dáng cho select (giữ nguyên) */
+.search-bar select {
+  width: 20%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: #fff;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+
+/* Responsive cho màn hình nhỏ */
+@media screen and (max-width: 480px) {
+  .search-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-bar input,
+  .search-bar select,
+  .search-bar button {
+    width: 100%;
+  }
+}
 
 #searchResults {
   display: none;
@@ -700,5 +769,68 @@ body {
   .search-bar input,
   .search-bar button {
     width: 100%;
+  }
+
+
+
+
+
+}
+
+.danhmuc_1_heder-action {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.danhmuc_1_heder-action button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.danhmuc_1_heder-action button:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.danhmuc_1_heder-action button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.danhmuc_1_heder-action button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.danhmuc_1_heder-action button:disabled:hover {
+  background-color: #fff;
+  border-color: #ddd;
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .danhmuc_1_heder-action button {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 }

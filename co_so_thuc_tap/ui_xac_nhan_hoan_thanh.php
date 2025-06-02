@@ -2,6 +2,25 @@
 session_start();
 require_once '../db.php';
 
+// Mapping array for khoa
+$khoa_display_names = [
+    'kinh_te' => 'Kinh tế',
+    'moi_truong' => 'Môi trường',
+    'quan_ly_dat_dai' => 'Quản lý đất đai',
+    'khi_tuong_thuy_van' => 'Khí tượng thủy văn',
+    'trac_dia_ban_do' => 'Trắc địa bản đồ',
+    'dia_chat' => 'Địa chất',
+    'tai_nguyen_nuoc' => 'Tài nguyên nước',
+    'cntt' => 'Công nghệ thông tin',
+    'ly_luan_chinh_tri' => 'Lý luận chính trị',
+    'bien_hai_dao' => 'Biển - Hải đảo',
+    'khoa_hoc_dai_cuong' => 'Khoa học đại cương',
+    'the_chat_quoc_phong' => 'Thể chất quốc phòng',
+    'bo_mon_luat' => 'Bộ môn Luật',
+    'bien_doi_khi_hau' => 'Biến đổi khí hậu',
+    'ngoai_ngu' => 'Ngoại ngữ'
+];
+
 // Handle confirmation of internship completion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
     $stt_sv = filter_input(INPUT_POST, 'stt_sv', FILTER_VALIDATE_INT);
@@ -82,7 +101,12 @@ if ($result) {
 $stmt->close();
 
 // Get total records for pagination
-$total_sql = "SELECT COUNT(DISTINCT sv.stt_sv) AS total FROM sinh_vien sv JOIN ung_tuyen ut ON sv.stt_sv = ut.stt_sv WHERE ut.trang_thai IN ('Đồng ý', 'Hoàn thành')";
+$total_sql = "
+    SELECT COUNT(DISTINCT sv.stt_sv) AS total 
+    FROM sinh_vien sv 
+    JOIN ung_tuyen ut ON sv.stt_sv = ut.stt_sv 
+    LEFT JOIN tuyen_dung td ON ut.ma_tuyen_dung = td.ma_tuyen_dung
+    WHERE ut.trang_thai IN ('Đồng ý', 'Hoàn thành')";
 $total_params = [];
 if ($keyword) {
     $total_sql .= " AND (sv.ma_sinh_vien LIKE ? OR sv.ho_ten LIKE ? OR sv.khoa LIKE ? OR td.tieu_de LIKE ?)";
@@ -236,7 +260,7 @@ $conn->close();
         }
 
         .pagination a:hover {
-            休闲-background-color: #0078d4;
+            background-color: #0078d4;
             color: #fff;
         }
 
@@ -256,7 +280,7 @@ $conn->close();
         #searchInput {
             padding: 8px;
             width: 300px;
-            border: 1px solid #ddd;
+            /* border: 1px solid #ddd; */
             border-radius: 4px;
         }
 
@@ -354,10 +378,6 @@ $conn->close();
                 <div class="subnav-title">
                     <i class="fa-solid fa-check-circle"></i> Xác nhận hoàn thành thực tập
                 </div>
-                <div class="button-group">
-                    <button class="btn" onclick="exportToExcel()">Xuất Excel</button>
-                    <button class="btn" onclick="configureColumns()">Cấu hình cột hiển thị</button>
-                </div>
             </div>
 
             <table class="data-table">
@@ -383,7 +403,7 @@ $conn->close();
                                 <td class="center-text"><?php echo $index + 1 + $offset; ?></td>
                                 <td><?php echo htmlspecialchars($sv['ma_sinh_vien']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['ho_ten']); ?></td>
-                                <td><?php echo htmlspecialchars($sv['khoa'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($khoa_display_names[$sv['khoa']] ?? $sv['khoa'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($sv['tieu_de'] ?? 'N/A'); ?></td>
                                 <td class="center-text"><?php echo $sv['trang_thai'] === 'Hoàn thành' ? '<i class="fas fa-check-circle" style="color: green;"></i>' : ''; ?></td>
                                 <td class="center-text">
@@ -451,13 +471,14 @@ $conn->close();
                     .then(data => {
                         resultsContainer.innerHTML = "";
                         if (data.success && data.data.students.length > 0) {
+                            const khoaDisplayNames = <?php echo json_encode($khoa_display_names); ?>;
                             const resultList = document.createElement("ul");
                             data.data.students.slice(0, 10).forEach(student => {
-                                const listItem = document.createElement(" underpinning li");
+                                const listItem = document.createElement("li");
                                 listItem.innerHTML = `
                                     <div>
                                         <strong>${escapeHTML(student.ho_ten)}</strong> (${student.ma_sinh_vien})
-                                        <p style="margin: 0; font-size: 12px;">${escapeHTML(student.tieu_de)}</p>
+                                        <p style="margin: 0; font-size: 12px;">${escapeHTML(khoaDisplayNames[student.khoa] || student.khoa || 'N/A')} - ${escapeHTML(student.tieu_de)}</p>
                                     </div>
                                 `;
                                 listItem.addEventListener("click", () => {
@@ -491,11 +512,11 @@ $conn->close();
 
         function escapeHTML(str) {
             return str.replace(/[&<>"']/g, match => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
+                '&': '&',
+                '<': '<',
+                '>': '>',
+                '"': '"',
+                "'": "'"
             })[match]);
         }
 

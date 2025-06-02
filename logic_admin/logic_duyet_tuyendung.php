@@ -20,20 +20,44 @@ $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 if ($action === 'get_recruitments' || $action === 'search_recruitments') {
     $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+    $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10; // Default to 10 records per page
+    $offset = ($page - 1) * $limit;
 
-    // Prepare SQL query
+    // Prepare SQL query for counting total recruitments
+    $countSql = "SELECT COUNT(*) FROM tuyen_dung td JOIN cong_ty ct ON td.stt_cty = ct.stt_cty";
+    if ($action === 'search_recruitments' && $keyword) {
+        $keyword = $conn->real_escape_string($keyword);
+        $countSql .= " WHERE td.tieu_de LIKE ? OR ct.ten_cong_ty LIKE ?";
+    }
+
+    $stmt = $conn->prepare($countSql);
+    if ($action === 'search_recruitments' && $keyword) {
+        $likeKeyword = "%$keyword%";
+        $stmt->bind_param('ss', $likeKeyword, $likeKeyword);
+    }
+    $stmt->execute();
+    $stmt->bind_result($totalRecruitments);
+    $stmt->fetch();
+    $stmt->close();
+
+    $totalPages = ceil($totalRecruitments / $limit);
+
+    // Prepare SQL query for fetching paginated recruitments
     $sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.trang_thai, td.noi_bat, ct.ten_cong_ty
             FROM tuyen_dung td
             JOIN cong_ty ct ON td.stt_cty = ct.stt_cty";
     if ($action === 'search_recruitments' && $keyword) {
-        $keyword = $conn->real_escape_string($keyword);
         $sql .= " WHERE td.tieu_de LIKE ? OR ct.ten_cong_ty LIKE ?";
     }
+    $sql .= " ORDER BY td.tieu_de ASC LIMIT ? OFFSET ?";
 
     $stmt = $conn->prepare($sql);
     if ($action === 'search_recruitments' && $keyword) {
         $likeKeyword = "%$keyword%";
-        $stmt->bind_param('ss', $likeKeyword, $likeKeyword);
+        $stmt->bind_param('ssii', $likeKeyword, $likeKeyword, $limit, $offset);
+    } else {
+        $stmt->bind_param('ii', $limit, $offset);
     }
 
     if ($stmt->execute()) {
@@ -48,7 +72,12 @@ if ($action === 'get_recruitments' || $action === 'search_recruitments') {
                 'noi_bat' => $row['noi_bat']
             ];
         }
-        sendResponse(true, ['recruitments' => $recruitments]);
+        sendResponse(true, [
+            'recruitments' => $recruitments,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'totalRecruitments' => $totalRecruitments
+        ]);
     } else {
         sendResponse(false, [], 'Lỗi khi truy vấn cơ sở dữ liệu: ' . $stmt->error);
     }
@@ -112,10 +141,8 @@ if (in_array($action, ['approve', 'reject', 'restore', 'cancel'])) {
     $result_check = $stmt_check->get_result();
 
     if ($result_check->num_rows == 0) {
-        sendResponse(false, [], 'Tin tuyển dụng không tồn tại!');
         $stmt_check->close();
-        $conn->close();
-        exit;
+        sendResponse(false, [], 'Tin tuyển dụng không tồn tại!');
     }
 
     $row = $result_check->fetch_assoc();

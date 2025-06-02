@@ -1,76 +1,76 @@
-```php
 <?php
 session_start();
 require_once '../db.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
-// Enable error logging
-ini_set('log_errors', 1);
-ini_set('error_log', 'C:/xampp/htdocs/Ql_web_cosothuctap/logs/error.log');
+$response = ['success' => false, 'data' => [], 'message' => ''];
 
-// Helper function to send JSON response
-function sendResponse($success, $data = [], $error = '')
-{
-    echo json_encode(['success' => $success, 'data' => $data, 'error' => $error]);
-    exit;
-}
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'search') {
+    $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+    $location = isset($_GET['location']) ? trim($_GET['location']) : '';
+    $khoa = isset($_GET['khoa']) ? trim($_GET['khoa']) : '';
 
-// Check database connection
-if ($conn->connect_error) {
-    error_log("Database connection failed: " . $conn->connect_error);
-    sendResponse(false, [], 'Lỗi kết nối cơ sở dữ liệu');
-}
+    $sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.dia_chi, ct.ten_cong_ty, ct.logo
+            FROM tuyen_dung td
+            JOIN cong_ty ct ON td.stt_cty = ct.stt_cty
+            WHERE td.trang_thai = 'Đã duyệt'";
+    $params = [];
+    $types = '';
 
-// Get search term
-$search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
+    if (!empty($khoa)) {
+        $sql .= " AND LOWER(td.khoa) LIKE LOWER(?)";
+        $params[] = "%$khoa%";
+        $types .= 's';
+    }
 
-// Determine ORDER BY clause (use ngay_tao if it exists, otherwise omit)
-$order_by = ''; // Default: no ORDER BY
-// Uncomment the next line if you confirm ngay_tao exists
-// $order_by = ' ORDER BY td.ngay_tao DESC';
+    if (!empty($keyword)) {
+        $sql .= " AND (LOWER(td.tieu_de) LIKE LOWER(?) OR LOWER(ct.ten_cong_ty) LIKE LOWER(?))";
+        $params[] = "%$keyword%";
+        $params[] = "%$keyword%";
+        $types .= 'ss';
+    }
 
-$sql = "SELECT td.ma_tuyen_dung, td.tieu_de, td.dia_chi, ct.stt_cty, ct.ten_cong_ty, ct.logo
-        FROM tuyen_dung td
-        JOIN cong_ty ct ON td.stt_cty = ct.stt_cty
-        WHERE td.trang_thai = 'Đã duyệt'";
-$params = [];
+    if (!empty($location)) {
+        $sql .= " AND LOWER(td.dia_chi) LIKE LOWER(?)";
+        $params[] = "%$location%";
+        $types .= 's';
+    }
 
-if ($search_term !== '') {
-    $sql .= " AND (td.tieu_de LIKE ? OR ct.ten_cong_ty LIKE ? OR td.dia_chi LIKE ?)";
-    $search_like = "%$search_term%";
-    $params = [$search_like, $search_like, $search_like];
-}
-
-$sql .= $order_by;
-
-if ($params) {
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
-        error_log("Prepare failed: " . $conn->error);
-        sendResponse(false, [], 'Lỗi chuẩn bị truy vấn');
+        $response['message'] = 'Prepare failed: ' . $conn->error;
+        echo json_encode($response);
+        exit;
     }
-    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
-    $stmt->execute();
-    $result = $stmt->get_result();
+
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $jobs = [];
+        while ($row = $result->fetch_assoc()) {
+            $jobs[] = [
+                'ma_tuyen_dung' => $row['ma_tuyen_dung'],
+                'tieu_de' => $row['tieu_de'],
+                'ten_cong_ty' => $row['ten_cong_ty'],
+                'dia_chi' => $row['dia_chi'],
+                'logo' => $row['logo'] ? '../sinh_vien/uploads/' . $row['logo'] : '../sinh_vien/uploads/logo.png'
+            ];
+        }
+        $response['success'] = true;
+        $response['data'] = $jobs;
+        $response['message'] = count($jobs) > 0 ? 'Success' : 'No matching jobs found';
+    } else {
+        $response['message'] = 'Query error: ' . $stmt->error;
+    }
+
+    $stmt->close();
 } else {
-    $result = $conn->query($sql);
+    $response['message'] = 'Invalid request method or action';
 }
 
-$jobs = [];
-while ($row = $result->fetch_assoc()) {
-    $jobs[] = [
-        'ma_tuyen_dung' => $row['ma_tuyen_dung'],
-        'tieu_de' => $row['tieu_de'],
-        'dia_chi' => $row['dia_chi'],
-        'stt_cty' => $row['stt_cty'],
-        'ten_cong_ty' => $row['ten_cong_ty'],
-        'logo' => $row['logo'] ? 'uploads/' . $row['logo'] : 'Uploads/logo.png'
-    ];
-}
-
-if ($params) $stmt->close();
+echo json_encode($response);
 $conn->close();
-
-sendResponse(true, ['jobs' => $jobs]);
-?>

@@ -41,10 +41,10 @@ $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8',
 
 // Thiết lập thông tin tài liệu
 $pdf->SetCreator(PDF_CREATOR);
-$pdf->SetAuthor('Hệ thống quản lý thực tập');
-$pdf->SetTitle('Phiếu Đánh Giá Thực Tập');
-$pdf->SetSubject('Đánh giá thực tập sinh viên');
-$pdf->SetKeywords('Đánh giá, Thực tập, Sinh viên');
+$pdf->SetAuthor('He thong quan ly thuc tap');
+$pdf->SetTitle('Phieu Danh Gia Thuc Tap');
+$pdf->SetSubject('Danh gia thuc tap sinh vien');
+$pdf->SetKeywords('Danh gia, Thuc tap, Sinh vien');
 
 // Thiết lập font hỗ trợ tiếng Việt
 $pdf->SetFont('dejavusans', '', 12);

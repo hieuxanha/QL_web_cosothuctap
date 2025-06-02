@@ -1,3 +1,9 @@
+<?php
+// Start the session at the very top
+if (session_status() == PHP_SESSION_NONE) {
+  session_start();
+}
+?>
 <html>
 
 <head>
@@ -10,6 +16,7 @@
 
 
   <link rel="stylesheet" href="../sinh_vien/giaodien_chinh.css?v=1.0">
+  <link rel="stylesheet" href="../sinh_vien/footer.css">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
@@ -219,7 +226,7 @@
         <img alt="TopCV Logo" height="40" src="../img/logo.png" width="100%" />
       </div>
       <div class="ten_trg">
-        <h3>ĐẠI HỌC TRƯỜNG NGUYÊN MÔI TRƯỜNG HÀ NỘI</h3>
+        <h3>ĐẠI HỌC TRƯỜNG TÀI NGUYÊN & MÔI TRƯỜNG HÀ NỘI</h3>
         <p>Hanoi University of Natural Resources and Environment</p>
       </div>
     </div>
@@ -227,9 +234,7 @@
     <div class="nav">
       <div class="account">
         <?php
-        if (session_status() == PHP_SESSION_NONE) {
-          session_start();
-        }
+
 
         if (isset($_SESSION['name'])) {
 
@@ -529,7 +534,7 @@
       </div>
       <div class="chat-messages" id="chatMessages">
         <div class="message system">
-          <span>Welcome to our support chat! How can we help you today?</span>
+          <span>Chào mừng bạn đến với cuộc trò chuyện hỗ trợ của chúng tôi! Chúng tôi có thể giúp gì cho bạn hôm nay?</span>
         </div>
       </div>
       <div class="chat-input">
@@ -553,8 +558,8 @@
         <p>Tiếp lợi thế - Nối thành công</p>
         <img src="../img/google_for_startup.webp" alt="Google for Startups" />
         <p>Liên hệ</p>
-        <p>Hotline: <a href="tel:02466805958">(024) 6680 5958</a> (Giờ hành chính)</p>
-        <p>Email: <a href="mailto:hotro@topcv.vn">hotro@topcv.vn</a></p>
+        <p>Hotline: <a href="tel:02466805958"> 0902.130.130</a> (Giờ hành chính)</p>
+        <p>Email: <a href="mailto:hotro@topcv.vn">DHTNMT@hunre.edu.vn</a></p>
         <p>Ứng dụng tải xuống</p>
         <div class="app-links">
           <img src="../img/app_store.webp" alt="App Store" />
@@ -709,6 +714,55 @@
   </script>
 
   <script>
+    var swiper = new Swiper('.swiper-container', {
+      slidesPerView: 4,
+      spaceBetween: 20,
+      loop: true,
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev'
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const items = document.querySelectorAll(".danhmuc_1_option");
+      const itemsPerPage = 4;
+      let currentPage = 1;
+      const totalPages = Math.ceil(items.length / itemsPerPage);
+      const pageInfo = document.querySelector(".danhmuc_1_heder-text");
+
+      function showPage(page) {
+        items.forEach((item, index) => {
+          if (index >= (page - 1) * itemsPerPage && index < page * itemsPerPage) {
+            item.style.display = "block";
+          } else {
+            item.style.display = "none";
+          }
+        });
+        pageInfo.textContent = `${page}/${totalPages}`;
+      }
+
+      document.getElementById("prev-btn").addEventListener("click", function() {
+        if (currentPage > 1) {
+          currentPage--;
+          showPage(currentPage);
+        }
+      });
+
+      document.getElementById("next-btn").addEventListener("click", function() {
+        if (currentPage < totalPages) {
+          currentPage++;
+          showPage(currentPage);
+        }
+      });
+
+      showPage(currentPage);
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
       const chatToggle = document.getElementById('chatToggle');
       const chatBox = document.getElementById('chatBox');
@@ -717,52 +771,108 @@
       const sendMessage = document.getElementById('sendMessage');
       const chatMessages = document.getElementById('chatMessages');
 
-      // Toggle chat box
-      chatToggle.addEventListener('click', function() {
-        chatBox.classList.toggle('show');
-      });
+      // Toggle chatbox
+      chatToggle.addEventListener('click', () => chatBox.classList.toggle('show'));
+      minimizeChat.addEventListener('click', () => chatBox.classList.remove('show'));
 
-      // Minimize chat box
-      minimizeChat.addEventListener('click', function() {
-        chatBox.classList.remove('show');
-      });
-
-      // Send message function
+      // Hàm gửi tin nhắn
       function sendUserMessage() {
         const message = messageInput.value.trim();
-        if (message) {
-          // Add user message
-          const userMessageDiv = document.createElement('div');
-          userMessageDiv.className = 'message user';
-          userMessageDiv.innerHTML = `<span>${message}</span>`;
-          chatMessages.appendChild(userMessageDiv);
+        if (!message) return;
 
-          // Clear input
-          messageInput.value = '';
+        // Hiển thị tin nhắn người dùng
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.className = 'message user';
+        userMessageDiv.innerHTML = `<span>${escapeHtml(message)}</span>`;
+        chatMessages.appendChild(userMessageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        messageInput.value = '';
 
-          // Auto-scroll to bottom
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+        // Hiển thị loading
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'message system loading';
+        loadingDiv.innerHTML = `<span>Đang xử lý... <i class="fas fa-spinner fa-spin"></i></span>`;
+        chatMessages.appendChild(loadingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-          // Simulate response after a delay
-          setTimeout(function() {
+        // Gửi yêu cầu đến server
+        fetch('chat_01.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message
+            })
+          })
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            return response.json();
+          })
+          .then(data => {
+            chatMessages.removeChild(loadingDiv);
             const responseDiv = document.createElement('div');
             responseDiv.className = 'message system';
-            responseDiv.innerHTML = `<span>Thanks for your message! Our team will get back to you soon.</span>`;
+            responseDiv.innerHTML = `<span>${formatMarkdown(escapeHtml(data.reply))}</span>`;
             chatMessages.appendChild(responseDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-          }, 1000);
-        }
+          })
+          .catch(error => {
+            chatMessages.removeChild(loadingDiv);
+            const responseDiv = document.createElement('div');
+            responseDiv.className = 'message system error';
+            responseDiv.innerHTML = `<span>❌ Lỗi: ${escapeHtml(error.message)}</span>`;
+            chatMessages.appendChild(responseDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          });
       }
 
-      // Send message on button click
-      sendMessage.addEventListener('click', sendUserMessage);
+      // Hàm xử lý markdown đơn giản
+      function formatMarkdown(text) {
+        return text
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // In đậm
+          .replace(/\*(.*?)\*/g, '<em>$1</em>') // Nghiêng
+          .replace(/(\n\s*[-•])/g, '<br>&bull;') // Danh sách gạch đầu dòng
+          .replace(/\n/g, '<br>'); // Xuống dòng
+      }
 
-      // Send message on Enter key
-      messageInput.addEventListener('keypress', function(e) {
+      // Hàm escape HTML để tránh XSS
+      function escapeHtml(unsafe) {
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Sự kiện gửi tin nhắn
+      sendMessage.addEventListener('click', sendUserMessage);
+      messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
+          e.preventDefault();
           sendUserMessage();
         }
       });
+
+      // Tin nhắn chào mừng
+      setTimeout(() => {
+        const welcomeDiv = document.createElement('div');
+        welcomeDiv.className = 'message system';
+        welcomeDiv.innerHTML = `
+            <span>
+                🎓 <strong>Xin chào! Tôi là trợ lý ảo của HUNRE</strong><br>
+                Bạn có thể hỏi tôi về:<br>
+                &bull; 🏢 Danh sách công ty thực tập<br>
+                &bull; 💼 Tin tuyển dụng mới nhất<br>
+                &bull; 📋 Thông tin báo cáo thực tập<br>
+                &bull; ⭐ Đánh giá thực tập<br><br>
+                Hãy thử hỏi: <em>"Có công ty nào thực tập không?"</em> hoặc <em>"Tìm việc làm mới"</em>
+            </span>
+        `;
+        chatMessages.appendChild(welcomeDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 1000);
     });
   </script>
 </body>

@@ -1,9 +1,89 @@
 <?php
-// Khởi tạo session nếu chưa có
+// Start session
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+
+
+// Database connection
+require_once '../db.php';
+
+try {
+    // Companies: Total approved and by field
+    /** @var mysqli_result $stmt */
+    $stmt = $conn->query("SELECT COUNT(*) as total FROM cong_ty WHERE trang_thai = 'Đã duyệt'");
+    if ($stmt === false) {
+        throw new Exception("Query failed for company total: " . $conn->error);
+    }
+    $company_total = $stmt->fetch_assoc()['total'];
+
+    /** @var mysqli_result $stmt */
+    $stmt = $conn->query("SELECT linh_vuc, COUNT(*) as count FROM cong_ty WHERE trang_thai = 'Đã duyệt' GROUP BY linh_vuc");
+    if ($stmt === false) {
+        throw new Exception("Query failed for company by field: " . $conn->error);
+    }
+    $company_by_field = $stmt->fetch_all(MYSQLI_ASSOC);
+    $company_labels = array_column($company_by_field, 'linh_vuc');
+    $company_data = array_column($company_by_field, 'count');
+    $company_details = implode(' | ', array_map(fn($row) => "{$row['linh_vuc']}: {$row['count']}", $company_by_field));
+
+    // Students: Total and by faculty
+    /** @var mysqli_result $stmt */
+    $stmt = $conn->query("SELECT COUNT(*) as total FROM sinh_vien");
+    if ($stmt === false) {
+        throw new Exception("Query failed for student total: " . $conn->error);
+    }
+    $student_total = $stmt->fetch_assoc()['total'];
+
+    /** @var mysqli_result $stmt */
+    $stmt = $conn->query("SELECT khoa, COUNT(*) as count FROM sinh_vien GROUP BY khoa");
+    if ($stmt === false) {
+        throw new Exception("Query failed for student by faculty: " . $conn->error);
+    }
+    $student_by_faculty = $stmt->fetch_all(MYSQLI_ASSOC);
+    $student_labels = array_column($student_by_faculty, 'khoa');
+    $student_data = array_column($student_by_faculty, 'count');
+    $student_details = implode(' | ', array_map(fn($row) => "{$row['khoa']}: {$row['count']}", $student_by_faculty));
+
+    // Applications: Total and by status
+    /** @var mysqli_result $stmt */
+    $stmt = $conn->query("SELECT COUNT(*) as total FROM ung_tuyen");
+    if ($stmt === false) {
+        throw new Exception("Query failed for application total: " . $conn->error);
+    }
+    $application_total = $stmt->fetch_assoc()['total'];
+
+    /** @var mysqli_result $stmt */
+    $stmt = $conn->query("SELECT trang_thai, COUNT(*) as count FROM ung_tuyen GROUP BY trang_thai");
+    if ($stmt === false) {
+        throw new Exception("Query failed for application by status: " . $conn->error);
+    }
+    $application_by_status = $stmt->fetch_all(MYSQLI_ASSOC);
+    $application_labels = array_column($application_by_status, 'trang_thai');
+    $application_data = array_column($application_by_status, 'count');
+    $application_details = implode(' | ', array_map(fn($row) => "{$row['trang_thai']}: {$row['count']}", $application_by_status));
+
+    // Job Postings: Total approved and by faculty
+    /** @var mysqli_result $stmt */
+    $stmt = $conn->query("SELECT COUNT(*) as total FROM tuyen_dung WHERE trang_thai = 'Đã duyệt'");
+    if ($stmt === false) {
+        throw new Exception("Query failed for job total: " . $conn->error);
+    }
+    $job_total = $stmt->fetch_assoc()['total'];
+
+    /** @var mysqli_result $stmt */
+    $stmt = $conn->query("SELECT khoa, COUNT(*) as count FROM tuyen_dung WHERE trang_thai = 'Đã duyệt' GROUP BY khoa");
+    if ($stmt === false) {
+        throw new Exception("Query failed for job by faculty: " . $conn->error);
+    }
+    $job_by_faculty = $stmt->fetch_all(MYSQLI_ASSOC);
+    $job_labels = array_column($job_by_faculty, 'khoa');
+    $job_data = array_column($job_by_faculty, 'count');
+    $job_details = implode(' | ', array_map(fn($row) => "{$row['khoa']}: {$row['count']}", $job_by_faculty));
+} catch (Exception $e) {
+    $error_message = "Lỗi truy vấn cơ sở dữ liệu: " . $e->getMessage();
+}
 ?>
 
 <!DOCTYPE html>
@@ -22,43 +102,44 @@ if (session_status() == PHP_SESSION_NONE) {
 
     <link rel="stylesheet" href="./ui_cstt.css" />
     <style>
-        /* Thêm CSS cho dropdown nếu cần */
-        .account .dropdown {
+        .dropdown {
             position: relative;
             display: inline-block;
         }
 
-        .account .user-name {
+        .user-name {
             cursor: pointer;
-            font-weight: 500;
-            color: #333;
+            padding: 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
         }
 
-        .account .dropdown-content {
+        .dropdown-content {
             display: none;
             position: absolute;
-            right: 0;
-            background: #fff;
-            min-width: 120px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
+            background-color: #ffffff;
+            min-width: 150px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
             z-index: 1;
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 15px;
+            top: 18px;
         }
 
-        .account .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .account .dropdown-content a {
-            color: #333;
-            padding: 10px;
+        .dropdown-content a {
+            color: black;
             text-decoration: none;
             display: block;
-            font-size: 14px;
+            padding: 8px 12px;
         }
 
-        .account .dropdown-content a:hover {
-            background: #f4f4f4;
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
     </style>
 </head>
@@ -81,13 +162,14 @@ if (session_status() == PHP_SESSION_NONE) {
                 <li><i class="fa-solid fa-star"></i> <a href="ui_danh_gia_thuc_tap.php">Theo dõi & đánh giá thực tập</a></li>
                 <li><i class="fa-solid fa-list-check"></i> <a href="ui_quan_ly_danh_gia.php">Quản lý đánh giá thực tập</a></li>
                 <li><i class="fa-solid fa-check-circle"></i> <a href="ui_xac_nhan_hoan_thanh.php">Xác nhận hoàn thành thực tập</a></li>
+                <!-- <li><i class="fa-solid fa-chart-line"></i> <a href="Lich_thuctap.php">Gửi lịch</a></li> -->
             </ul>
         </div>
     </div>
 
     <div class="content" id="content">
         <div class="header">
-            <div class="search-bar">
+            <div class="search-bar" style="visibility: hidden">
                 <input type="text" placeholder="Tìm kiếm..." />
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"></circle>
@@ -104,42 +186,41 @@ if (session_status() == PHP_SESSION_NONE) {
                     echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
                     echo '</div>';
                     echo '</div>';
-                } else {
-                    echo '<div class="dropdown">';
-                    echo '<span class="user-name">Xin chào, Khách</span>';
-                    echo '<div class="dropdown-content">';
-                    echo '<a href="../dang_nhap_dang_ki/dang_nhap.php">Đăng nhập</a>';
-                    echo '</div>';
-                    echo '</div>';
                 }
                 ?>
+
             </div>
+
         </div>
 
         <div class="dashboard-content">
+            <?php if (isset($error_message)): ?>
+                <div class="error-message"><?php echo htmlspecialchars($error_message); ?></div>
+            <?php endif; ?>
+
             <div class="card">
-                <h3>Thông tin Công ty</h3>
-                <p>Tên: Công ty TNHH ABC</p>
-                <p>Địa chỉ: 123 Đường Nguyễn Trãi, Hà Nội</p>
-                <p>Số nhân sự: 47</p>
+                <h3>Công ty: <?php echo htmlspecialchars($company_total); ?></h3>
+                <p><?php echo htmlspecialchars($company_details ?: 'Không có dữ liệu'); ?></p>
+                <canvas id="companyChart"></canvas>
             </div>
             <div class="card">
-                <h3>Cơ sở thực tập</h3>
-                <p>Số lượng cơ sở thực tập liên kết: 10</p>
-                <p>Ngành nghề chính: Công nghệ thông tin, Kế toán, Quản trị kinh doanh</p>
-                <canvas id="internshipChart"></canvas>
+                <h3>Sinh viên: <?php echo htmlspecialchars($student_total); ?></h3>
+                <p><?php echo htmlspecialchars($student_details ?: 'Không có dữ liệu'); ?></p>
+                <canvas id="studentChart"></canvas>
             </div>
             <div class="card">
-                <h3>Thống kê ngành nghề</h3>
-                <p>Công nghệ thông tin: 35%</p>
-                <p>Kế toán - Kiểm toán: 25%</p>
-                <p>Quản trị kinh doanh: 20%</p>
-                <p>Kỹ thuật: 20%</p>
+                <h3>Ứng tuyển: <?php echo htmlspecialchars($application_total); ?></h3>
+                <p><?php echo htmlspecialchars($application_details ?: 'Không có dữ liệu'); ?></p>
+                <canvas id="applicationChart"></canvas>
+            </div>
+            <div class="card">
+                <h3>Tuyển dụng: <?php echo htmlspecialchars($job_total); ?></h3>
+                <p><?php echo htmlspecialchars($job_details ?: 'Không có dữ liệu'); ?></p>
                 <canvas id="jobChart"></canvas>
             </div>
+
         </div>
     </div>
-
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById("sidebar");
@@ -148,25 +229,35 @@ if (session_status() == PHP_SESSION_NONE) {
             content.classList.toggle("collapsed");
         }
 
-        new Chart(document.getElementById('internshipChart'), {
-            type: 'pie',
+        // Company Chart (Doughnut)
+        new Chart(document.getElementById("companyChart"), {
+            type: "doughnut",
             data: {
-                labels: ['CNTT', 'Kế toán', 'Quản trị KD'],
+                labels: <?php echo json_encode($company_labels); ?>,
                 datasets: [{
-                    data: [50, 30, 20],
-                    backgroundColor: ['#3498db', '#e74c3c', '#2ecc71']
+                    data: <?php echo json_encode($company_data); ?>,
+                    backgroundColor: ["#3498db", "#e74c3c", "#2ecc71", "#f1c40f", "#9b59b6"]
                 }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
             }
         });
 
-        new Chart(document.getElementById('jobChart'), {
-            type: 'bar',
+        // Student Chart (Bar)
+        new Chart(document.getElementById("studentChart"), {
+            type: "bar",
             data: {
-                labels: ['CNTT', 'Kế toán', 'QTKD', 'Kỹ thuật'],
+                labels: <?php echo json_encode($student_labels); ?>,
                 datasets: [{
-                    label: 'Phần trăm',
-                    data: [35, 25, 20, 20],
-                    backgroundColor: ['#1abc9c', '#f39c12', '#9b59b6', '#e67e22']
+                    label: "Số sinh viên",
+                    data: <?php echo json_encode($student_data); ?>,
+                    backgroundColor: "#f39c12"
                 }]
             },
             options: {
@@ -174,6 +265,46 @@ if (session_status() == PHP_SESSION_NONE) {
                 scales: {
                     y: {
                         beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Application Chart (Pie)
+        new Chart(document.getElementById("applicationChart"), {
+            type: "pie",
+            data: {
+                labels: <?php echo json_encode($application_labels); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($application_data); ?>,
+                    backgroundColor: ["#1abc9c", "#9b59b6", "#e67e22"]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+
+        // Job Chart (Pie)
+        new Chart(document.getElementById("jobChart"), {
+            type: "pie",
+            data: {
+                labels: <?php echo json_encode($job_labels); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($job_data); ?>,
+                    backgroundColor: ["#1abc9c", "#9b59b6", "#e67e22", "#3498db"]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top'
                     }
                 }
             }

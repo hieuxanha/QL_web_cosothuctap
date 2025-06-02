@@ -64,6 +64,7 @@ require '../db.php';
 
 <body>
     <div class="container">
+
         <!-- Cột bên trái: Form đăng ký -->
         <div class="left">
             <h2>Chào mừng bạn đến</h2>
@@ -90,6 +91,7 @@ require '../db.php';
                     <label>Số hiệu giảng viên</label>
                     <input type="number" name="so_hieu_giangvien" placeholder="Số hiệu giảng viên" />
                 </div>
+
                 <div class="input-group">
                     <label>Email</label>
                     <input type="email" name="email" placeholder="Nhập email" required />

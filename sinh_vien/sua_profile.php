@@ -89,6 +89,7 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -101,15 +102,18 @@ $conn->close();
         .form-group {
             margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
             font-weight: 500;
             margin-bottom: 5px;
             color: #333;
         }
+
         .form-group label .required {
             color: #f44336;
         }
+
         .form-control {
             width: 100%;
             padding: 10px;
@@ -118,16 +122,19 @@ $conn->close();
             font-size: 1rem;
             color: #333;
         }
+
         .form-control:focus {
             border-color: #007bff;
             outline: none;
             box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
         }
+
         .form-actions {
             margin-top: 20px;
             display: flex;
             gap: 15px;
         }
+
         .save-btn {
             padding: 10px 25px;
             background-color: #28a745;
@@ -139,9 +146,11 @@ $conn->close();
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         .save-btn:hover {
             background-color: #218838;
         }
+
         .cancel-btn {
             padding: 10px 25px;
             background-color: #f44336;
@@ -153,30 +162,35 @@ $conn->close();
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         .cancel-btn:hover {
             background-color: #c62828;
         }
+
         .message {
             padding: 10px;
             margin-bottom: 15px;
             border-radius: 5px;
             text-align: center;
         }
+
         .message.success {
             background-color: #e8f5e9;
             color: #2e7d32;
         }
+
         .message.error {
             background-color: #ffebee;
             color: #c62828;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <div class="left-section">
             <div class="logo">
-                <img alt="Logo" src="https://via.placeholder.com/100x50" />
+                <img alt="Logo" src="../img/logo.png" />
             </div>
             <div class="ten_trg">
                 <h3>ĐẠI HỌC TÀI NGUYÊN MÔI TRƯỜNG HÀ NỘI</h3>
@@ -184,8 +198,7 @@ $conn->close();
             </div>
         </div>
         <div class="nav">
-            <a href="../index.php">Việc làm</a>
-            <a href="#">Hồ sơ & CV</a>
+            <a href="./giaodien_sinhvien.php">Trang chủ</a>
             <a href="../dang_nhap_dang_ki/logic_dangxuat.php" class="btn btn-login"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
             <a href="./profile.php"><i class="fas fa-user"></i></a>
         </div>
@@ -223,11 +236,36 @@ $conn->close();
                     </div>
                     <div class="form-group">
                         <label>Lớp</label>
-                        <input type="text" name="lop" class="form-control" value="<?php echo htmlspecialchars($sinh_vien['lop']); ?>" >
+                        <input type="text" name="lop" class="form-control" value="<?php echo htmlspecialchars($sinh_vien['lop']); ?>">
                     </div>
                     <div class="form-group">
                         <label>Khoa</label>
-                        <input type="text" name="khoa" class="form-control" value="<?php echo htmlspecialchars($sinh_vien['khoa']); ?>" >
+                        <select name="khoa" class="form-control">
+                            <option value="">-- Chọn khoa --</option>
+                            <?php
+                            $khoa_options = [
+                                'kinh_te' => 'Kinh tế',
+                                'moi_truong' => 'Môi trường',
+                                'quan_ly_dat_dai' => 'Quản lý đất đai',
+                                'khi_tuong_thuy_van' => 'Khí tượng thủy văn',
+                                'trac_dia_ban_do' => 'Trắc địa bản đồ',
+                                'dia_chat' => 'Địa chất',
+                                'tai_nguyen_nuoc' => 'Tài nguyên nước',
+                                'cntt' => 'Công nghệ thông tin',
+                                'ly_luan_chinh_tri' => 'Lý luận chính trị',
+                                'bien_hai_dao' => 'Biển - Hải đảo',
+                                'khoa_hoc_dai_cuong' => 'Khoa học đại cương',
+                                'the_chat_quoc_phong' => 'Thể chất quốc phòng',
+                                'bo_mon_luat' => 'Bộ môn Luật',
+                                'bien_doi_khi_hau' => 'Biến đổi khí hậu',
+                                'ngoai_ngu' => 'Ngoại ngữ'
+                            ];
+                            foreach ($khoa_options as $value => $label) {
+                                $selected = ($sinh_vien['khoa'] == $value) ? 'selected' : '';
+                                echo "<option value=\"$value\" $selected>$label</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="save-btn"><i class="fas fa-save"></i> Lưu thay đổi</button>
@@ -238,4 +276,5 @@ $conn->close();
         </div>
     </div>
 </body>
+
 </html>

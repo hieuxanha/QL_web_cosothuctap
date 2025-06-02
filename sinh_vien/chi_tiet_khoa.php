@@ -1,11 +1,17 @@
 <?php
-// Kết nối CSDL
 require_once '../db.php';
+if (session_status() == PHP_SESSION_NONE) {
+  session_start();
+}
 
-// Lấy tham số khoa từ URL
 $khoa = isset($_GET['khoa']) ? $_GET['khoa'] : '';
+$keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+$location = isset($_GET['location']) ? trim($_GET['location']) : '';
 
-// Ánh xạ tên khoa từ URL sang giá trị trong CSDL
+$per_page = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $per_page;
+
 $khoa_mapping = [
   'kinh_te' => 'kinh_te',
   'moi_truong' => 'moi_truong',
@@ -24,83 +30,330 @@ $khoa_mapping = [
   'ngoai_ngu' => 'ngoai_ngu'
 ];
 
-// Chuyển đổi tham số khoa từ URL sang giá trị trong CSDL
 $khoa_value = isset($khoa_mapping[$khoa]) ? $khoa_mapping[$khoa] : '';
+$error_message = '';
+if (empty($khoa_value)) {
+  $khoa_value = ''; // Hiển thị tất cả tin nếu khoa không hợp lệ
+  $error_message = "Tham số 'khoa' không hợp lệ. Hiển thị tất cả tin tuyển dụng.";
+}
 
-// Truy vấn CSDL để lấy tin tuyển dụng theo khoa và thông tin công ty
-$sql = "SELECT t.*, c.ten_cong_ty, c.logo 
-        FROM tuyen_dung t 
-        JOIN cong_ty c ON t.stt_cty = c.stt_cty 
-        WHERE t.khoa = ? AND t.trang_thai = 'Đã duyệt'";
+$sql = "
+    SELECT t.*, c.ten_cong_ty, c.logo, c.stt_cty
+    FROM tuyen_dung t 
+    JOIN cong_ty c ON t.stt_cty = c.stt_cty 
+    WHERE t.trang_thai = 'Đã duyệt'";
+$params = [];
+$conditions = [];
+
+if ($khoa_value) {
+  $sql .= " AND t.khoa = ?";
+  $params[] = $khoa_value;
+}
+
+if ($keyword) {
+  $conditions[] = "(t.tieu_de LIKE ? OR c.ten_cong_ty LIKE ?)";
+  $likeKeyword = "%$keyword%";
+  $params[] = $likeKeyword;
+  $params[] = $likeKeyword;
+}
+
+if ($location) {
+  $conditions[] = "t.dia_chi LIKE ?";
+  $likeLocation = "%$location%";
+  $params[] = $likeLocation;
+}
+
+if ($conditions) {
+  $sql .= " AND " . implode(" AND ", $conditions);
+}
+
+$sql .= " ORDER BY t.han_nop DESC LIMIT ? OFFSET ?";
+$params[] = $per_page;
+$params[] = $offset;
+
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $khoa_value);
+$param_count = count($params) - 2; // Số lượng tham số chuỗi
+$types = ($param_count > 0 ? str_repeat('s', $param_count) : '') . 'ii';
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
+
+$total_sql = "
+    SELECT COUNT(*) AS total 
+    FROM tuyen_dung t 
+    JOIN cong_ty c ON t.stt_cty = c.stt_cty 
+    WHERE t.trang_thai = 'Đã duyệt'";
+$total_params = [];
+if ($khoa_value) {
+  $total_sql .= " AND t.khoa = ?";
+  $total_params[] = $khoa_value;
+}
+if ($keyword) {
+  $total_sql .= " AND (t.tieu_de LIKE ? OR c.ten_cong_ty LIKE ?)";
+  $likeKeyword = "%$keyword%";
+  $total_params[] = $likeKeyword;
+  $total_params[] = $likeKeyword;
+}
+if ($location) {
+  $total_sql .= " AND t.dia_chi LIKE ?";
+  $likeLocation = "%$location%";
+  $total_params[] = $likeLocation;
+}
+
+$total_stmt = $conn->prepare($total_sql);
+$total_stmt->bind_param(str_repeat('s', count($total_params)), ...$total_params);
+$total_stmt->execute();
+$total_records = $total_stmt->get_result()->fetch_assoc()['total'];
+$total_pages = ceil($total_records / $per_page);
+$total_stmt->close();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Danh sách tin tuyển dụng - <?php echo htmlspecialchars($khoa); ?></title>
+  <title>Danh sách tin tuyển dụng - <?php echo htmlspecialchars($khoa ? $khoa : 'Tất cả'); ?></title>
   <link rel="stylesheet" href="../sinh_vien/chi_tiet_khoa.css">
+  <link rel="stylesheet" href="../sinh_vien/footer.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <style>
+    .timkiem-job {
+      display: flex;
+      justify-content: center;
+    }
+
+    .search-bar {
+      background-color: #fff;
+      padding: 12px;
+      position: relative;
+      display: inline-flex;
+      justify-content: center;
+      gap: 10px;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-bar input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    #clearSearch {
+      cursor: pointer;
+      color: #555;
+      font-size: 18px;
+      margin-left: 5px;
+      display: none;
+    }
+
+    #clearSearch:hover {
+      color: #000;
+    }
+
+    #searchLoading {
+      margin-left: 10px;
+      display: none;
+    }
+
+    #searchResults {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 300px;
+      overflow-y: auto;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      z-index: 1000;
+      display: none;
+    }
+
+    #searchResults.active {
+      display: block;
+    }
+
+    #searchResults ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #searchResults li {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #searchResults li:hover {
+      background-color: #f5f5f5;
+    }
+
+    #searchResults li:last-child {
+      border-bottom: none;
+    }
+
+    #searchResults img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+    }
+
+    .pagination {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .pagination a {
+      display: inline-block;
+      padding: 8px 12px;
+      margin: 0 4px;
+      text-decoration: none;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      color: #0078d4;
+    }
+
+    .pagination a:hover {
+      background-color: #0078d4;
+      color: white;
+    }
+
+    .pagination a.active {
+      background-color: #0078d4;
+      color: white;
+      font-weight: bold;
+    }
+
+    .job-card img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      margin-right: 15px;
+    }
+
+    .job-card h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .job-card h3 a {
+      color: #333;
+      text-decoration: none;
+    }
+
+    .job-card h3 a:hover {
+      text-decoration: underline;
+    }
+
+    .job-card p a {
+      color: #333;
+      text-decoration: none;
+    }
+
+    .job-card p a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 
 <body>
-  <!-- Header -->
   <div class="header">
     <div class="left-section">
       <div class="logo">
         <img alt="TopCV Logo" height="40" src="../img/logo.png" width="100%" />
       </div>
       <div class="ten_trg">
-        <h3>ĐẠI HỌC TRƯỜNG NGUYÊN MÔI TRƯỜNG HÀ NỘI</h3>
+        <h3>ĐẠI HỌC TÀI NGUYÊN & MÔI TRƯỜNG HÀ NỘI</h3>
         <p>Hanoi University of Natural Resources and Environment</p>
       </div>
     </div>
     <div class="nav">
-      <a href="#">Việc làm</a>
-      <a href="#">Hồ sơ & CV</a>
-      <a class="btn" href="./form_dn.html">Đăng nhập</a>
-      <a class="btn" href="./form_dk.html">Đăng ký</a>
-      <a href="#"><i class="fa-solid fa-user"></i></a>
+      <div class="account">
+        <?php
+        if (isset($_SESSION['name'])) {
+          echo '<div class="dropdown">';
+          echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+          echo '<div class="dropdown-content">';
+          echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
+          echo '</div>';
+          echo '</div>';
+        }
+        ?>
+      </div>
+      <?php
+      if (!isset($_SESSION['name'])) {
+        echo '<a class="btn" href="../dang_nhap_dang_ki/form_dn.php">Đăng nhập</a>';
+        echo '<a class="btn" href="../dang_nhap_dang_ki/form_dk.php">Đăng ký</a>';
+      }
+      ?>
+      <?php
+      if (isset($_SESSION['name'])) {
+        echo '<a href="./profile.php"><i class="fa-solid fa-user"></i></a>';
+      } else {
+        echo '<a href="../dang_nhap_dang_ki/form_dn.php"><i class="fa-solid fa-user"></i></a>';
+      }
+      ?>
     </div>
   </div>
 
   <div class="timkiem-job">
     <div class="search-bar">
-      <input placeholder="Khoa ..." type="text" />
-      <button>Tìm kiếm</button>
+      <input id="searchInput" placeholder="Tìm theo tiêu đề, công ty..." type="text" value="<?php echo htmlspecialchars($keyword); ?>" />
+      <select id="locationFilter">
+        <option value="">Địa điểm</option>
+        <option value="Ba Đình" <?php echo $location === 'Ba Đình' ? 'selected' : ''; ?>>Ba Đình</option>
+        <option value="Hoàn Kiếm" <?php echo $location === 'Hoàn Kiếm' ? 'selected' : ''; ?>>Hoàn Kiếm</option>
+        <option value="Tây Hồ" <?php echo $location === 'Tây Hồ' ? 'selected' : ''; ?>>Tây Hồ</option>
+        <option value="Cầu Giấy" <?php echo $location === 'Cầu Giấy' ? 'selected' : ''; ?>>Cầu Giấy</option>
+        <option value="Đống Đa" <?php echo $location === 'Đống Đa' ? 'selected' : ''; ?>>Đống Đa</option>
+        <option value="Hai Bà Trưng" <?php echo $location === 'Hai Bà Trưng' ? 'selected' : ''; ?>>Hai Bà Trưng</option>
+        <option value="Hoàng Mai" <?php echo $location === 'Hoàng Mai' ? 'selected' : ''; ?>>Hoàng Mai</option>
+        <option value="Long Biên" <?php echo $location === 'Long Biên' ? 'selected' : ''; ?>>Long Biên</option>
+        <option value="Nam Từ Liêm" <?php echo $location === 'Nam Từ Liêm' ? 'selected' : ''; ?>>Nam Từ Liêm</option>
+        <option value="Bắc Từ Liêm" <?php echo $location === 'Bắc Từ Liêm' ? 'selected' : ''; ?>>Bắc Từ Liêm</option>
+        <option value="Thanh Xuân" <?php echo $location === 'Thanh Xuân' ? 'selected' : ''; ?>>Thanh Xuân</option>
+        <option value="Sơn Tây" <?php echo $location === 'Sơn Tây' ? 'selected' : ''; ?>>Sơn Tây</option>
+        <option value="Ba Vì" <?php echo $location === 'Ba Vì' ? 'selected' : ''; ?>>Ba Vì</option>
+        <option value="Chương Mỹ" <?php echo $location === 'Chương Mỹ' ? 'selected' : ''; ?>>Chương Mỹ</option>
+        <option value="Đan Phượng" <?php echo $location === 'Đan Phượng' ? 'selected' : ''; ?>>Đan Phượng</option>
+        <option value="Đông Anh" <?php echo $location === 'Đông Anh' ? 'selected' : ''; ?>>Đông Anh</option>
+        <option value="Gia Lâm" <?php echo $location === 'Gia Lâm' ? 'selected' : ''; ?>>Gia Lâm</option>
+        <option value="Hoài Đức" <?php echo $location === 'Hoài Đức' ? 'selected' : ''; ?>>Hoài Đức</option>
+        <option value="Mỹ Đức" <?php echo $location === 'Mỹ Đức' ? 'selected' : ''; ?>>Mỹ Đức</option>
+        <option value="Phú Xuyên" <?php echo $location === 'Phú Xuyên' ? 'selected' : ''; ?>>Phú Xuyên</option>
+        <option value="Quốc Oai" <?php echo $location === 'Quốc Oai' ? 'selected' : ''; ?>>Quốc Oai</option>
+        <option value="Thạch Thất" <?php echo $location === 'Thạch Thất' ? 'selected' : ''; ?>>Thạch Thất</option>
+        <option value="Thái Nguyên" <?php echo $location === 'Thái Nguyên' ? 'selected' : ''; ?>>Thái Nguyên</option>
+        <option value="Thường Tín" <?php echo $location === 'Thường Tín' ? 'selected' : ''; ?>>Thường Tín</option>
+        <option value="Ứng Hòa" <?php echo $location === 'Ứng Hòa' ? 'selected' : ''; ?>>Ứng Hòa</option>
+        <option value="Phúc Thọ" <?php echo $location === 'Phúc Thọ' ? 'selected' : ''; ?>>Phúc Thọ</option>
+        <option value="Hà Nội (ngoại thành)" <?php echo $location === 'Hà Nội (ngoại thành)' ? 'selected' : ''; ?>>Hà Nội (ngoại thành)</option>
+      </select>
+      <span id="clearSearch" style="display: none;"><i class="fas fa-times"></i></span>
+      <button onclick="updateSearch(document.getElementById('searchInput').value, document.getElementById('locationFilter').value)">Tìm kiếm</button>
+      <span id="searchLoading"><i class="fas fa-spinner fa-spin"></i></span>
+      <div id="searchResults"></div>
     </div>
   </div>
 
   <div class="container">
     <div class="main-content">
-      <!-- Sidebar Filters -->
-      <!-- <aside class="sidebar">
-        <h3>Bộ lọc</h3>
-        <div class="filter-group">
-          <h4>Danh mục</h4>
-          <label><input type="checkbox"> Sales Bán lẻ</label>
-          <label><input type="checkbox"> Kinh doanh khác</label>
-          <label><input type="checkbox"> Sales Admin</label>
+      <?php if (!empty($error_message)): ?>
+        <div style="color: red; padding: 10px; margin: 10px 0; background: #ffe0e0;">
+          <?php echo htmlspecialchars($error_message); ?>
         </div>
-        <div class="filter-group">
-          <h4>Hình thức kinh doanh</h4>
-          <label><input type="radio" name="business-type"> Tất cả</label>
-          <label><input type="radio" name="business-type"> Telesales</label>
-        </div>
-      </aside> -->
-
-      <!-- Job Listings -->
+      <?php endif; ?>
       <section class="job-listings">
         <?php
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
-            // Truy vấn số lượng ứng tuyển cho tin này
             $ma_tuyen_dung = $row['ma_tuyen_dung'];
             $sql_ung_tuyen = "SELECT COUNT(*) as so_ung_tuyen FROM ung_tuyen WHERE ma_tuyen_dung = ?";
             $stmt_ung_tuyen = $conn->prepare($sql_ung_tuyen);
@@ -108,35 +361,46 @@ $result = $stmt->get_result();
             $stmt_ung_tuyen->execute();
             $result_ung_tuyen = $stmt_ung_tuyen->get_result();
             $so_ung_tuyen = $result_ung_tuyen->fetch_assoc()['so_ung_tuyen'];
+            $stmt_ung_tuyen->close();
 
             echo '<div class="job-card">';
-            echo '<img src="../uploads/' . htmlspecialchars($row['logo']) . '" alt="Company Logo" class="job-image">';
+            echo '<img src="../sinh_vien/uploads/' . htmlspecialchars($row['logo']) . '" alt="Company Logo" class="job-image">';
             echo '<div class="job-info">';
-            echo '<h4>' . htmlspecialchars($row['tieu_de']) . '</h4>';
-            echo '<p>' . htmlspecialchars($row['ten_cong_ty']) . '</p>';
+            echo '<h3><a href="chi_tiet.php?ma_tuyen_dung=' . htmlspecialchars($row['ma_tuyen_dung']) . '">' . htmlspecialchars($row['tieu_de']) . '</a></h3>';
+            echo '<p><a href="giaodien_thongtincty.php?stt_cty=' . htmlspecialchars($row['stt_cty']) . '">' . htmlspecialchars($row['ten_cong_ty']) . '</a></p>';
             echo '<p>' . htmlspecialchars($row['dia_chi']) . ' | Hạn nộp: ' . htmlspecialchars($row['han_nop']) . '</p>';
             echo '<p>Số lượng tuyển: ' . htmlspecialchars($row['so_luong']) . ' | Đã ứng tuyển: ' . $so_ung_tuyen . '</p>';
             echo '</div>';
             echo '</div>';
           }
         } else {
-          echo '<p>Không có tin tuyển dụng nào cho khoa này.</p>';
+          echo '<p>Không có tin tuyển dụng nào cho khoa này. Kiểm tra dữ liệu trong bảng tuyen_dung và cong_ty.</p>';
+          if ($khoa_value) {
+            echo '<p>Giá trị khoa hiện tại: ' . htmlspecialchars($khoa_value) . '</p>';
+          }
         }
         ?>
       </section>
+
+      <?php if ($total_pages > 1): ?>
+        <div class="pagination">
+          <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+            <a href="?khoa=<?php echo urlencode($khoa); ?>&page=<?php echo $i; ?>&keyword=<?php echo urlencode($keyword); ?>&location=<?php echo urlencode($location); ?>" class="<?php echo $i === $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+          <?php endfor; ?>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 
-  <!-- Footer -->
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-section">
-        <img src="logo.png" alt="TopCV Logo" class="footer-logo" />
+        <img src="../img/logo.png" alt="TopCV Logo" class="footer-logo" />
         <p>Tiếp lợi thế - Nối thành công</p>
         <img src="../img/google_for_startup.webp" alt="Google for Startups" />
         <p>Liên hệ</p>
-        <p>Hotline: <a href="tel:02466805958">(024) 6680 5958</a> (Giờ hành chính)</p>
-        <p>Email: <a href="mailto:hotro@topcv.vn">hotro@topcv.vn</a></p>
+        <p>Hotline: <a href="tel:02466805958"> 0902.130.130</a> (Giờ hành chính)</p>
+        <p>Email: <a href="mailto:hotro@topcv.vn">DHTNMT@hunre.edu.vn</a></p>
         <p>Ứng dụng tải xuống</p>
         <div class="app-links">
           <img src="../img/app_store.webp" alt="App Store" />
@@ -185,12 +449,122 @@ $result = $stmt->get_result();
       </div>
     </div>
   </footer>
+
+  <script>
+    let debounceTimer;
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+      clearTimeout(debounceTimer);
+      const keyword = this.value.trim();
+      const location = document.getElementById("locationFilter").value;
+      const resultsContainer = document.getElementById("searchResults");
+      const loadingSpinner = document.getElementById("searchLoading");
+      const clearSearch = document.getElementById("clearSearch");
+
+      if (keyword === "" && location === "") {
+        resultsContainer.classList.remove("active");
+        clearSearch.style.display = 'none';
+        return;
+      }
+
+      clearSearch.style.display = 'inline-block';
+      loadingSpinner.style.display = 'inline-block';
+      debounceTimer = setTimeout(() => {
+        const url = `../logic_sinhvien/logic_chi_tiet_khoa.php?action=search&khoa=<?php echo urlencode($khoa); ?>&keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`;
+
+        fetch(url)
+          .then(response => {
+            loadingSpinner.style.display = 'none';
+            if (!response.ok) throw new Error("HTTP status " + response.status);
+            return response.json();
+          })
+          .then(data => {
+            resultsContainer.innerHTML = "";
+            if (data.success && data.data.jobs.length > 0) {
+              const resultList = document.createElement("ul");
+              data.data.jobs.slice(0, 10).forEach(job => {
+                const listItem = document.createElement("li");
+                const logo = job.logo || "../sinh_vien/uploads/logo.png";
+                listItem.innerHTML = `
+                                    <img src="${escapeHTML(logo)}" alt="Company Logo" />
+                                    <div>
+                                        <strong>${escapeHTML(job.tieu_de)}</strong>
+                                        <p style="margin: 0; font-size: 12px;">${escapeHTML(job.ten_cong_ty)}</p>
+                                    </div>
+                                `;
+                listItem.addEventListener("click", () => {
+                  updateSearch(job.tieu_de, location);
+                  resultsContainer.classList.remove("active");
+                });
+                resultList.appendChild(listItem);
+              });
+              resultsContainer.appendChild(resultList);
+              resultsContainer.classList.add("active");
+            } else {
+              resultsContainer.innerHTML = "<p>Không tìm thấy tin tuyển dụng phù hợp.</p>";
+              resultsContainer.classList.add("active");
+            }
+          })
+          .catch(error => {
+            loadingSpinner.style.display = 'none';
+            alert("Có lỗi xảy ra khi tìm kiếm: " + error.message);
+            console.error("Lỗi tìm kiếm:", error);
+          });
+      }, 300);
+    });
+
+    document.getElementById("locationFilter").addEventListener("change", function() {
+      const keyword = document.getElementById("searchInput").value.trim();
+      const location = this.value;
+      updateSearch(keyword, location);
+    });
+
+    document.getElementById("clearSearch").addEventListener("click", function() {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("locationFilter").value = "";
+      this.style.display = 'none';
+      updateSearch("", "");
+    });
+
+    document.addEventListener("click", function(event) {
+      const resultsContainer = document.getElementById("searchResults");
+      const searchInput = document.getElementById("searchInput");
+      if (!resultsContainer.contains(event.target) && !searchInput.contains(event.target)) {
+        resultsContainer.classList.remove("active");
+      }
+    });
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, match => ({
+        '&': '&',
+        '<': '<',
+        '>': '>',
+        '"': '"',
+        "'": "'"
+      })[match]);
+    }
+
+    function updateSearch(keyword, location) {
+      const params = new URLSearchParams();
+      params.append('khoa', '<?php echo urlencode($khoa); ?>');
+      params.append('page', '1');
+      if (keyword) params.append('keyword', keyword);
+      if (location) params.append('location', location);
+      window.location.href = `?${params.toString()}`;
+    }
+
+    window.onload = function() {
+      const keyword = document.getElementById("searchInput").value.trim();
+      const location = document.getElementById("locationFilter").value;
+      if (keyword || location) {
+        document.getElementById("clearSearch").style.display = 'inline-block';
+      }
+    };
+  </script>
 </body>
 
 </html>
 
 <?php
-// Đóng kết nối
 $stmt->close();
 $conn->close();
 ?>

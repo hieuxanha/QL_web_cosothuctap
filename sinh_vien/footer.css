@@ -38,9 +38,10 @@
 
 .footer-section ul li a {
     text-decoration: none;
-    color: #007bff;
+    color: #0b1218;
 }
 
 .footer-section ul li a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    /* Bỏ gạch chân khi hover */
 }

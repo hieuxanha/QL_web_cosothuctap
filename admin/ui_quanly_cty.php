@@ -281,6 +281,42 @@ session_start();
         .cancel:hover {
             background-color: #e0a800;
         }
+
+        /* Pagination styles */
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #1e657e;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            color: #888;
+        }
+
+        .pagination span {
+            padding: 8px 12px;
+            background-color: #1e657e;
+            color: white;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
@@ -294,14 +330,13 @@ session_start();
             <hr />
             <ul>
                 <h2>Quản lý</h2>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_admin.php">admin..</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanly_cty.php">Phê duyệt công ty</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Thông báo</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Bảo trì hệ thống</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Cơ sở</a></li>
+                <li><i class="fa-solid fa-chart-line"></i> <a href="ui_admin.php">Tổng quan</a></li>
+                <li><i class="fa-solid fa-users"></i> <a href="ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
+                <li><i class="fa-solid fa-building-circle-check"></i> <a href="ui_quanly_cty.php">Phê duyệt công ty</a></li>
+                <li><i class="fa-solid fa-file-circle-check"></i> <a href="ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
+                <li><i class="fa-solid fa-chalkboard-user"></i> <a href="ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
+
+
             </ul>
         </div>
     </div>
@@ -375,6 +410,9 @@ session_start();
                     </tr>
                 </tbody>
             </table>
+            <div class="pagination" id="pagination">
+                <!-- Pagination controls will be dynamically added here -->
+            </div>
         </div>
 
         <!-- Modal chỉnh sửa công ty -->
@@ -431,6 +469,9 @@ session_start();
     </div>
 
     <script>
+        let currentPage = 1;
+        const recordsPerPage = 10;
+
         function toggleSidebar() {
             document.getElementById("sidebar").classList.toggle("collapsed");
             document.getElementById("content").classList.toggle("collapsed");
@@ -438,17 +479,16 @@ session_start();
 
         function escapeHTML(str) {
             return str.replace(/[&<>"']/g, match => ({
-                '&': '&',
-                '<': '<',
-                '>': '>',
-                '"': '"',
-                "'": "'"
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
             })[match]);
         }
 
         function getActionButtons(stt_cty, trang_thai) {
             let buttons = `<button class="edit" onclick="openEditModal(${stt_cty})">Sửa</button>`;
-            // let buttons = `<button class="edit" onclick="openEditModal(${stt_cty})">Xem</button>`;
 
             if (trang_thai === 'Đang chờ') {
                 buttons += `
@@ -472,13 +512,13 @@ session_start();
             return buttons;
         }
 
-        function loadCompanies(searchTerm = '') {
+        function loadCompanies(searchTerm = '', page = 1) {
             const tableBody = document.getElementById("companyList");
             tableBody.innerHTML = '<tr><td colspan="5"><i class="fas fa-spinner fa-spin"></i> Đang tải...</td></tr>';
 
             const url = searchTerm ?
-                `../logic_admin/logic_duyet_cty.php?action=search_companies&keyword=${encodeURIComponent(searchTerm)}` :
-                '../logic_admin/logic_duyet_cty.php?action=get_companies';
+                `../logic_admin/logic_duyet_cty.php?action=search_companies&keyword=${encodeURIComponent(searchTerm)}&page=${page}&limit=${recordsPerPage}` :
+                `../logic_admin/logic_duyet_cty.php?action=get_companies&page=${page}&limit=${recordsPerPage}`;
 
             fetch(url)
                 .then(response => {
@@ -490,7 +530,7 @@ session_start();
                 .then(data => {
                     tableBody.innerHTML = '';
                     if (data.success && data.data.companies.length > 0) {
-                        let stt = 1;
+                        let stt = (page - 1) * recordsPerPage + 1;
                         data.data.companies.forEach(company => {
                             const row = document.createElement('tr');
                             row.setAttribute('data-stt-cty', company.stt_cty);
@@ -504,8 +544,11 @@ session_start();
                             `;
                             tableBody.appendChild(row);
                         });
+                        // Render pagination controls
+                        renderPagination(data.data.totalPages, page, searchTerm);
                     } else {
                         tableBody.innerHTML = '<tr><td colspan="5">Không tìm thấy công ty nào</td></tr>';
+                        renderPagination(0, page, searchTerm);
                     }
                 })
                 .catch(error => {
@@ -513,6 +556,43 @@ session_start();
                     showMessage('error', 'Không thể tải danh sách công ty. Vui lòng thử lại.');
                     console.error('Error:', error);
                 });
+        }
+
+        function renderPagination(totalPages, currentPage, searchTerm) {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+
+            // Previous button
+            const prevButton = document.createElement("button");
+            prevButton.textContent = "Trước";
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => loadCompanies(searchTerm, currentPage - 1);
+            pagination.appendChild(prevButton);
+
+            // Page numbers (show limited range for better UX)
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageSpan = document.createElement(i === currentPage ? "span" : "button");
+                pageSpan.textContent = i;
+                if (i !== currentPage) {
+                    pageSpan.onclick = () => loadCompanies(searchTerm, i);
+                }
+                pagination.appendChild(pageSpan);
+            }
+
+            // Next button
+            const nextButton = document.createElement("button");
+            nextButton.textContent = "Sau";
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+            nextButton.onclick = () => loadCompanies(searchTerm, currentPage + 1);
+            pagination.appendChild(nextButton);
         }
 
         let debounceTimer;
@@ -528,7 +608,7 @@ session_start();
             }
 
             debounceTimer = setTimeout(() => {
-                fetch(`../logic_admin/logic_duyet_cty.php?action=search_companies&keyword=${encodeURIComponent(keyword)}`)
+                fetch(`../logic_admin/logic_duyet_cty.php?action=search_companies&keyword=${encodeURIComponent(keyword)}&page=1&limit=${recordsPerPage}`)
                     .then(response => {
                         if (!response.ok) throw new Error("HTTP status " + response.status);
                         return response.json();
@@ -548,7 +628,7 @@ session_start();
                                     </div>
                                 `;
                                 listItem.addEventListener("click", () => {
-                                    loadCompanies(company.ten_cong_ty);
+                                    loadCompanies(company.ten_cong_ty, 1);
                                     resultsContainer.classList.remove("active");
                                     document.getElementById("searchInput").value = company.ten_cong_ty;
                                 });
@@ -640,6 +720,7 @@ session_start();
                     if (data.success) {
                         row.remove();
                         showMessage('success', 'Xóa công ty thành công!');
+                        loadCompanies('', currentPage); // Refresh with current page
                     } else {
                         showMessage('error', data.error || 'Lỗi khi xóa công ty!');
                     }
@@ -651,7 +732,6 @@ session_start();
                 });
         }
 
-        // Hàm mở modal và lấy thông tin công ty
         function openEditModal(stt_cty) {
             console.log('Opening modal for company:', stt_cty);
             fetch(`../logic_admin/logic_duyet_cty.php?action=get_company&stt_cty=${stt_cty}`)
@@ -686,7 +766,6 @@ session_start();
                             }
                         }
 
-                        // Hiển thị ảnh logo hiện tại
                         const logoImg = document.getElementById('current_logo');
                         if (company.logo && company.logo !== '') {
                             logoImg.src = '../sinh_vien/uploads/' + company.logo;
@@ -696,7 +775,6 @@ session_start();
                             logoImg.style.display = 'none';
                         }
 
-                        // Hiển thị ảnh bìa hiện tại
                         const anhBiaImg = document.getElementById('current_anh_bia');
                         if (company.anh_bia && company.anh_bia !== '') {
                             anhBiaImg.src = '../sinh_vien/uploads/' + company.anh_bia;
@@ -717,16 +795,13 @@ session_start();
                 });
         }
 
-        // Hàm đóng modal
         function closeModal() {
             document.getElementById('editModal').style.display = 'none';
             document.getElementById('editCompanyForm').reset();
-            // Ẩn ảnh preview khi đóng modal
             document.getElementById('current_logo').style.display = 'none';
             document.getElementById('current_anh_bia').style.display = 'none';
         }
 
-        // Xử lý submit form chỉnh sửa
         document.getElementById('editCompanyForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -739,7 +814,7 @@ session_start();
                 .then(data => {
                     if (data.success) {
                         closeModal();
-                        loadCompanies();
+                        loadCompanies('', currentPage);
                         showMessage('success', 'Chỉnh sửa công ty thành công!');
                     } else {
                         showMessage('error', data.error || 'Lỗi khi chỉnh sửa công ty!');
@@ -751,7 +826,6 @@ session_start();
                 });
         });
 
-        // Đóng modal khi nhấp ra ngoài
         window.onclick = function(event) {
             const modal = document.getElementById('editModal');
             if (event.target == modal) {

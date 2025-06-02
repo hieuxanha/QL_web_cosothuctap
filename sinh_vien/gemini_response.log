@@ -1,0 +1,175 @@
+Array
+(
+    [candidates] => Array
+        (
+            [0] => Array
+                (
+                    [content] => Array
+                        (
+                            [parts] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [text] => Chào bạn, dưới đây là một số tin tuyển dụng hiện có tại hệ thống thực tập của trường Đại học Tài nguyên và Môi trường Hà Nội (HUNRE):
+
+**1. Nhân Viên Tester (QC/ Tester)**
+
+*   **Công ty:** Công ty Cổ phần Công nghệ Tài chính Goline
+*   **Địa chỉ:** Tòa Nhà Kim Ánh, 78 Duy Tân, Cầu Giấy, Hà Nội
+*   **Mô tả:**
+    *   Phối hợp với các đội phát triển phần mềm để hiểu rõ về dự án và mục tiêu kiểm thử cũng như các yêu cầu đưa ra. Đọc hiểu tài liệu nghiệp vụ & tài liệu design của sản phẩm.
+    *   Thiết kế và xây dựng các trường hợp kiểm thử theo nhiều phương pháp khác nhau
+    *   Thực hiện kiểm tra, log lỗi, và theo dõi tiến độ fix bug
+    *   Kiểm soát chất lượng, đảm bảo hệ thống/sản phẩm được xây dựng đúng như thiết kế hệ thống và đáp ứng được yêu cầu nghiệp vụ
+    *   Phối hợp chặt chẽ với developers, designer & suppoter trong các kế hoạch release
+*   **Logo:** http://localhost/sinh_vien/uploads/1747626612_logo_C%C3%B4ng%20ty%20C%E1%BB%95%20ph%E1%BA%A7n%20C%C3%B4ng%20ngh%E1%BB%87%20T%C3%A0i%20ch%C3%ADnh%20Goline.webp
+
+**2. Mid. Frontend Dev - HTML5/CSS3/JavaScript**
+
+*   **Công ty:** SOLIS LAB
+*   **Địa chỉ:** Tầng 4 tòa nhà Hà Thành Plaza 102 Thái Thịnh, Đống Đa, Hanoi, Vietnam
+*   **Mô tả:**
+    *   Solis Lab is hiring now Frontend Dev - HTML5/CSS3/JavaScript. Join Solis Lab, a dynamic team crafting websites for top-tier brands with millions of monthly views. We're looking for a developer who is eager to turn intricate designs into stunning, responsive, and accessible web components. If you're detail-oriented, proactive, and ready to dive into front-end web development best practices, we want you!
+    *   Your main responsibilities include:
+        *   Transform design files (Sketch, Zeplin, Figma) into responsive and accessible front-end components.
+        *   Uphold and advance accessibility, performance, and coding standards.
+        *   Collaborate with the team leader and project manager to keep projects on schedule and aligned with goals.
+        *   Engage with the technical lead to research and adopt cutting-edge front-end practices.
+    *   You are perfect for this position if:
+        *   Have a keen eye for details and can interpret design requirements into front-end code precisely.
+        *   Writes clean, maintainable code that is designed for reusability and scalability across various projects.
+        *   Demonstrates independence and initiative, proactively researching and devising technical solutions for challenging tasks.
+        *   Conducts thorough quality assurance on your work before seeking reviews from team leaders.
+        *   Supports fellow team members, is willing to share knowledge, and provides mentorship to less experienced developers.
+        *   Takes pride in delivering high-quality work and is committed to excellence. Only apply if you're ready to invest the time and effort required to achieve the highest standards.
+*   **Logo:** http://localhost/sinh_vien/uploads/1747627525_logo_SOLIS%20LAB.webp
+
+**3. Senior Cloud Solution Architect (AWS)**
+
+*   **Công ty:** MEGAZONE
+*   **Địa chỉ:** 54 Lieu Giai, Quận Ba Đình, Hà Nội
+*   **Mô tả:**
+    *   Vị trí: Kiến trúc sư Giải pháp Đám mây (Cloud Solution Architect)
+    *   Địa điểm: MEGAZONE Việt Nam
+    *   MEGAZONE Việt Nam đang tìm kiếm một Kiến trúc sư Giải pháp Đám mây giàu kinh nghiệm, chuyên về các giải pháp điện toán đám mây. Vai trò này đóng vai trò then chốt trong việc cung cấp các thiết kế kỹ thuật và giải pháp sáng tạo cho khách hàng tại Việt Nam, thúc đẩy việc ứng dụng các công nghệ đám mây.
+    *   Là một thành viên cấp cao trong đội ngũ kỹ thuật, bạn sẽ đóng vai trò quan trọng trong việc định hình và thực thi các chiến lược kỹ thuật trong một môi trường kinh doanh năng động và đang phát triển nhanh chóng.
+    *   Trách nhiệm chính:
+        *   Chịu trách nhiệm về thành công kỹ thuật của các dự án và tương tác với khách hàng.
+        *   Định nghĩa kiến trúc triển khai mạnh mẽ và hiệu quả.
+        *   Soạn thảo các phản hồi kỹ thuật cho các yêu cầu đề xuất (RFPs).
+        *   Phát triển chuyên môn sâu về các dịch vụ và công nghệ đám mây.
+        *   Hợp tác chặt chẽ với các đội nhóm quốc tế tại MEGAZONE CLOUD và các đối tác bên ngoài.
+        *   Đóng vai trò là chuyên gia kỹ thuật (Subject Matter Expert) cho khách hàng trong khu vực.
+        *   Tham gia chủ động vào các dự án thử nghiệm (pilot projects) và phát triển các bản trình diễn giải pháp kỹ thuật.
+        *   Báo cáo trực tiếp cho Trưởng phòng Kinh doanh MEGAZONE Việt Nam.
+*   **Logo:** http://localhost/sinh_vien/uploads/logo_15_1747629462.png
+
+**4. Nhân Viên Kinh Doanh**
+
+*   **Công ty:** CÔNG TY CỔ PHẦN TẬP ĐOÀN THIÊN KHÔI
+*   **Địa chỉ:** Tầng 2 tòa nhà MIPEC Tower, 229 Tây Sơn, Đống Đa, Hà Nội
+*   **Mô tả:**
+    *   Nghe điện thoại khách gọi đến nhờ tư vấn, tìm kiếm mua nhà
+    *   Tìm thông tin nhà có sẵn trên App của Công ty để ra căn nhà phù hợp nhất với nhu cầu của khách,
+    *   Phối hợp với đồng nghiệp để hoàn thành giao dịch
+    *   Chi tiết công việc được đào tạo, hướng dẫn kỹ càng, có người thạo việc hướng dẫn cho đến khi tự độc lập làm thành thạo
+*   **Logo:** http://localhost/sinh_vien/uploads/1747628906_logo_C%C3%94NG%20TY%20C%E1%BB%94%20PH%E1%BA%A6N%20T%E1%BA%ACP%20%C4%90O%C3%80N%20THI%C3%8AN%20KH%C3%94I.webp
+
+**5. Nhân Viên Xử Lý Khiếu Nại**
+
+*   **Công ty:** CÔNG TY TNHH Á CHÂU LOGISTICS
+*   **Địa chỉ:** 45 Trần Thái Tông, Quận Cầu Giấy, Thành phố Hà Nội
+*   **Mô tả:**
+    *   Tiếp nhận và xử lý các vấn đề phát sinh sau mua với các đối tác TQ qua sàn Thương mại điện tử.
+    *   Liên hệ người bán, người mua, thuyết phục, xử lý và phối hợp với các bộ phận liên quan để hoàn tất yêu cầu khiếu nại.
+    *   Theo dõi quá trình khiếu nại với đối tác TQ để xử lý kịp thời, hiệu quả.
+    *   Làm các việc khác theo yêu cầu của cấp trên.
+*   **Logo:** http://localhost/sinh_vien/uploads/1747629697_logo_C%C3%94NG%20TY%20TNHH%20%C3%81%20CH%C3%82U%20LOGISTICS.webp
+
+Chúc bạn tìm được vị trí phù hợp!
+
+                                        )
+
+                                )
+
+                            [role] => model
+                        )
+
+                    [finishReason] => STOP
+                    [citationMetadata] => Array
+                        (
+                            [citationSources] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [startIndex] => 584
+                                            [endIndex] => 771
+                                            [uri] => https://www.fss.com.vn/tuyen-dung/manualtesterhn
+                                        )
+
+                                    [1] => Array
+                                        (
+                                            [startIndex] => 682
+                                            [endIndex] => 814
+                                            [uri] => https://devmaster.edu.vn/cong-ty-co-phan-giai-phap-phan-mem-tai-chinh-financial-software-solutions.html
+                                        )
+
+                                    [2] => Array
+                                        (
+                                            [startIndex] => 1684
+                                            [endIndex] => 2080
+                                            [uri] => https://solislab.freshteam.com/jobs/rlopoZMJcWG5/middle-frontend-developer
+                                        )
+
+                                    [3] => Array
+                                        (
+                                            [startIndex] => 2140
+                                            [endIndex] => 2905
+                                        )
+
+                                    [4] => Array
+                                        (
+                                            [startIndex] => 4935
+                                            [endIndex] => 5110
+                                            [uri] => https://www.topcv.vn/viec-lam/nhan-vien-kinh-doanh-bat-dong-san-thu-nhap-tu-50-000-000-vnd/1302255.html
+                                        )
+
+                                )
+
+                        )
+
+                    [avgLogprobs] => -0.0050082882600171
+                )
+
+        )
+
+    [usageMetadata] => Array
+        (
+            [promptTokenCount] => 1915
+            [candidatesTokenCount] => 1792
+            [totalTokenCount] => 3707
+            [promptTokensDetails] => Array
+                (
+                    [0] => Array
+                        (
+                            [modality] => TEXT
+                            [tokenCount] => 1915
+                        )
+
+                )
+
+            [candidatesTokensDetails] => Array
+                (
+                    [0] => Array
+                        (
+                            [modality] => TEXT
+                            [tokenCount] => 1792
+                        )
+
+                )
+
+        )
+
+    [modelVersion] => gemini-2.0-flash
+    [responseId] => 4lI7aLfiJ-S4qsMPxofMuQM
+)

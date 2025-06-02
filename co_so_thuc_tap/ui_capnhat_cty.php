@@ -54,7 +54,7 @@ if (session_status() == PHP_SESSION_NONE) {
       margin-top: 8px;
       padding: 8px;
       border-radius: 15px;
-      top: 20px;
+      top: 18px;
 
     }
 
@@ -120,7 +120,7 @@ if (session_status() == PHP_SESSION_NONE) {
       </div>
       <div class="account">
         <?php
-        if (isset($_SESSION['name']) && !empty($_SESSION['name'])) {
+        if (isset($_SESSION['name'])) {
           echo '<div class="dropdown">';
           echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
           echo '<div class="dropdown-content">';
@@ -128,12 +128,6 @@ if (session_status() == PHP_SESSION_NONE) {
           echo '</div>';
           echo '</div>';
         } else {
-          echo '<div class="dropdown">';
-          echo '<span class="user-name">Xin chào, Khách</span>';
-          echo '<div class="dropdown-content">';
-          echo '<a href="../dang_nhap_dang_ki/dang_nhap.php">Đăng nhập</a>';
-          echo '</div>';
-          echo '</div>';
         }
         ?>
       </div>
@@ -217,17 +211,17 @@ if (session_status() == PHP_SESSION_NONE) {
     }
   </script>
 
-  <!-- <script>
-function previewImage(event, previewId) {
-    var reader = new FileReader();
-    reader.onload = function () {
+  <script>
+    function previewImage(event, previewId) {
+      var reader = new FileReader();
+      reader.onload = function() {
         var output = document.getElementById(previewId);
         output.src = reader.result;
         output.style.display = "block";
-    };
-    reader.readAsDataURL(event.target.files[0]);
-}
-</script> -->
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  </script>
 
 
 

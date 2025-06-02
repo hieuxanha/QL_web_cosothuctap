@@ -64,22 +64,7 @@ session_start();
 
         .search-bar {
             position: relative;
-            /* width: 300px; */
         }
-
-        /* .search-bar input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-        } */
 
         .user-management table {
             width: 100%;
@@ -128,6 +113,42 @@ session_start();
         .btn-delete:hover {
             background-color: #c82333;
         }
+
+        /* Pagination styles */
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #1e657e;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            color: #888;
+        }
+
+        .pagination span {
+            padding: 8px 12px;
+            background-color: #1e657e;
+            color: white;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
@@ -141,15 +162,13 @@ session_start();
             <hr />
             <ul>
                 <h2>Quản lý</h2>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_admin.php">admin..</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanly_cty.php">Phê duyệt công ty</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Thông báo</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Bảo trì hệ thống</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="#">Cơ sở</a></li>
-            </ul>
+                <li><i class="fa-solid fa-chart-line"></i> <a href="ui_admin.php">Tổng quan</a></li>
+                <li><i class="fa-solid fa-users"></i> <a href="ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
+                <li><i class="fa-solid fa-building-circle-check"></i> <a href="ui_quanly_cty.php">Phê duyệt công ty</a></li>
+                <li><i class="fa-solid fa-file-circle-check"></i> <a href="ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
+                <li><i class="fa-solid fa-chalkboard-user"></i> <a href="ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
+
+
         </div>
     </div>
 
@@ -211,38 +230,37 @@ session_start();
                     </tr>
                 </tbody>
             </table>
+            <div class="pagination" id="pagination">
+                <!-- Pagination controls will be dynamically added here -->
+            </div>
         </div>
     </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            const content = document.getElementById("content");
-            sidebar.classList.toggle("collapsed");
-            content.classList.toggle("collapsed");
-        }
+        // Phân trang
+        let currentPage = 1;
+        const recordsPerPage = 15;
 
-        function loadUsers(searchTerm = '') {
+        function loadUsers(searchTerm = '', page = 1) {
             const url = searchTerm ?
-                `../logic_admin/logic_quanly_taikhoan.php?action=search_users&keyword=${encodeURIComponent(searchTerm)}` :
-                '../logic_admin/logic_quanly_taikhoan.php?action=get_users';
+                `../logic_admin/logic_quanly_taikhoan.php?action=search_users&keyword=${encodeURIComponent(searchTerm)}&page=${page}&limit=${recordsPerPage}` :
+                `../logic_admin/logic_quanly_taikhoan.php?action=get_users&page=${page}&limit=${recordsPerPage}`;
 
-            console.log('Fetching URL:', url); // Debug: Log the URL being fetched
+            console.log('Fetching URL:', url);
 
             fetch(url)
                 .then(response => {
-                    console.log('Response status:', response.status); // Debug: Log the response status
                     if (!response.ok) {
                         throw new Error(`HTTP status ${response.status}: ${response.statusText}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Data received:', data); // Debug: Log the response data
+                    console.log('Data received:', data);
                     if (data.success) {
                         const userList = document.getElementById("userList");
                         userList.innerHTML = "";
-                        let index = 1;
+                        let index = (page - 1) * recordsPerPage + 1;
                         data.users.forEach(user => {
                             userList.innerHTML += `
                                 <tr>
@@ -266,6 +284,9 @@ session_start();
                         if (data.users.length === 0) {
                             userList.innerHTML = '<tr><td colspan="5">Không tìm thấy người dùng phù hợp.</td></tr>';
                         }
+
+                        // Render pagination controls
+                        renderPagination(data.totalPages, page, searchTerm);
                     } else {
                         showMessage('error', 'Lỗi khi tải danh sách tài khoản: ' + data.error);
                     }
@@ -274,6 +295,43 @@ session_start();
                     showMessage('error', 'Đã có lỗi xảy ra khi tải danh sách tài khoản: ' + error.message);
                     console.error('Fetch error:', error);
                 });
+        }
+
+        function renderPagination(totalPages, currentPage, searchTerm) {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+
+            // Previous button
+            const prevButton = document.createElement("button");
+            prevButton.textContent = "Trước";
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => loadUsers(searchTerm, currentPage - 1);
+            pagination.appendChild(prevButton);
+
+            // Page numbers (show limited range for better UX)
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageSpan = document.createElement(i === currentPage ? "span" : "button");
+                pageSpan.textContent = i;
+                if (i !== currentPage) {
+                    pageSpan.onclick = () => loadUsers(searchTerm, i);
+                }
+                pagination.appendChild(pageSpan);
+            }
+
+            // Next button
+            const nextButton = document.createElement("button");
+            nextButton.textContent = "Sau";
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => loadUsers(searchTerm, currentPage + 1);
+            pagination.appendChild(nextButton);
         }
 
         let debounceTimer;
@@ -289,7 +347,7 @@ session_start();
             }
 
             debounceTimer = setTimeout(() => {
-                fetch(`../logic_admin/logic_quanly_taikhoan.php?action=search_users&keyword=${encodeURIComponent(keyword)}`)
+                fetch(`../logic_admin/logic_quanly_taikhoan.php?action=search_users&keyword=${encodeURIComponent(keyword)}&page=1&limit=${recordsPerPage}`)
                     .then(response => {
                         if (!response.ok) throw new Error("HTTP status " + response.status);
                         return response.json();
@@ -309,7 +367,7 @@ session_start();
                                     </div>
                                 `;
                                 listItem.addEventListener("click", () => {
-                                    loadUsers(user.name);
+                                    loadUsers(user.name, 1);
                                     resultsContainer.classList.remove("active");
                                     document.getElementById("searchInput").value = user.name;
                                 });
@@ -350,7 +408,7 @@ session_start();
                 .then(data => {
                     if (data.success) {
                         showMessage('success', data.message);
-                        loadUsers(); // Refresh the table after updating role
+                        loadUsers('', currentPage); // Refresh with current page
                     } else {
                         showMessage('error', data.error);
                     }
@@ -374,7 +432,7 @@ session_start();
                     .then(data => {
                         if (data.success) {
                             showMessage('success', data.message);
-                            loadUsers();
+                            loadUsers('', currentPage);
                         } else {
                             showMessage('error', data.error);
                         }
@@ -395,7 +453,7 @@ session_start();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            console.log('DOM loaded, calling loadUsers'); // Debug: Confirm event listener
+            console.log('DOM loaded, calling loadUsers');
             loadUsers();
         });
     </script>

@@ -184,15 +184,15 @@ $conn->close();
             <hr />
             <ul>
                 <h2>Quản lý</h2>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_admin.php">Trang chủ admin</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanly_cty.php">Phê duyệt công ty</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_lecturer_assignment.php">Danh sách giảng viên phụ trách</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_thongbao.php">Thông báo</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_baotri.php">Bảo trì hệ thống</a></li>
-                <li><i class="fa-brands fa-windows"></i><a href="../admin/ui_coso.php">Cơ sở</a></li>
+                <li><i class="fa-solid fa-chart-line"></i> <a href="ui_admin.php">Tổng quan</a></li>
+                <li><i class="fa-solid fa-users"></i> <a href="ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
+                <li><i class="fa-solid fa-building-circle-check"></i> <a href="ui_quanly_cty.php">Phê duyệt công ty</a></li>
+                <li><i class="fa-solid fa-file-circle-check"></i> <a href="ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
+                <li><i class="fa-solid fa-chalkboard-user"></i> <a href="ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
+
+                <li><i class="fa-brands fa-windows"></i><a href="ui_lecturer_assignment.php">...</a></li>
+
+
             </ul>
         </div>
     </div>

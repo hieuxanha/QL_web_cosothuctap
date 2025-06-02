@@ -195,26 +195,37 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         /* CSS cho phân trang */
         .pagination {
             margin-top: 20px;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
-        .pagination a {
-            margin: 0 5px;
-            padding: 5px 10px;
-            text-decoration: none;
+        .pagination button {
+            padding: 8px 12px;
             border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
             border-radius: 4px;
+            transition: background-color 0.3s;
         }
 
-        .pagination a:hover {
+        .pagination button:hover {
             background-color: #007bff;
             color: white;
         }
 
-        .pagination a.active {
-            font-weight: bold;
+        .pagination button:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            color: #888;
+        }
+
+        .pagination span {
+            padding: 8px 12px;
             background-color: #007bff;
             color: white;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -252,9 +263,18 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 </svg>
                 <div id="searchResults"></div>
             </div>
-            <div class="profile">
-                <span><?php echo htmlspecialchars($_SESSION['name'] ?? 'Tên người dùng'); ?></span>
-                <img src="images/profile.jpg" alt="Ảnh đại diện" />
+            <div class="account">
+                <?php
+                if (isset($_SESSION['name'])) {
+                    echo '<div class="dropdown">';
+                    echo '<span class="user-name">Xin chào, ' . htmlspecialchars($_SESSION['name']) . '</span>';
+                    echo '<div class="dropdown-content">';
+                    echo '<a href="../dang_nhap_dang_ki/logic_dangxuat.php">Đăng xuất</a>';
+                    echo '</div>';
+                    echo '</div>';
+                } else {
+                }
+                ?>
             </div>
         </div>
 
@@ -309,9 +329,11 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                                 <td><?php echo htmlspecialchars($eval['tieu_de_tuyen_dung']); ?></td>
                                 <td><?php echo htmlspecialchars($eval['ngay_danh_gia']); ?></td>
                                 <td><?php echo htmlspecialchars($eval['nguoi_danh_gia']); ?></td>
+                                <!-- In the <tbody> section of the evaluations table -->
                                 <td class="action-buttons">
                                     <a href="../logic_cstt/export_pdf.php?stt_danhgia=<?php echo $eval['stt_danhgia']; ?>" class="pdf">Xuất PDF</a>
                                     <button onclick="sendEmail(<?php echo $eval['stt_danhgia']; ?>)" class="email">Gửi Email</button>
+                                    <button onclick="exportAndSend(<?php echo $eval['stt_danhgia']; ?>)" class="pdf">Gửi Đi</button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -320,9 +342,24 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             </table>
 
             <div class="pagination">
-                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?page=<?php echo $i; ?>&keyword=<?php echo urlencode($keyword); ?>" <?php if ($i == $page) echo 'class="active"'; ?>><?php echo $i; ?></a>
+                <button onclick="changePage(<?php echo $page - 1; ?>)" <?php echo $page <= 1 ? 'disabled' : ''; ?>>Trước</button>
+                <?php
+                $max_pages_to_show = 5;
+                $start_page = max(1, $page - floor($max_pages_to_show / 2));
+                $end_page = min($total_pages, $start_page + $max_pages_to_show - 1);
+
+                if ($end_page - $start_page + 1 < $max_pages_to_show) {
+                    $start_page = max(1, $end_page - $max_pages_to_show + 1);
+                }
+
+                for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <?php if ($i == $page): ?>
+                        <span><?php echo $i; ?></span>
+                    <?php else: ?>
+                        <button onclick="changePage(<?php echo $i; ?>)"><?php echo $i; ?></button>
+                    <?php endif; ?>
                 <?php endfor; ?>
+                <button onclick="changePage(<?php echo $page + 1; ?>)" <?php echo $page >= $total_pages ? 'disabled' : ''; ?>>Sau</button>
             </div>
         </div>
     </div>
@@ -425,16 +462,21 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 
         function escapeHTML(str) {
             return str.replace(/[&<>"']/g, match => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
+                '&': '&',
+                '<': '<',
+                '>': '>',
+                '"': '"',
+                "'": "'"
             })[match]);
         }
 
         function updateSearch(keyword) {
             window.location.href = `?page=1&keyword=${encodeURIComponent(keyword)}`;
+        }
+
+        function changePage(page) {
+            const keyword = '<?php echo htmlspecialchars($keyword); ?>';
+            window.location.href = `?page=${page}&keyword=${encodeURIComponent(keyword)}`;
         }
 
         function showMessage(type, message) {
@@ -444,6 +486,49 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             messageDiv.style.margin = '10px';
             document.getElementById('content').insertBefore(messageDiv, document.querySelector('.container'));
             setTimeout(() => messageDiv.remove(), 3000);
+        }
+
+        function exportAndSend(stt_danhgia) {
+            const button = event.target;
+            button.disabled = true; // Disable the button to prevent multiple clicks
+
+            // Gửi yêu cầu AJAX đến export_pdf1.php để tạo PDF
+            fetch(`../logic_cstt/export_pdf1.php?stt_danhgia=${encodeURIComponent(stt_danhgia)}&send_to_ui=true`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Lỗi khi tạo PDF: HTTP status ' + response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Gửi file PDF đến logic_store_pdf.php với filepath đầy đủ
+                        fetch('../logic_cstt/logic_store_pdf.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: `stt_danhgia=${encodeURIComponent(stt_danhgia)}&filename=${encodeURIComponent(data.filename)}&filepath=${encodeURIComponent(data.filepath)}`
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    showMessage('success', 'File PDF đã được gửi và lưu thành công!');
+                                } else {
+                                    showMessage('success', ' ' + result.message);
+                                }
+                            })
+                            .catch(error => {
+                                showMessage('success', ' ' + error.message);
+                            });
+                    } else {
+                        showMessage('error', 'Lỗi khi tạo file PDF: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    showMessage('error', 'Đã xảy ra lỗi: ' + error.message);
+                })
+                .finally(() => {
+                    button.disabled = false; // Re-enable the button after the request completes
+                });
         }
     </script>
 </body>

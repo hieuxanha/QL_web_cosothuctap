@@ -9,6 +9,26 @@ if (!isset($_SESSION['name']) || $_SESSION['role'] !== 'sinh_vien') {
 
 // Kết nối cơ sở dữ liệu
 require_once '../db.php';
+$conn->set_charset("utf8mb4");
+
+// Định nghĩa mảng khoa
+$khoa_options = [
+    'kinh_te' => 'Kinh tế',
+    'moi_truong' => 'Môi trường',
+    'quan_ly_dat_dai' => 'Quản lý đất đai',
+    'khi_tuong_thuy_van' => 'Khí tượng thủy văn',
+    'trac_dia_ban_do' => 'Trắc địa bản đồ',
+    'dia_chat' => 'Địa chất',
+    'tai_nguyen_nuoc' => 'Tài nguyên nước',
+    'cntt' => 'Công nghệ thông tin',
+    'ly_luan_chinh_tri' => 'Lý luận chính trị',
+    'bien_hai_dao' => 'Biển - Hải đảo',
+    'khoa_hoc_dai_cuong' => 'Khoa học đại cương',
+    'the_chat_quoc_phong' => 'Thể chất quốc phòng',
+    'bo_mon_luat' => 'Bộ môn Luật',
+    'bien_doi_khi_hau' => 'Biến đổi khí hậu',
+    'ngoai_ngu' => 'Ngoại ngữ'
+];
 
 // Lấy mã sinh viên từ session
 $ma_sinh_vien = isset($_SESSION['ma_sinh_vien']) ? $_SESSION['ma_sinh_vien'] : null;
@@ -45,8 +65,12 @@ if (!$sinh_vien) {
         'email' => 'N/A',
         'lop' => 'N/A',
         'khoa' => 'N/A',
-        'so_dien_thoai' => 'N/A'
+        'so_dien_thoai' => 'N/A',
+        'so_hieu' => 'N/A'
     ];
+} else {
+    // Chuyển đổi giá trị khoa thành tên đầy đủ
+    $sinh_vien['khoa'] = isset($khoa_options[$sinh_vien['khoa']]) ? $khoa_options[$sinh_vien['khoa']] : 'N/A';
 }
 
 // Truy vấn danh sách đơn đăng ký thực tập của sinh viên
@@ -88,8 +112,36 @@ if ($sinh_vien['stt_sv']) {
     $stmt->close();
 }
 
-// Xử lý gửi báo cáo hằng tuần
+// Truy vấn danh sách điểm đánh giá từ pdf_nhan thay vì danh_gia_thuc_tap
+$danh_gia_list = [];
 $errors = [];
+if ($sinh_vien['stt_sv']) {
+    $sql = "SELECT p.stt_danhgia, p.ket_qua, p.created_at AS ngay_danh_gia, gv.ho_ten AS giang_vien
+            FROM pdf_nhan p
+            JOIN danh_gia_thuc_tap dg ON p.stt_danhgia = dg.stt_danhgia
+            JOIN ung_tuyen ut ON dg.ma_dang_ky = ut.id
+            JOIN sinh_vien sv ON ut.stt_sv = sv.stt_sv
+            LEFT JOIN giang_vien gv ON sv.so_hieu = gv.so_hieu_giang_vien
+            WHERE ut.stt_sv = ? AND p.ket_qua IS NOT NULL
+            ORDER BY p.created_at DESC";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Lỗi chuẩn bị truy vấn điểm đánh giá: " . $conn->error, 3, '../errors.log');
+        $errors[] = "Lỗi truy vấn điểm đánh giá: " . htmlspecialchars($conn->error);
+    } else {
+        $stmt->bind_param("i", $sinh_vien['stt_sv']);
+        if (!$stmt->execute()) {
+            error_log("Lỗi thực thi truy vấn điểm đánh giá: " . $stmt->error, 3, '../errors.log');
+            $errors[] = "Lỗi thực thi truy vấn điểm đánh giá: " . htmlspecialchars($stmt->error);
+        } else {
+            $result = $stmt->get_result();
+            $danh_gia_list = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+        }
+    }
+}
+
+// Xử lý gửi báo cáo hằng tuần
 $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['gui_bao_cao'])) {
     $ma_dang_ky = filter_input(INPUT_POST, 'ma_dang_ky', FILTER_VALIDATE_INT);
@@ -136,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['gui_bao_cao'])) {
                 VALUES (?, ?, ?, CURDATE(), ?)";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
-            $errors[] = "Lỗi chuẩn bị truy vấn: " . $conn->error;
+            $errors[] = "Lỗi chuẩn bị truy vấn báo cáo: " . $conn->error;
         } else {
             $stmt->bind_param("isss", $ma_dang_ky, $ma_tuyen_dung, $noi_dung, $file_path);
             if ($stmt->execute()) {
@@ -150,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['gui_bao_cao'])) {
                         ORDER BY bct.ngay_gui DESC";
                 $stmt_refresh = $conn->prepare($sql);
                 if (!$stmt_refresh) {
-                    $errors[] = "Lỗi chuẩn bị truy vấn: " . $conn->error;
+                    $errors[] = "Lỗi làm mới danh sách báo cáo: " . $conn->error;
                 } else {
                     $stmt_refresh->bind_param("i", $sinh_vien['stt_sv']);
                     $stmt_refresh->execute();
@@ -215,6 +267,18 @@ $conn->close();
         .status-completed {
             color: #2e7d32;
             font-weight: bold;
+        }
+
+        .status-report-pending {
+            color: #ff9800;
+        }
+
+        .status-report-approved {
+            color: #4caf50;
+        }
+
+        .status-report-needs-fix {
+            color: #f44336;
         }
 
         .notifications {
@@ -333,6 +397,31 @@ $conn->close();
         .file-link:hover {
             text-decoration: underline;
         }
+
+        .danh-gia-list .grade-A {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .danh-gia-list .grade-Bp {
+            color: #2196f3;
+        }
+
+        .danh-gia-list .grade-B {
+            color: #2196f3;
+        }
+
+        .danh-gia-list .grade-C {
+            color: #ff9800;
+        }
+
+        .danh-gia-list .grade-D {
+            color: #ff9800;
+        }
+
+        .danh-gia-list .grade-F {
+            color: #f44336;
+        }
     </style>
 </head>
 
@@ -340,17 +429,15 @@ $conn->close();
     <div class="header">
         <div class="left-section">
             <div class="logo">
-                <img alt="Logo" src="https://via.placeholder.com/100x50" />
+                <img alt="Logo" src="../img/logo.png" />
             </div>
             <div class="ten_trg">
-                <h3>ĐẠI HỌC TÀI NGUYÊN MÔI TRƯỜNG HÀ NỘI</h3>
+                <h3>ĐẠI HỌC TÀI NGUYÊN MÔI & TRƯỜNG HÀ NỘI</h3>
                 <p>Hanoi University of Natural Resources and Environment</p>
             </div>
         </div>
         <div class="nav">
-            <button style=""><a href="./giaodien_sinhvien.php">Trang Chủ</a></button>
-            <a href="../index.php">Việc làm</a>
-            <a href="#">Hồ sơ & CV</a>
+            <a href="./giaodien_sinhvien.php">Trang chủ</a>
             <a href="../dang_nhap_dang_ki/logic_dangxuat.php" class="btn btn-login"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
             <a href="#"><i class="fas fa-user"></i></a>
         </div>
@@ -364,10 +451,6 @@ $conn->close();
             </div>
             <div class="section-content">
                 <div class="student-profile">
-                    <div class="student-avatar">
-                        <img src="https://via.placeholder.com/200x250" alt="Student Avatar" />
-                        <div class="student-id">Mã sinh viên: <strong><?php echo htmlspecialchars($sinh_vien['ma_sinh_vien']); ?></strong></div>
-                    </div>
                     <div class="student-info">
                         <div class="info-row">
                             <div class="info-label">Mã sinh viên:</div>
@@ -387,7 +470,7 @@ $conn->close();
                         </div>
                         <div class="info-row">
                             <div class="info-label">Khoa:</div>
-                            <div class="info-value"><?php echo htmlspecialchars($sinh_vien['khoa'] ?? 'N/A'); ?></div>
+                            <div class="info-value"><?php echo htmlspecialchars($sinh_vien['khoa']); ?></div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">Số điện thoại:</div>
@@ -405,6 +488,15 @@ $conn->close();
                 <div>▲</div>
             </div>
             <div class="section-content">
+                <!-- Hiển thị lỗi nếu có -->
+                <?php if (!empty($errors)): ?>
+                    <div class="error">
+                        <?php foreach ($errors as $error): ?>
+                            <p><?php echo htmlspecialchars($error); ?></p>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+
                 <table class="status-table">
                     <thead>
                         <tr>
@@ -503,6 +595,38 @@ $conn->close();
                                             <?php endif; ?>
                                         </td>
                                         <td><?php echo htmlspecialchars(date('d/m/Y', strtotime($bao_cao['ngay_gui']))); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Danh sách điểm đánh giá -->
+                <div class="danh-gia-list">
+                    <h3>Danh sách điểm đánh giá</h3>
+                    <table class="status-table">
+                        <thead>
+                            <tr>
+                                <th>Giảng viên</th>
+                                <th>Điểm đánh giá</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($danh_gia_list)): ?>
+                                <tr>
+                                    <td colspan="2">Bạn chưa có điểm đánh giá nào.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($danh_gia_list as $danh_gia): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($danh_gia['giang_vien'] ?? 'Chưa xác định'); ?></td>
+                                        <td class="grade-<?php
+                                                            $ket_qua = $danh_gia['ket_qua'];
+                                                            echo strtolower(str_replace('+', 'p', $ket_qua));
+                                                            ?>">
+                                            <?php echo htmlspecialchars($danh_gia['ket_qua']); ?>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>

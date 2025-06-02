@@ -20,18 +20,42 @@ $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 if ($action === 'get_companies' || $action === 'search_companies') {
     $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+    $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10; // Default to 10 records per page
+    $offset = ($page - 1) * $limit;
 
-    // Prepare SQL query
-    $sql = "SELECT stt_cty, ten_cong_ty, dia_chi, trang_thai FROM cong_ty";
+    // Prepare SQL query for counting total companies
+    $countSql = "SELECT COUNT(*) FROM cong_ty";
     if ($action === 'search_companies' && $keyword) {
         $keyword = $conn->real_escape_string($keyword);
+        $countSql .= " WHERE ten_cong_ty LIKE ? OR dia_chi LIKE ?";
+    }
+
+    $stmt = $conn->prepare($countSql);
+    if ($action === 'search_companies' && $keyword) {
+        $likeKeyword = "%$keyword%";
+        $stmt->bind_param('ss', $likeKeyword, $likeKeyword);
+    }
+    $stmt->execute();
+    $stmt->bind_result($totalCompanies);
+    $stmt->fetch();
+    $stmt->close();
+
+    $totalPages = ceil($totalCompanies / $limit);
+
+    // Prepare SQL query for fetching paginated companies
+    $sql = "SELECT stt_cty, ten_cong_ty, dia_chi, trang_thai FROM cong_ty";
+    if ($action === 'search_companies' && $keyword) {
         $sql .= " WHERE ten_cong_ty LIKE ? OR dia_chi LIKE ?";
     }
+    $sql .= " ORDER BY ten_cong_ty ASC LIMIT ? OFFSET ?";
 
     $stmt = $conn->prepare($sql);
     if ($action === 'search_companies' && $keyword) {
         $likeKeyword = "%$keyword%";
-        $stmt->bind_param('ss', $likeKeyword, $likeKeyword);
+        $stmt->bind_param('ssii', $likeKeyword, $likeKeyword, $limit, $offset);
+    } else {
+        $stmt->bind_param('ii', $limit, $offset);
     }
 
     if ($stmt->execute()) {
@@ -45,7 +69,12 @@ if ($action === 'get_companies' || $action === 'search_companies') {
                 'trang_thai' => $row['trang_thai'] ?: 'Đang chờ'
             ];
         }
-        sendResponse(true, ['companies' => $companies]);
+        sendResponse(true, [
+            'companies' => $companies,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'totalCompanies' => $totalCompanies
+        ]);
     } else {
         sendResponse(false, [], 'Lỗi khi truy vấn cơ sở dữ liệu: ' . $stmt->error);
     }
@@ -167,7 +196,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // Allowed image types
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
         if (isset($_FILES['logo']) && $_FILES['logo']['error'] == UPLOAD_ERR_OK) {
             $logo_mime = mime_content_type($_FILES['logo']['tmp_name']);

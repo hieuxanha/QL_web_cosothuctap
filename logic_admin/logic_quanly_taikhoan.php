@@ -31,17 +31,46 @@ switch ($action) {
     case 'get_users':
     case 'search_users':
         $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 15; // Default to 15 records per page
+        $offset = ($page - 1) * $limit;
         $users = [];
+        $totalUsers = 0;
 
-        // Query admin (use email as name)
-        $query = "SELECT id, email AS name, email, role, 'admin' AS `table` FROM admin";
-        if ($action === 'search_users' && $keyword) {
-            $query .= " WHERE email LIKE ?";
+        // Search condition
+        $searchCondition = $keyword ? " WHERE %s LIKE ?" : "";
+        $searchTerm = $keyword ? "%$keyword%" : null;
+
+        // Count total users for pagination
+        $countQueries = [
+            'admin' => "SELECT COUNT(*) FROM admin" . ($searchCondition ? sprintf($searchCondition, 'email') : ''),
+            'giang_vien' => "SELECT COUNT(*) FROM giang_vien" . ($searchCondition ? sprintf($searchCondition, 'ho_ten') : ''),
+            'sinh_vien' => "SELECT COUNT(*) FROM sinh_vien" . ($searchCondition ? sprintf($searchCondition, 'ho_ten') : ''),
+            'co_so_thuc_tap' => "SELECT COUNT(*) FROM co_so_thuc_tap" . ($searchCondition ? sprintf($searchCondition, 'ten_co_so') : '')
+        ];
+
+        foreach ($countQueries as $table => $query) {
+            $stmt = $conn->prepare($query);
+            if ($searchCondition && $keyword) {
+                $stmt->bind_param("s", $searchTerm);
+            }
+            $stmt->execute();
+            $stmt->bind_result($count);
+            $stmt->fetch();
+            $totalUsers += $count;
+            $stmt->close();
         }
-        $stmt = $conn->prepare($query);
-        if ($action === 'search_users' && $keyword) {
-            $searchTerm = "%$keyword%";
-            $stmt->bind_param("s", $searchTerm);
+
+        $totalPages = ceil($totalUsers / $limit);
+
+        // Query admin
+        $query = "SELECT id, email AS name, email, role, 'admin' AS `table` FROM admin" . $searchCondition;
+        $query .= " LIMIT ? OFFSET ?";
+        $stmt = $conn->prepare(sprintf($query, 'email'));
+        if ($searchCondition && $keyword) {
+            $stmt->bind_param("sii", $searchTerm, $limit, $offset);
+        } else {
+            $stmt->bind_param("ii", $limit, $offset);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -51,13 +80,13 @@ switch ($action) {
         $stmt->close();
 
         // Query giang_vien
-        $query = "SELECT stt_gv AS id, ho_ten AS name, email, role, 'giang_vien' AS `table` FROM giang_vien";
-        if ($action === 'search_users' && $keyword) {
-            $query .= " WHERE ho_ten LIKE ?";
-        }
-        $stmt = $conn->prepare($query);
-        if ($action === 'search_users' && $keyword) {
-            $stmt->bind_param("s", $searchTerm);
+        $query = "SELECT stt_gv AS id, ho_ten AS name, email, role, 'giang_vien' AS `table` FROM giang_vien" . $searchCondition;
+        $query .= " LIMIT ? OFFSET ?";
+        $stmt = $conn->prepare(sprintf($query, 'ho_ten'));
+        if ($searchCondition && $keyword) {
+            $stmt->bind_param("sii", $searchTerm, $limit, $offset);
+        } else {
+            $stmt->bind_param("ii", $limit, $offset);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -67,13 +96,13 @@ switch ($action) {
         $stmt->close();
 
         // Query sinh_vien
-        $query = "SELECT stt_sv AS id, ho_ten AS name, email, role, 'sinh_vien' AS `table` FROM sinh_vien";
-        if ($action === 'search_users' && $keyword) {
-            $query .= " WHERE ho_ten LIKE ?";
-        }
-        $stmt = $conn->prepare($query);
-        if ($action === 'search_users' && $keyword) {
-            $stmt->bind_param("s", $searchTerm);
+        $query = "SELECT stt_sv AS id, ho_ten AS name, email, role, 'sinh_vien' AS `table` FROM sinh_vien" . $searchCondition;
+        $query .= " LIMIT ? OFFSET ?";
+        $stmt = $conn->prepare(sprintf($query, 'ho_ten'));
+        if ($searchCondition && $keyword) {
+            $stmt->bind_param("sii", $searchTerm, $limit, $offset);
+        } else {
+            $stmt->bind_param("ii", $limit, $offset);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -83,13 +112,13 @@ switch ($action) {
         $stmt->close();
 
         // Query co_so_thuc_tap
-        $query = "SELECT stt_cstt AS id, ten_co_so AS name, email, role, 'co_so_thuc_tap' AS `table` FROM co_so_thuc_tap";
-        if ($action === 'search_users' && $keyword) {
-            $query .= " WHERE ten_co_so LIKE ?";
-        }
-        $stmt = $conn->prepare($query);
-        if ($action === 'search_users' && $keyword) {
-            $stmt->bind_param("s", $searchTerm);
+        $query = "SELECT stt_cstt AS id, ten_co_so AS name, email, role, 'co_so_thuc_tap' AS `table` FROM co_so_thuc_tap" . $searchCondition;
+        $query .= " LIMIT ? OFFSET ?";
+        $stmt = $conn->prepare(sprintf($query, 'ten_co_so'));
+        if ($searchCondition && $keyword) {
+            $stmt->bind_param("sii", $searchTerm, $limit, $offset);
+        } else {
+            $stmt->bind_param("ii", $limit, $offset);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -98,8 +127,22 @@ switch ($action) {
         }
         $stmt->close();
 
+        // Sort users by name to ensure consistent display
+        usort($users, function ($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+
+        // Slice the users array to respect the limit and offset
+        $users = array_slice($users, 0, $limit);
+
         error_log("Users fetched: " . json_encode($users)); // Debug: Log the users
-        echo json_encode(['success' => true, 'users' => $users]);
+        echo json_encode([
+            'success' => true,
+            'users' => $users,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'totalUsers' => $totalUsers
+        ]);
         break;
 
     case 'update_role':

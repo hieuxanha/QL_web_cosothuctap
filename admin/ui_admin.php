@@ -146,21 +146,20 @@ try {
       <hr />
       <ul>
         <h2>Quản lý</h2>
-        <li><i class="fa-brands fa-windows"></i><a href="ui_admin.php">Tổng quan</a></li>
-        <li><i class="fa-brands fa-windows"></i><a href="ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
-        <li><i class="fa-brands fa-windows"></i><a href="ui_quanly_cty.php">Phê duyệt công ty</a></li>
-        <li><i class="fa-brands fa-windows"></i><a href="ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
-        <li><i class="fa-brands fa-windows"></i><a href="ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
-        <li><i class="fa-brands fa-windows"></i><a href="#">Thông báo</a></li>
-        <li><i class="fa-brands fa-windows"></i><a href="#">Bảo trì hệ thống</a></li>
-        <li><i class="fa-brands fa-windows"></i><a href="#">Cơ sở</a></li>
+        <li><i class="fa-solid fa-chart-line"></i> <a href="ui_admin.php">Tổng quan</a></li>
+        <li><i class="fa-solid fa-users"></i> <a href="ui_tk_nguoidung.php">Quản lý tài khoản người dùng</a></li>
+        <li><i class="fa-solid fa-building-circle-check"></i> <a href="ui_quanly_cty.php">Phê duyệt công ty</a></li>
+        <li><i class="fa-solid fa-file-circle-check"></i> <a href="ui_quanlytt.php">Phê duyệt tuyển dụng</a></li>
+        <li><i class="fa-solid fa-chalkboard-user"></i> <a href="ui_timkiem_gv_phutrach.php">Tìm kiếm giáo viên phụ trách</a></li>
+
+
       </ul>
     </div>
   </div>
 
   <div class="content" id="content">
     <div class="header">
-      <div class="search-bar">
+      <div class="search-bar" style="visibility: hidden">
         <input type="text" placeholder="Tìm kiếm..." />
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8"></circle>
