@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 
 // API key & URL
-$apiKey = 'AIzaSyArQjQP3jxsa14vl8CwXzZDIsg1lithCmE'; // Thay bằng API key thật
+$apiKey = 'AIzaSyBsrEtn27f_uUTuRd8Q7ML6GOdjQkmcnXo'; // Thay bằng API key thật
 $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($apiKey);
 
 // Nhận nội dung người dùng

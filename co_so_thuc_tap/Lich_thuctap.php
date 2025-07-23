@@ -207,6 +207,46 @@ $applications = $stmt->fetch_all(MYSQLI_ASSOC);
             padding-top: 20px;
             border-top: 1px solid #ddd;
         }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-name {
+            cursor: pointer;
+            padding: 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #ffffff;
+            min-width: 150px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 15px;
+            top: 18px;
+        }
+
+        .dropdown-content a {
+            color: black;
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
     </style>
 </head>
 
@@ -224,6 +264,7 @@ $applications = $stmt->fetch_all(MYSQLI_ASSOC);
                 <li><i class="fa-solid fa-briefcase"></i> <a href="ui_capnhat_cty.php">Đăng ký thông tin công ty</a></li>
                 <li><i class="fa-solid fa-bullhorn"></i> <a href="ui_capnhat_tt.php">Cập nhật thông tin tuyển dụng</a></li>
                 <li><i class="fa-solid fa-file-alt"></i> <a href="ui_duyet_cv.php">Xét duyệt hồ sơ ứng tuyển</a></li>
+                <li><i class="fa-solid fa-chart-line"></i> <a href="Lich_thuctap.php">Gửi lịch</a></li>
                 <li><i class="fa-solid fa-file-signature"></i> <a href="ui_quanly_baocao.php">Gửi báo cáo hàng tuần</a></li>
                 <li><i class="fa-solid fa-star"></i> <a href="ui_danh_gia_thuc_tap.php">Theo dõi & đánh giá thực tập</a></li>
                 <li><i class="fa-solid fa-list-check"></i> <a href="ui_quan_ly_danh_gia.php">Quản lý đánh giá thực tập</a></li>

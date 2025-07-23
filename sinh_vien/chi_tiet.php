@@ -183,7 +183,7 @@ $conn->close();
             <a href="./giaodien_sinhvien.php">Trang chủ</a>
             <?php
             if (isset($_SESSION['name'])) {
-                echo '<a href="./profile.php"><i class="fa-solid fa-user"></i></a>';
+                echo '<a href="./profile22.php"><i class="fa-solid fa-user"></i></a>';
             } else {
                 echo '<a href="../dang_nhap_dang_ki/form_dn.php"><i class="fa-solid fa-user"></i></a>';
             }

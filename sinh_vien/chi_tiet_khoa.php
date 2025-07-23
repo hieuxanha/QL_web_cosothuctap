@@ -295,7 +295,7 @@ $total_stmt->close();
       ?>
       <?php
       if (isset($_SESSION['name'])) {
-        echo '<a href="./profile.php"><i class="fa-solid fa-user"></i></a>';
+        echo '<a href="./profile22.php"><i class="fa-solid fa-user"></i></a>';
       } else {
         echo '<a href="../dang_nhap_dang_ki/form_dn.php"><i class="fa-solid fa-user"></i></a>';
       }

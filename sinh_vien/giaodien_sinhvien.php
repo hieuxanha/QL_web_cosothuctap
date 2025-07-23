@@ -328,7 +328,7 @@ if (session_status() == PHP_SESSION_NONE) {
         echo '<a class="btn" href="../dang_nhap_dang_ki/form_dk.php">Đăng ký</a>';
       }
       ?>
-      <a href="<?php echo isset($_SESSION['name']) ? './profile.php' : '../dang_nhap_dang_ki/form_dn.php'; ?>">
+      <a href="<?php echo isset($_SESSION['name']) ? './profile22.php' : '../dang_nhap_dang_ki/form_dn.php'; ?>">
         <i class="fa-solid fa-user"></i>
       </a>
     </div>

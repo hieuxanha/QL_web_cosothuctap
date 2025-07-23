@@ -530,7 +530,7 @@ $conn->close();
                                                 ?>">
                                         <?php echo htmlspecialchars($trang_thai); ?>
                                     </td>
-                                    <td><?php echo htmlspecialchars(date('d/m/Y', strtotime($don['ngay_ung_tuyen']))); ?></td>
+                                    <td><?php echo htmlspecialchars(date('m/d/y', strtotime($don['ngay_ung_tuyen']))); ?></td>
                                     <td>
                                         <?php if ($trang_thai === 'Đồng ý'): ?>
                                             <button class="btn-report" onclick="showBaoCaoForm(<?php echo $don['id']; ?>, '<?php echo htmlspecialchars($don['ma_tuyen_dung']); ?>', '<?php echo htmlspecialchars($don['tieu_de']); ?>')">
@@ -545,7 +545,7 @@ $conn->close();
                         <?php endif; ?>
                     </tbody>
                 </table>
-
+                <!-- kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk -->
                 <!-- Danh sách lịch thực tập theo ca -->
                 <div class="lich-thuc-tap-list">
                     <h3>Lịch Thực Tập Theo Ca</h3>
@@ -568,7 +568,7 @@ $conn->close();
                                 <?php foreach ($lich_thuc_tap_list as $lich): ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($lich['tieu_de']); ?></td>
-                                        <td><?php echo htmlspecialchars(date('d/m/Y', strtotime($lich['ngay_thuc_tap']))); ?></td>
+                                        <td><?php echo htmlspecialchars(date('d/m/y', strtotime($lich['ngay_thuc_tap']))); ?></td>
                                         <td><?php echo htmlspecialchars($lich['ca_lam']); ?></td>
                                         <td><?php echo htmlspecialchars($lich['thoi_gian_ca']); ?></td>
                                         <td><?php echo htmlspecialchars($lich['danh_gia'] ?? 'Chưa đánh giá'); ?></td>
@@ -633,7 +633,7 @@ $conn->close();
                                                 Không có
                                             <?php endif; ?>
                                         </td>
-                                        <td><?php echo htmlspecialchars(date('d/m/Y', strtotime($bao_cao['ngay_gui']))); ?></td>
+                                        <td><?php echo htmlspecialchars(date('m/d/y', strtotime($bao_cao['ngay_gui']))); ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -703,7 +703,7 @@ $conn->close();
                                     elseif ($trang_thai === 'Không đồng ý') echo 'bị từ chối';
                                     else echo 'đã hoàn thành';
                                     ?>
-                                    - <?php echo htmlspecialchars(date('d/m/Y', strtotime($don['ngay_ung_tuyen']))); ?>
+                                    - <?php echo htmlspecialchars(date('m/d/y', strtotime($don['ngay_ung_tuyen']))); ?>
                                 </span>
                             </div>
                         <?php endforeach; ?>

@@ -21,10 +21,13 @@ $khoa_display_names = [
     'ngoai_ngu' => 'Ngoại ngữ'
 ];
 
-// Lấy bộ lọc và từ khóa tìm kiếm từ GET
+// Lấy bộ lọc, từ khóa tìm kiếm và tham số phân trang từ GET
 $khoa_filter = isset($_GET['khoa']) ? $_GET['khoa'] : 'Tất cả';
 $lop_filter = isset($_GET['lop']) ? $_GET['lop'] : 'Tất cả';
 $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+$per_page = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $per_page;
 
 // Truy vấn danh sách sinh viên đã ứng tuyển
 $sql = "SELECT ut.stt_sv, sv.ma_sinh_vien, sv.ho_ten, sv.email, sv.lop, sv.khoa, sv.so_dien_thoai, ut.ngay_ung_tuyen, ut.ma_tuyen_dung, td.tieu_de, ut.trang_thai, ut.cv_path
@@ -55,16 +58,57 @@ if ($conditions) {
     $sql .= " WHERE " . implode(" AND ", $conditions);
 }
 
-$sql .= " ORDER BY ut.ngay_ung_tuyen DESC";
+$sql .= " ORDER BY ut.ngay_ung_tuyen DESC LIMIT ? OFFSET ?";
+$params[] = $per_page;
+$params[] = $offset;
 
 $stmt = $conn->prepare($sql);
 if ($params) {
-    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+    $types = str_repeat('s', count($params) - 2) . 'ii';
+    $stmt->bind_param($types, ...$params);
 }
 $stmt->execute();
 $result = $stmt->get_result();
 $sinh_vien_list = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// Tính tổng số bản ghi cho phân trang
+$total_sql = "SELECT COUNT(*) AS total
+              FROM ung_tuyen ut
+              JOIN sinh_vien sv ON ut.stt_sv = sv.stt_sv
+              JOIN tuyen_dung td ON ut.ma_tuyen_dung = td.ma_tuyen_dung";
+$total_params = [];
+$total_conditions = [];
+
+if ($khoa_filter !== 'Tất cả') {
+    $total_conditions[] = "sv.khoa = ?";
+    $total_params[] = $khoa_filter;
+}
+if ($lop_filter !== 'Tất cả') {
+    $total_conditions[] = "sv.lop = ?";
+    $total_params[] = $lop_filter;
+}
+if ($keyword) {
+    $total_conditions[] = "(sv.ma_sinh_vien LIKE ? OR sv.ho_ten LIKE ? OR sv.email LIKE ? OR td.tieu_de LIKE ?)";
+    $likeKeyword = "%$keyword%";
+    $total_params[] = $likeKeyword;
+    $total_params[] = $likeKeyword;
+    $total_params[] = $likeKeyword;
+    $total_params[] = $likeKeyword;
+}
+
+if ($total_conditions) {
+    $total_sql .= " WHERE " . implode(" AND ", $total_conditions);
+}
+
+$total_stmt = $conn->prepare($total_sql);
+if ($total_params) {
+    $total_stmt->bind_param(str_repeat('s', count($total_params)), ...$total_params);
+}
+$total_stmt->execute();
+$total_records = $total_stmt->get_result()->fetch_assoc()['total'];
+$total_pages = ceil($total_records / $per_page);
+$total_stmt->close();
 
 // Lấy danh sách khoa và lớp để điền vào bộ lọc
 $khoa_list = $conn->query("SELECT DISTINCT khoa FROM sinh_vien WHERE khoa IS NOT NULL ORDER BY khoa")->fetch_all(MYSQLI_ASSOC);
@@ -330,7 +374,6 @@ $conn->close();
         #searchInput {
             padding: 8px;
             width: 300px;
-            /* border: 1px solid #ddd; */
             border-radius: 4px;
         }
 
@@ -375,6 +418,42 @@ $conn->close();
         #searchResults li:last-child {
             border-bottom: none;
         }
+
+        /* CSS cho phân trang */
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #0078d4;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            color: #888;
+        }
+
+        .pagination span {
+            padding: 8px 12px;
+            background-color: #0078d4;
+            color: white;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
@@ -392,6 +471,7 @@ $conn->close();
                 <li><i class="fa-solid fa-briefcase"></i> <a href="ui_capnhat_cty.php">Đăng ký thông tin công ty</a></li>
                 <li><i class="fa-solid fa-bullhorn"></i> <a href="ui_capnhat_tt.php">Cập nhật thông tin tuyển dụng</a></li>
                 <li><i class="fa-solid fa-file-alt"></i> <a href="ui_duyet_cv.php">Xét duyệt hồ sơ ứng tuyển</a></li>
+                <li><i class="fa-solid fa-chart-line"></i> <a href="Lich_thuctap.php">Gửi lịch</a></li>
                 <li><i class="fa-solid fa-file-signature"></i> <a href="ui_quanly_baocao.php">Gửi báo cáo hàng tuần</a></li>
                 <li><i class="fa-solid fa-star"></i> <a href="ui_danh_gia_thuc_tap.php">Theo dõi & đánh giá thực tập</a></li>
                 <li><i class="fa-solid fa-list-check"></i> <a href="ui_quan_ly_danh_gia.php">Quản lý đánh giá thực tập</a></li>
@@ -443,7 +523,6 @@ $conn->close();
                     Danh sách tất cả ứng tuyển
                     <span class="youtube-icon">▶</span>
                 </div>
-
             </div>
 
             <div class="filter-section">
@@ -472,6 +551,7 @@ $conn->close();
                         </select>
                     </div>
                     <input type="hidden" name="keyword" id="keywordInput" value="<?php echo htmlspecialchars($keyword); ?>" />
+                    <input type="hidden" name="page" id="pageInput" value="<?php echo $page; ?>" />
                 </form>
             </div>
 
@@ -479,7 +559,6 @@ $conn->close();
                 <thead>
                     <tr>
                         <th style="width: 50px;">STT</th>
-
                         <th style="width: 150px;">Mã sinh viên</th>
                         <th style="width: 200px;">Họ tên</th>
                         <th style="width: 200px;">Email</th>
@@ -496,14 +575,13 @@ $conn->close();
                 <tbody id="applicationList">
                     <?php if (empty($sinh_vien_list)): ?>
                         <tr>
-                            <td colspan="13" class="center-text">Không có ứng viên nào.</td>
+                            <td colspan="12" class="center-text">Không có ứng viên nào.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($sinh_vien_list as $index => $sv): ?>
                             <?php $trang_thai = trim($sv['trang_thai']) ?: 'Chờ duyệt'; ?>
                             <tr data-stt-sv="<?php echo htmlspecialchars($sv['stt_sv']); ?>" data-ma-tuyen-dung="<?php echo htmlspecialchars($sv['ma_tuyen_dung']); ?>">
-                                <td class="center-text"><?php echo $index + 1; ?></td>
-
+                                <td class="center-text"><?php echo $index + 1 + $offset; ?></td>
                                 <td><?php echo htmlspecialchars($sv['ma_sinh_vien']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['ho_ten']); ?></td>
                                 <td><?php echo htmlspecialchars($sv['email']); ?></td>
@@ -539,6 +617,27 @@ $conn->close();
                     <?php endif; ?>
                 </tbody>
             </table>
+
+            <div class="pagination">
+                <button onclick="changePage(<?php echo $page - 1; ?>)" <?php echo $page <= 1 ? 'disabled' : ''; ?>>Trước</button>
+                <?php
+                $max_pages_to_show = 5;
+                $start_page = max(1, $page - floor($max_pages_to_show / 2));
+                $end_page = min($total_pages, $start_page + $max_pages_to_show - 1);
+
+                if ($end_page - $start_page + 1 < $max_pages_to_show) {
+                    $start_page = max(1, $end_page - $max_pages_to_show + 1);
+                }
+
+                for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <?php if ($i == $page): ?>
+                        <span><?php echo $i; ?></span>
+                    <?php else: ?>
+                        <button onclick="changePage(<?php echo $i; ?>)"><?php echo $i; ?></button>
+                    <?php endif; ?>
+                <?php endfor; ?>
+                <button onclick="changePage(<?php echo $page + 1; ?>)" <?php echo $page >= $total_pages ? 'disabled' : ''; ?>>Sau</button>
+            </div>
         </div>
     </div>
 
@@ -581,7 +680,7 @@ $conn->close();
 
         function updateStatus(stt_sv, ma_tuyen_dung, action) {
             const row = document.querySelector(`tr[data-stt-sv="${stt_sv}"][data-ma-tuyen-dung="${ma_tuyen_dung}"]`);
-            const statusCell = row.querySelector('td:nth-child(11)');
+            const statusCell = row.querySelector('td:nth-child(10)');
             const buttonsCell = row.querySelector('.action-buttons');
 
             buttonsCell.innerHTML += '<span class="loading">Đang xử lý...</span>';
@@ -611,19 +710,19 @@ $conn->close();
 
                         if (data.trang_thai === 'Chờ duyệt') {
                             buttonsCell.innerHTML = `
-                            <button class="action-btn approve-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'approve')">Duyệt</button>
-                            <button class="action-btn reject-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'reject')">Từ chối</button>
-                        `;
+                                <button class="action-btn approve-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'approve')">Duyệt</button>
+                                <button class="action-btn reject-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'reject')">Từ chối</button>
+                            `;
                         } else if (data.trang_thai === 'Đồng ý') {
                             buttonsCell.innerHTML = `
-                            <button class="action-btn cancel-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'cancel')">Hủy duyệt</button>
-                            <button class="action-btn reject-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'reject')">Từ chối</button>
-                        `;
+                                <button class="action-btn cancel-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'cancel')">Hủy duyệt</button>
+                                <button class="action-btn reject-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'reject')">Từ chối</button>
+                            `;
                         } else if (data.trang_thai === 'Không đồng ý') {
                             buttonsCell.innerHTML = `
-                            <button class="action-btn restore-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'restore')">Khôi phục</button>
-                            <button class="action-btn approve-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'approve')">Duyệt</button>
-                        `;
+                                <button class="action-btn restore-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'restore')">Khôi phục</button>
+                                <button class="action-btn approve-btn" onclick="updateStatus('${stt_sv}', '${ma_tuyen_dung}', 'approve')">Duyệt</button>
+                            `;
                         }
 
                         const messageDiv = document.createElement('div');
@@ -731,6 +830,13 @@ $conn->close();
         function updateFilterForm(keyword) {
             const form = document.getElementById("filterForm");
             document.getElementById("keywordInput").value = keyword;
+            document.getElementById("pageInput").value = 1; // Reset to page 1 on search
+            form.submit();
+        }
+
+        function changePage(page) {
+            const form = document.getElementById("filterForm");
+            document.getElementById("pageInput").value = page;
             form.submit();
         }
     </script>
